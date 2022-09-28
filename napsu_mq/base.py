@@ -7,7 +7,7 @@ class InferenceModel(metaclass=abc.ABCMeta):
     """ A statistical model to generate privacy-preserving synthetic twins data sets from sensitive data. """
 
     @abc.abstractmethod
-    def fit(self, data: pd.DataFrame, rng: PRNGState, epsilon: float, delta: float, **kwargs) -> 'InferenceResult':
+    def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGState, epsilon: float, delta: float, **kwargs) -> 'InferenceResult':
         """ Compute the parameter posterior (approximation) for a given data set, hyperparameters and privacy bounds.
 
         Args:

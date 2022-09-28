@@ -22,16 +22,27 @@ from jax import random
 import napsu_mq.maximum_entropy_model as mem
 from napsu_mq.markov_network_jax import MarkovNetworkJax
 
-kernels = Literal['NUTS', 'MixedHMC', 'HMCGibbs']
+kernels = Literal['NUTS', 'HMC',]
+
+def get_kernel(MCMC_algo: kernels):
+    if MCMC_algo == 'NUTS':
+        return numpyro.infer.NUTS
+    elif MCMC_algo == 'HMC':
+        return numpyro.infer.HMC
+    else:
+        raise ValueError(f"{MCMC_algo} not recognized as MCMC inference algorithm")
+
 
 
 def run_numpyro_mcmc(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
-        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, num_samples: int = 1000,
+        MCMC_algo: kernels = "NUTS", prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, num_samples: int = 1000,
         num_warmup: int = 500, num_chains: int = 1, disable_progressbar: bool = False,
-        kernel: numpyro.infer.mcmc.MCMCKernel = numpyro.infer.NUTS
 ) -> numpyro.infer.MCMC:
-    kernel = numpyro.infer.NUTS(model=mem.normal_prior_model_numpyro, max_tree_depth=12)
+
+    MCMC_algorithm = get_kernel(MCMC_algo)
+
+    kernel = MCMC_algorithm(model=mem.normal_prior_model_numpyro, max_tree_depth=12)
     mcmc = numpyro.infer.MCMC(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
         progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential"
@@ -42,10 +53,13 @@ def run_numpyro_mcmc(
 
 def run_numpyro_mcmc_normalised(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
-        laplace_approx: numpyro.distributions.MultivariateNormal, prior_sigma: float = 10,
+        laplace_approx: numpyro.distributions.MultivariateNormal, MCMC_algo: kernels = "NUTS", prior_sigma: float = 10,
         num_samples: int = 1000, num_warmup: int = 500, num_chains: int = 1, disable_progressbar: bool = False,
 ) -> Tuple[numpyro.infer.MCMC, Callable]:
-    kernel = numpyro.infer.NUTS(model=mem.normal_prior_normalised_model_numpyro, max_tree_depth=12)
+
+    MCMC_algorithm = get_kernel(MCMC_algo)
+
+    kernel = MCMC_algorithm(model=mem.normal_prior_normalised_model_numpyro, max_tree_depth=12)
     mcmc = numpyro.infer.MCMC(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
         progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential"
@@ -70,13 +84,6 @@ def run_numpyro_laplace_approximation(
         prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=5
 ) -> Tuple[numpyro.distributions.MultivariateNormal, bool]:
 
-    print("LAPLACE APPROX PARAMS")
-    print(rng)
-    print(suff_stat)
-    print(n)
-    print(sigma_DP)
-
-
     fail_count = 0
 
     for i in range(0, max_retries + 1):
@@ -86,14 +93,9 @@ def run_numpyro_laplace_approximation(
             model_args=(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
         )
 
-        print(init_lambdas)
-
         lambdas = init_lambdas[0]["lambdas"]
 
-        print(lambdas)
-
         result = jax.scipy.optimize.minimize(lambda l: potential_fn({"lambdas": l}), lambdas, method="BFGS", tol=1e-2)
-        print(result)
         if not result.success:
             fail_count += 1
         else:

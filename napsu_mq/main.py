@@ -13,7 +13,7 @@
 # limitations under the License.
 import os
 from pathlib import Path
-from typing import TypeVar, Optional, List, Tuple
+from typing import TypeVar, Optional, List, Tuple, Iterable
 import sys
 from jax.config import config
 
@@ -45,10 +45,9 @@ def format_td():
     return t1 - t0
 
 
-def create_model(name: str, id: str, input: pd.DataFrame, epsilon: float, delta: float,
-                 cliques: List[Tuple[str, ...]] = None,
-                 use_laplace_approximation: bool = False, rng: jax.random.PRNGKey = None,
-                 output: Optional[str] = "") -> NapsuMQResult:
+def create_model(input: pd.DataFrame, dataset_name: str, epsilon: float, delta: float,
+                 cliques: List[Tuple[str, ...]] = None, MCMC_algo: str = 'NUTS',
+                 use_laplace_approximation: bool = True, rng: jax.random.PRNGKey = None) -> NapsuMQResult:
     if rng is None:
         rng = jax.random.PRNGKey(6473286482)
 
@@ -57,40 +56,18 @@ def create_model(name: str, id: str, input: pd.DataFrame, epsilon: float, delta:
 
     print("Initializing NapsuMQModel")
     model = NapsuMQModel()
-    result = model.fit(input, rng, epsilon, delta, column_feature_set=cliques,
+    result = model.fit(input, dataset_name, rng, epsilon, delta, column_feature_set=cliques, MCMC_algo=MCMC_algo,
                        use_laplace_approximation=use_laplace_approximation)
-
-    timestamp = datetime.now().strftime("%m%d%Y_%H%M%S")
-
-    print("Writing model to file")
-    napsu_result_file = open(f"{output}/napsu_model_{name}_{id}_{timestamp}.dill", "wb")
-    result.store(napsu_result_file)
-
-    print("Writing original dataframe")
-    input.to_csv(f'{output}/original_dataframe_{name}_{id}_{timestamp}.csv')
 
     return result
 
 
-def sample(name: str, id: str, model: NapsuMQResult, n_datasets: int, n_samples: int, output: Optional[str] = "",
-           rng: jax.random.PRNGKey = None):
+def sample(model: NapsuMQResult, n_datasets: int, n_samples: int, rng: jax.random.PRNGKey = None) -> Iterable[pd.DataFrame]:
     if rng is None:
         rng = jax.random.PRNGKey(86933526)
 
     print("Generating datasets")
     datasets = model.generate_extended(rng, n_samples, n_datasets)
-
-    output_directory = os.path.join(current_path, output)
-
-    if not os.path.exists(output_directory):
-        print(f"Creating directory {output_directory}")
-        os.mkdir(output_directory)
-
-    timestamp = datetime.now().strftime("%m%d%Y_%H%M%S")
-
-    print("Writing datasets")
-    for i, df in enumerate(datasets):
-        df.to_csv(f'{output}/dataframe_synthetic_sampled_{name}_{i}_{id}_{timestamp}.csv')
 
     return datasets
 

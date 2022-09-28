@@ -1,5 +1,6 @@
 datasets:
-  - "dummy"
+  "binary4d": "binary4d.csv"
+  #"adult": "cleaned_adult_data_v2.csv"
 epsilons:
   - "01"
   - "03"
@@ -13,3 +14,4 @@ MCMC_algorithms:
   - "NUTS"
   - "HMC"
 # MCMC_algorithms = ["NUTS", "HMC", "DataAugMCMC"]
+n_datasets: 10

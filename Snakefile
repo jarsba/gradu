@@ -1,26 +1,26 @@
 configfile: "config.yaml"
 
-datasets = config['datasets']
+n_datasets = config['n_datasets']
+dataset = config['datasets']
+dataset_names = [key for key in dataset.keys()]
+dataset_files = [value for value in dataset.values()]
 epsilons = config['epsilons']
 MCMC_algorithms = config['MCMC_algorithms']
-
-napsu_results = expand("_{epsilon}e_{MCMC_algorithm}", epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
-synt_data_results = expand("synt_data_{dataset}_{epsilon}e_{MCMC_algorithm}", dataset=datasets, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
-
+index = [i for i in range(n_datasets)]
 
 rule all:
     input:
-        "plots/{lr_comparison}.svg",
-        "plots/{clf_comparison}.svg"
+        expand("plots/lr_comparison_{dataset}.svg", dataset=dataset_names),
+        expand("plots/clf_comparison_{dataset}.svg", dataset=dataset_names)
 
 
 rule run_napsu:
     input:
-        "data/datasets/{dataset}.csv"
+        expand("data/datasets/{dataset}", dataset=dataset_files)
     output:
-        "models/napsu_{dataset}_{napsu_results}.npy"
-    log:
-        "logs/napsu/napsu_{dataset}_{napsu_results}.log"
+        expand("models/napsu_{dataset}_{epsilon}e_{MCMC_algorithm}.dill", dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
+    #log:
+    #    expand("logs/napsu/napsu_{dataset}_{epsilon}e_{MCMC_algorithm}.log", dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     conda:
         "envs/napsu.yaml"
     script:
@@ -29,18 +29,18 @@ rule run_napsu:
 
 rule generate_synt_datasets:
     input:
-        "models/{napsu_results}.npy"
+        expand("models/napsu_{dataset}_{epsilon}e_{MCMC_algorithm}.dill", dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     output:
-        "data/synt_datasets/synthetic_dataset_{name}_{index}_{parameters}_{id}.csv",
+        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset}_{epsilon}e_{MCMC_algorithm}.csv", i=index, dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     conda:
         "envs/napsu.yaml"
     script:
-        "scripts/run_napsu.py"
+        "scripts/generate_datasets.py"
 
 
 rule run_logistic_regression_on_synt:
     input:
-        "data/synt_datasets/{synt_dataset}.csv"
+        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset}_{epsilon}e_{MCMC_algorithm}.csv", i=index, dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     output:
         "results/synthetic_logistic_regression_results.csv"
     conda:
@@ -51,7 +51,7 @@ rule run_logistic_regression_on_synt:
 
 rule run_logistic_regression_on_original:
     input:
-        "data/datasets/{dataset}.csv"
+        expand("data/datasets/{dataset}", dataset=dataset_files)
     output:
         "results/original_logistic_regression_results.csv"
     conda:
@@ -62,7 +62,7 @@ rule run_logistic_regression_on_original:
 
 rule run_classification_on_synt:
     input:
-        "data/synt_datasets/{synt_dataset}.csv"
+        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset}_{epsilon}e_{MCMC_algorithm}.csv", i=index, dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     output:
         "results/synthetic_classification_results.csv"
     conda:
@@ -73,7 +73,7 @@ rule run_classification_on_synt:
 
 rule run_classification_on_original:
     input:
-        "data/datasets/{dataset}.csv"
+        expand("data/datasets/{dataset}", dataset=dataset_files)
     output:
         "results/original_classification_results.csv"
     conda:
@@ -84,10 +84,10 @@ rule run_classification_on_original:
 
 rule compare_datasets:
     input:
-        "data/datasets/{dataset}.csv",
-        "data/synt_datasets/synthetic_dataset_{name}_{index}_{parameters}_{id}.csv"
+        expand("data/datasets/{dataset}", dataset=dataset_files),
+        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset}_{epsilon}e_{MCMC_algorithm}.csv", i=index, dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     output:
-        "results/comparison_{dataset}_{}.txt"
+        "results/comparison_{dataset}_vs_{i}_{parameters}.csv"
     conda:
         "envs/analysis.yaml"
     script:
@@ -96,10 +96,10 @@ rule compare_datasets:
 
 rule compare_lr_results:
     input:
-        "results/{synt_lr_result}.txt",
-        "results/{orig_lr_result}.txt",
+        "results/synthetic_logistic_regression_results.csv",
+        "results/original_logistic_regression_results.csv",
     output:
-        report("plots/{lr_comparison}.svg"),
+        report(expand("plots/lr_comparison_{dataset}.svg", dataset=dataset_names))
     conda:
         "envs/analysis.yaml"
     script:
@@ -108,10 +108,10 @@ rule compare_lr_results:
 
 rule compare_clf_results:
     input:
-        "results/{synt_clf_result}.txt",
-        "results/{orig_clf_result}.txt"
+        "results/synthetic_classification_results.csv",
+        "results/original_classification_results.csv"
     output:
-        report("plots/{clf_comparison}.svg")
+        report(expand("plots/clf_comparison_{dataset}.svg", dataset=dataset_names))
     conda:
         "envs/analysis.yaml"
     script:

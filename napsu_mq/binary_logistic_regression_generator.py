@@ -78,5 +78,5 @@ if __name__ == '__main__':
     rng_key = jax.random.PRNGKey(42)
     data: np.ndarray = jnp.asarray(data_generator4d.generate_data(100000, rng_key=rng_key))
     dataframe = pd.DataFrame(data, columns=['A', 'B', 'C', 'D'])
-    dataframe.to_csv("binary_data_4d.csv")
+    dataframe.to_csv("binary4d.csv")
 

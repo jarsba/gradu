@@ -38,8 +38,10 @@ class NapsuMQModel(InferenceModel):
     def __init__(self) -> None:
         super().__init__()
 
-    def fit(self, data: pd.DataFrame, rng: PRNGState, epsilon: float, delta: float, **kwargs) -> 'NapsuMQResult':
+    def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGState, epsilon: float, delta: float,
+            **kwargs) -> 'NapsuMQResult':
         column_feature_set = kwargs['column_feature_set'] if 'column_feature_set' in kwargs else []
+        MCMC_algo = kwargs['MCMC_algo'] if 'MCMC_algo' in kwargs else 'NUTS'
         use_laplace_approximation = kwargs[
             'use_laplace_approximation'] if 'use_laplace_approximation' in kwargs else False
 
@@ -52,7 +54,6 @@ class NapsuMQModel(InferenceModel):
         domain = Domain(domain_key_list, domain_value_count_list)
         query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
                                    cliques_to_include=column_feature_set)
-
 
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         queries = queries.get_canonical_queries()
@@ -69,7 +70,8 @@ class NapsuMQModel(InferenceModel):
 
             rng = jax.random.PRNGKey(6473286482)
 
-            laplace_approx, success = mei.run_numpyro_laplace_approximation(rng, dp_suff_stat, n, sigma_DP, mnjax)
+            laplace_approx, success = mei.run_numpyro_laplace_approximation(rng, dp_suff_stat, n, sigma_DP, mnjax,
+                                                                            MCMC_algo)
             mcmc, backtransform = mei.run_numpyro_mcmc_normalised(
                 rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800, num_chains=4
             )
@@ -79,23 +81,33 @@ class NapsuMQModel(InferenceModel):
 
         else:
             mcmc = mei.run_numpyro_mcmc(
-                rng, dp_suff_stat, n, sigma_DP, mnjax, num_samples=2000, num_warmup=800, num_chains=4
+                rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800, num_chains=4
             )
             inf_data = az.from_numpyro(mcmc, log_likelihood=False)
             posterior_values = inf_data.posterior.stack(draws=("chain", "draw"))
             posterior_values = posterior_values.lambdas.values.transpose()
 
-        return NapsuMQResult(mnjax, posterior_values, category_mapping)
+        meta = {
+            "dataset_name": dataset_name,
+            "epsilon": epsilon,
+            "delta": delta,
+            "MCMC_algo": MCMC_algo,
+            "cliques": column_feature_set,
+            "use_laplace_approximation": use_laplace_approximation
+        }
+
+        return NapsuMQResult(mnjax, posterior_values, category_mapping, meta)
 
 
 class NapsuMQResult(InferenceResult):
 
     def __init__(self, markov_network: MarkovNetworkJax, posterior_values: jnp.ndarray,
-                 category_mapping: Mapping) -> None:
+                 category_mapping: Mapping, meta: Mapping) -> None:
         super().__init__()
         self._markov_network = markov_network
         self._posterior_values = posterior_values
         self._category_mapping = category_mapping
+        self._meta = meta
 
     @property
     def markov_network(self) -> MarkovNetworkJax:
@@ -108,6 +120,10 @@ class NapsuMQResult(InferenceResult):
     @property
     def category_mapping(self) -> Mapping:
         return self._category_mapping
+
+    @property
+    def meta(self) -> Mapping:
+        return self._meta
 
     def _store_to_io(self, write_io: BinaryIO) -> None:
         assert write_io.writable()
