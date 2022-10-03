@@ -14,6 +14,6 @@ def get_dataset(name):
     if name == 'adult':
         return "data/datasets/cleaned_adult_data_v2.csv"
     elif name == 'dummy':
-        return "data/datasets/binary_data4d.csv"
+        return "data/datasets/binary4d.csv"
     else:
         raise ValueError(f"{name} not recognized dataset")

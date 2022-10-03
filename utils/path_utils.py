@@ -42,10 +42,10 @@ def get_filename(path: str, with_suffix=False) -> str:
 def get_metadata_from_synthetic_path(synthetic_path: str):
     filename = get_filename(synthetic_path)
     filename_paths = filename.split("_")
-    index = filename_paths[2]
+    dataset_index = filename_paths[2]
     dataset_name = filename_paths[3]
     epsilon_str = filename_paths[4][0:2]
     epsilon = float(f"{epsilon_str[0]}.{epsilon_str[1]}")
     MCMC_algorithm = filename_paths[5]
 
-    return index, dataset_name, epsilon, MCMC_algorithm
+    return dataset_index, dataset_name, epsilon, MCMC_algorithm

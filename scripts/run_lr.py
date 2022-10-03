@@ -1,7 +1,9 @@
 import os
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from utils.path_utils import get_dataset_name, get_filename, get_metadata_from_filename
+from sklearn.model_selection import cross_val_score
+
+from utils.path_utils import get_dataset_name, get_filename, get_metadata_from_synthetic_path
 
 dataset_paths = snakemake.input[0]
 print(dataset_paths)
@@ -19,9 +21,11 @@ TEST_DATASETS_FOR_DATASET = {
 synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
 
 if synthetic_task:
-    results = pd.DataFrame(columns=["dataset_name", "index", "epsilon", "MCMC_algorithm", "accuracy", "coefficients"])
+    results = pd.DataFrame(
+        columns=["dataset_name", "dataset_index", "epsilon", "MCMC_algorithm", "accuracy", "balanced_accuracy", "F1",
+                 "coefficients"])
 else:
-    results = pd.DataFrame(columns=["dataset_name", "accuracy", "coefficients"])
+    results = pd.DataFrame(columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients"])
 
 for path in dataset_paths:
     df = pd.read_csv(path)
@@ -31,26 +35,30 @@ for path in dataset_paths:
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
     feature_columns = [col for col in df.columns if col != target_column]
 
-    X, y = df.drop(columns=[target_column]), df[target_column]
+    X_train, y_train = df.drop(columns=[target_column]), df[target_column]
 
-    clf = LogisticRegression(random_state=0).fit(X, y)
-    coeficcients = clf.coef_
+    model = LogisticRegression(random_state=0)
+    model.fit(X_train, y_train)
+    coeficcients = model.coef_
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
     test_df = pd.read_csv(path)
-    test_X, test_y = test_df.drop(columns=[target_column]), test_df[target_column]
+    X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
-    accuracy = clf.score(test_X, test_y)
+    accuracy_score = cross_val_score(model, X_test, y_test, scoring='accuracy', n_jobs=-1, error_score='raise')
+    balanced_accuracy_score = cross_val_score(model, X_test, y_test, scoring='balanced_accuracy', n_jobs=-1,
+                                              error_score='raise')
+    f1_score = cross_val_score(model, X_test, y_test, scoring='f1', n_jobs=-1, error_score='raise')
 
     if synthetic_task:
-        index, _, epsilon, MCMC_algorithm = get_metadata_from_filename(path)
-        results.append([dataset_name, index, epsilon, MCMC_algorithm, accuracy, coeficcients])
+        dataset_index, _, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
+        results.append([dataset_name, dataset_index, epsilon, MCMC_algorithm, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
     else:
-        results.append([dataset_name, accuracy, coeficcients])
+        results.append([dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
 
 if synthetic_task:
     result_path = os.path.join("results", "synthetic_logistic_regression_results.csv")
-    results.to_csv(result_path)
+    results.to_csv(result_path, index=False)
 else:
     result_path = os.path.join("results", "original_logistic_regression_results.csv")
-    results.to_csv(result_path)
+    results.to_csv(result_path, index=False)

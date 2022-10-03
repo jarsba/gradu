@@ -30,4 +30,4 @@ for model_path in models:
 
     for i, df in enumerate(synt_datasets):
         path = os.path.join(SYNT_DATASET_DIRECTORY, f"synthetic_dataset_{i}_{dataset_name}_{epsilon}e_{MCMC_algorithm}.csv")
-        df.to_csv(path)
+        df.to_csv(path, index=False)
