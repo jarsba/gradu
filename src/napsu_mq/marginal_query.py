@@ -34,7 +34,7 @@ class MarginalQuery:
         self.value = value if type(value) is np.ndarray else np.array(value)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
-        return (x[:, self.inds] == self.value).all(axis=1).astype("int").reshape((-1, 1))
+        return (x[:, self.inds] == self.value).all(axis=1).astype(int).reshape((-1, 1))
 
     def __str__(self) -> str:
         return "{} = {}".format(self.inds, [val.item() for val in self.value])
