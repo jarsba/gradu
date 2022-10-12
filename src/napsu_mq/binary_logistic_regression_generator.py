@@ -73,15 +73,15 @@ class BinaryLogisticRegressionDataGenerator:
 
 
 if __name__ == '__main__':
-    data_generator3d = BinaryLogisticRegressionDataGenerator(np.array([1.0, 0.0]))
+    data_generator4d = BinaryLogisticRegressionDataGenerator(np.array([1.0, 0.0, 2.0]))
     rng_key = jax.random.PRNGKey(42)
-    data: np.ndarray = jnp.asarray(data_generator3d.generate_data(150000, rng_key=rng_key))
+    data: np.ndarray = jnp.asarray(data_generator4d.generate_data(150000, rng_key=rng_key))
 
     train_data, test_data = data[0:100000], data[100000:]
 
-    train_dataframe = pd.DataFrame(train_data, columns=['A', 'B', 'C'])
-    train_dataframe.to_csv("binary3d.csv")
+    train_dataframe = pd.DataFrame(train_data, columns=['A', 'B', 'C', 'D'])
+    train_dataframe.to_csv("binary4d.csv", index=False)
 
-    test_dataframe = pd.DataFrame(test_data, columns=['A', 'B', 'C'])
-    test_dataframe.to_csv("binary3d_test.csv")
+    test_dataframe = pd.DataFrame(test_data, columns=['A', 'B', 'C', 'D'])
+    test_dataframe.to_csv("binary4d_test.csv", index=False)
 

@@ -36,6 +36,7 @@ from src.utils.timer import Timer
 
 timer = Timer()
 
+
 class NapsuMQModel(InferenceModel):
 
     def __init__(self) -> None:
@@ -66,6 +67,10 @@ class NapsuMQModel(InferenceModel):
         pid = timer.start(f"Calculating full marginal query", dataset_name=dataset_name, epsilon=epsilon)
 
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
+        timer.stop(pid)
+
+        pid = timer.start(f"Calculating canonical query set", dataset_name=dataset_name, epsilon=epsilon)
+
         queries = queries.get_canonical_queries()
 
         timer.stop(pid)

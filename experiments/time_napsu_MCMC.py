@@ -39,6 +39,9 @@ for dataset_name, dataset in datasets.items():
 
         n, d = dataset.shape
 
+        print(n)
+        print(d)
+
         pid = timer.start(f"MCMC (LA) main run", dataset_name=dataset_name, epsilon=epsilon)
 
         model = create_model(

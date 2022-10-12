@@ -25,6 +25,7 @@ class Timer(metaclass=Singleton):
         return self.times
 
     def start(self, task: str, **kwargs):
+        print("Recording: ", task)
         process_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         start = timer()
         self.times.append({

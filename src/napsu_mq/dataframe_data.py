@@ -52,6 +52,8 @@ class DataFrameData:
             else sorted(list(self.base_df[col].unique()))
             for col in self.int_df.columns
         }
+
+
         self.values_by_int_feature = {i: list(self.values_by_col[col]) for i, col in enumerate(self.int_df.columns)}
 
     def get_x_values(self) -> np.ndarray:
