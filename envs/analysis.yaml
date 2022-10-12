@@ -1,6 +1,8 @@
+name: napsu-analysis-env
 channels:
   - conda-forge
 dependencies:
+  - python=3.8
   - scikit-learn=1.1.2
   - pandas=1.5.0
   - xgboost=1.6.2
