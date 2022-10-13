@@ -1,11 +1,14 @@
 import pandas as pd
-from napsu_mq.main import create_model
+from src.napsu_mq.main import create_model
+from src.utils.timer import Timer
 
 dataset_map = snakemake.config['datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 datasets = snakemake.input[0]
 epsilons = snakemake.config["epsilons"]
 MCMC_algorithms = snakemake.config['MCMC_algorithms']
+
+timer = Timer()
 
 dataset_to_cliques_map = {
     "dummy": [
@@ -37,3 +40,6 @@ for dataset in datasets:
             print("Writing model to file")
             napsu_result_file = open(f"models/napsu_{dataset}_{epsilon}e_{algo}.dill", "wb")
             model.store(napsu_result_file)
+
+
+timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv")

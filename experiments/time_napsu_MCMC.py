@@ -14,7 +14,7 @@ datasets = {
     # 'adult': adult_data
 }
 
-epsilons = [0.01, 0.1, 1.0, 8.0]
+epsilons = [0.1, 0.3, 1.0, 3.0, 8.0]
 
 dataset_to_cliques_map = {
     "binary_3d": [
@@ -38,9 +38,6 @@ for dataset_name, dataset in datasets.items():
         print(f"Testing {dataset_name} dataset with epsilon {epsilon}")
 
         n, d = dataset.shape
-
-        print(n)
-        print(d)
 
         pid = timer.start(f"MCMC (LA) main run", dataset_name=dataset_name, epsilon=epsilon)
 

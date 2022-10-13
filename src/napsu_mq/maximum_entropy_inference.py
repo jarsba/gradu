@@ -131,7 +131,7 @@ def run_numpyro_laplace_approximation(
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 
-    for i in range(0, max_retries):
+    for i in range(0, max_retries + 1):
 
         rng = subkeys[i]
 
