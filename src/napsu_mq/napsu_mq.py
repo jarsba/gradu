@@ -33,6 +33,7 @@ from .marginal_query import FullMarginalQuerySet
 from .markov_network_jax import MarkovNetworkJax
 from .mst import MST_selection
 from src.utils.timer import Timer
+from src.utils.query_utils import calculate_query_number
 
 timer = Timer()
 
@@ -49,6 +50,16 @@ class NapsuMQModel(InferenceModel):
         use_laplace_approximation = kwargs[
             'use_laplace_approximation'] if 'use_laplace_approximation' in kwargs else True
 
+        query_str = "".join(column_feature_set)
+        timer_meta = {
+            "dataset_name": dataset_name,
+            "query": query_str,
+            "epsilon": epsilon,
+            "delta": delta,
+            "MCMC_algo": MCMC_algo,
+            "laplace_approximation": use_laplace_approximation
+        }
+
         dataframe = DataFrameData(data)
         category_mapping = DataFrameData.get_category_mapping(data)
         n, d = dataframe.int_array.shape
@@ -56,7 +67,7 @@ class NapsuMQModel(InferenceModel):
         domain_key_list = list(dataframe.values_by_col.keys())
         domain_value_count_list = [len(dataframe.values_by_col[key]) for key in domain_key_list]
 
-        pid = timer.start(f"Query selection", dataset_name=dataset_name, epsilon=epsilon)
+        pid = timer.start(f"Query selection", **timer_meta)
 
         domain = Domain(domain_key_list, domain_value_count_list)
         query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
@@ -64,14 +75,17 @@ class NapsuMQModel(InferenceModel):
 
         timer.stop(pid)
 
-        pid = timer.start(f"Calculating full marginal query", dataset_name=dataset_name, epsilon=epsilon)
+        pid = timer.start(f"Calculating full marginal query", **timer_meta)
 
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
 
-        pid = timer.start(f"Calculating canonical query set", dataset_name=dataset_name, epsilon=epsilon)
+        pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
         queries = queries.get_canonical_queries()
+
+        query_number = calculate_query_number(queries.queries)
+        timer_meta['n_canonical_queries'] = query_number
 
         timer.stop(pid)
 
@@ -85,13 +99,13 @@ class NapsuMQModel(InferenceModel):
 
         if use_laplace_approximation is True:
 
-            pid = timer.start(f"Laplace approximation", dataset_name=dataset_name, epsilon=epsilon)
+            pid = timer.start(f"Laplace approximation", **timer_meta)
 
             laplace_approx, success = mei.run_numpyro_laplace_approximation(rng, dp_suff_stat, n, sigma_DP, mnjax)
 
             timer.stop(pid)
 
-            pid = timer.start(f"MCMC (LA)", dataset_name=dataset_name, epsilon=epsilon)
+            pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc, backtransform = mei.run_numpyro_mcmc_normalised(
                 rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800, num_chains=4
@@ -105,7 +119,7 @@ class NapsuMQModel(InferenceModel):
 
         else:
 
-            pid = timer.start(f"MCMC", dataset_name=dataset_name, epsilon=epsilon)
+            pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc = mei.run_numpyro_mcmc(
                 rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800, num_chains=4
@@ -117,16 +131,7 @@ class NapsuMQModel(InferenceModel):
             posterior_values = inf_data.posterior.stack(draws=("chain", "draw"))
             posterior_values = posterior_values.lambdas.values.transpose()
 
-        meta = {
-            "dataset_name": dataset_name,
-            "epsilon": epsilon,
-            "delta": delta,
-            "MCMC_algo": MCMC_algo,
-            "cliques": column_feature_set,
-            "use_laplace_approximation": use_laplace_approximation
-        }
-
-        return NapsuMQResult(mnjax, posterior_values, category_mapping, meta)
+        return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta)
 
 
 class NapsuMQResult(InferenceResult):

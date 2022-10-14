@@ -7,6 +7,7 @@ DATASETS_FOLDER = os.path.join(DATA_FOLDER, "datasets")
 SYNT_DATASETS_FOLDER = os.path.join(DATA_FOLDER, "synt_datasets")
 MODELS_FOLDER = os.path.join(PROJECT_ROOT_PATH, "models")
 NAPSU_FOLDER = os.path.join(PROJECT_ROOT_PATH, "napsu_mq")
+RESULTS_FOLDER = os.path.join(PROJECT_ROOT_PATH, "results")
 
 
 def get_dataset_name(path):
@@ -22,6 +23,8 @@ def get_dataset_name(path):
             return "adult"
         elif "binary4d" in filename:
             return "binary4d"
+        elif "binary3d" in filename:
+            return "binary3d"
         else:
             raise ValueError(f"Cannot determine dataset name from filename {filename}")
 
@@ -41,8 +44,9 @@ def get_metadata_from_synthetic_path(synthetic_path: str):
     filename_paths = filename.split("_")
     dataset_index = filename_paths[2]
     dataset_name = filename_paths[3]
-    epsilon_str = filename_paths[4][0:2]
+    query = filename_paths[4]
+    epsilon_str = filename_paths[5][0:2]
     epsilon = float(f"{epsilon_str[0]}.{epsilon_str[1]}")
-    MCMC_algorithm = filename_paths[5]
+    MCMC_algorithm = filename_paths[6]
 
-    return dataset_index, dataset_name, epsilon, MCMC_algorithm
+    return dataset_index, dataset_name, query, epsilon, MCMC_algorithm

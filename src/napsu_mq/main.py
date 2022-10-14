@@ -54,7 +54,7 @@ def create_model(input: pd.DataFrame, dataset_name: str, epsilon: float, delta: 
         rng = jax.random.PRNGKey(6473286482)
 
     print(
-        f"PARAMS: \n\tepsilon {epsilon}\n\tdelta: {delta}")
+        f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(cliques)}\n\tMCMC algo {MCMC_algo}\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {use_laplace_approximation}")
 
     print("Initializing NapsuMQModel")
     model = NapsuMQModel()

@@ -4,18 +4,13 @@ datasets:
   #"adult": "cleaned_adult_data_v2.csv"
 epsilons:
   - "01"
-#  - "03"
-#  - "05"
-#  - "07"
-#  - "10"
-#  - "30"
-#  - "50"
+  - "03"
+  - "10"
+  - "30"
   - "80"
 MCMC_algorithms:
   - "NUTS"
-#  - "HMC"
-# MCMC_algorithms = ["NUTS", "HMC", "DataAugMCMC"]
-n_synt_datasets: 2
+n_synt_datasets: 10
 queries:
   "binary4d":
     - []

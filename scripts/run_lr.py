@@ -2,27 +2,18 @@ import os
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
+from .constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 
-from utils.path_utils import get_dataset_name, get_filename, get_metadata_from_synthetic_path
+from src.utils.path_utils import get_dataset_name, get_filename, get_metadata_from_synthetic_path, RESULTS_FOLDER
 
 dataset_paths = snakemake.input[0]
 print(dataset_paths)
-
-TARGET_COLUMNS_FOR_DATASET = {
-    "adult": "compensation",
-    "binary4d": "D"
-}
-
-TEST_DATASETS_FOR_DATASET = {
-    "adult": "data/datasets/cleaned_adult_data_v2_test.csv",
-    "binary4d": "data/datasets/binary4d_test.csv"
-}
 
 synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
 
 if synthetic_task:
     results = pd.DataFrame(
-        columns=["dataset_name", "dataset_index", "epsilon", "MCMC_algorithm", "accuracy", "balanced_accuracy", "F1",
+        columns=["dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy", "balanced_accuracy", "F1",
                  "coefficients"])
 else:
     results = pd.DataFrame(columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients"])
@@ -51,14 +42,14 @@ for path in dataset_paths:
     f1_score = cross_val_score(model, X_test, y_test, scoring='f1', n_jobs=-1, error_score='raise')
 
     if synthetic_task:
-        dataset_index, _, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
-        results.append([dataset_name, dataset_index, epsilon, MCMC_algorithm, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
+        dataset_index, _, query, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
+        results.append([dataset_name, dataset_index, query, epsilon, MCMC_algorithm, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
     else:
         results.append([dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
 
 if synthetic_task:
-    result_path = os.path.join("results", "synthetic_logistic_regression_results.csv")
+    result_path = os.path.join(RESULTS_FOLDER, "synthetic_logistic_regression_results.csv")
     results.to_csv(result_path, index=False)
 else:
-    result_path = os.path.join("results", "original_logistic_regression_results.csv")
+    result_path = os.path.join(RESULTS_FOLDER, "original_logistic_regression_results.csv")
     results.to_csv(result_path, index=False)
