@@ -1,17 +1,9 @@
 from timeit import default_timer as timer
-import random
-import string
+from typing import Optional
 
 import pandas as pd
-
-
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+from src.utils.keygen import get_key
+from singleton import Singleton
 
 
 class Timer(metaclass=Singleton):
@@ -24,9 +16,12 @@ class Timer(metaclass=Singleton):
     def get_times(self):
         return self.times
 
-    def start(self, task: str, **kwargs):
+    def start(self, task: str, **kwargs) -> str:
         print("Recording: ", task)
-        process_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        if "process_id" in kwargs:
+            process_id = kwargs['process_id']
+        else:
+            process_id = get_key()
         start = timer()
         self.times.append({
             'process_id': process_id,
@@ -43,7 +38,7 @@ class Timer(metaclass=Singleton):
 
         return process_id
 
-    def stop(self, process_id):
+    def stop(self, process_id: str) -> None:
         stop = timer()
 
         index = self.times_index[process_id]
@@ -52,14 +47,14 @@ class Timer(metaclass=Singleton):
         times_obj['stop'] = stop
         times_obj['timedelta'] = stop - times_obj['start']
 
-    def to_df(self):
+    def to_df(self) -> Optional[pd.DataFrame]:
         if len(self.times) == 0:
             return None
         else:
             df = pd.DataFrame(self.times)
             return df
 
-    def to_csv(self, file_path):
+    def to_csv(self, file_path: str) -> None:
         df = self.to_df()
 
         if df is None:

@@ -17,6 +17,7 @@ import jax
 import jax.numpy as jnp
 import numpyro
 import numpyro.infer.util as nummcmc_util
+from numpyro.diagnostics import summary
 from jax import random
 
 from . import maximum_entropy_model as mem
@@ -59,6 +60,11 @@ def print_stats_from_variable(trace, name, n_chains=4):
 
 def print_MCMC_diagnostics(mcmc):
     mcmc.print_summary()
+    summary_dict = summary(mcmc.get_samples(), group_by_chain=True)
+
+    for key, value in summary_dict.items():
+        print(f"[{key}]\t max r_hat: {jnp.max(value['r_hat']):.4f}")
+
     poten = mcmc.get_extra_fields()["potential_energy"]
     accept_prob = mcmc.get_extra_fields()["accept_prob"]
     mean_accept_prob = mcmc.get_extra_fields()["mean_accept_prob"]
@@ -82,12 +88,10 @@ def run_numpyro_mcmc(
     mcmc = numpyro.infer.MCMC(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
         progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential",
-
     )
     mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
              extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
 
-    mcmc.print_summary()
     print_MCMC_diagnostics(mcmc)
     return mcmc
 
