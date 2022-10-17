@@ -65,7 +65,7 @@ synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
 
 if synthetic_task:
     results = pd.DataFrame(
-        columns=["dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "model_name", "accuracy", "balanced_accuracy", "F1"])
+        columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "model_name", "accuracy", "balanced_accuracy", "F1"])
 else:
     results = pd.DataFrame(columns=["dataset_name", "model_name", "accuracy", "balanced_accuracy", "F1"])
 
@@ -82,11 +82,11 @@ for path in dataset_paths:
     scores = run_classification_on_adult(train_df, test_df, target_column, models)
 
     if synthetic_task:
-        dataset_index, _, query, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
+        experiment_id, dataset_index, _, query, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
 
         for model_score in scores:
             model_name, accuracy, balanced_accuracy, f1 = model_score
-            results.append([dataset_name, dataset_index, query, epsilon, MCMC_algorithm, model_name, accuracy, balanced_accuracy, f1])
+            results.append([experiment_id, dataset_name, dataset_index, query, epsilon, MCMC_algorithm, model_name, accuracy, balanced_accuracy, f1])
     else:
         for model_score in scores:
             model_name, accuracy, balanced_accuracy, f1 = model_score

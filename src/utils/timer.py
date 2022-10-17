@@ -1,5 +1,5 @@
 from timeit import default_timer as timer
-from typing import Optional
+from typing import Optional, Tuple
 
 import pandas as pd
 from src.utils.keygen import get_key
@@ -18,13 +18,13 @@ class Timer(metaclass=Singleton):
 
     def start(self, task: str, **kwargs) -> str:
         print("Recording: ", task)
-        if "process_id" in kwargs:
-            process_id = kwargs['process_id']
+        if "experiment_id" in kwargs:
+            experiment_id = kwargs['experiment_id']
         else:
-            process_id = get_key()
+            experiment_id = None
         start = timer()
         self.times.append({
-            'process_id': process_id,
+            'experiment_id': experiment_id,
             'start': start,
             'stop': None,
             'timedelta': None,
@@ -33,6 +33,7 @@ class Timer(metaclass=Singleton):
         })
 
         index = len(self.times) - 1
+        process_id = get_key()
 
         self.times_index[process_id] = index
 

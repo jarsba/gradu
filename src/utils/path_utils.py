@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Tuple
 
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__name__))
 DATA_FOLDER = os.path.join(PROJECT_ROOT_PATH, "data")
@@ -39,14 +40,15 @@ def get_filename(path: str, with_suffix=False) -> str:
         return path.stem
 
 
-def get_metadata_from_synthetic_path(synthetic_path: str):
+def get_metadata_from_synthetic_path(synthetic_path: str) -> Tuple[str, str, str, str, float, str]:
     filename = get_filename(synthetic_path)
     filename_paths = filename.split("_")
-    dataset_index = filename_paths[2]
-    dataset_name = filename_paths[3]
-    query = filename_paths[4]
-    epsilon_str = filename_paths[5][0:2]
+    experiment_id = filename_paths[2]
+    dataset_index = filename_paths[3]
+    dataset_name = filename_paths[4]
+    query = filename_paths[5]
+    epsilon_str = filename_paths[6][0:2]
     epsilon = float(f"{epsilon_str[0]}.{epsilon_str[1]}")
-    MCMC_algorithm = filename_paths[6]
+    MCMC_algorithm = filename_paths[7]
 
-    return dataset_index, dataset_name, query, epsilon, MCMC_algorithm
+    return experiment_id, dataset_index, dataset_name, query, epsilon, MCMC_algorithm

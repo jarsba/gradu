@@ -25,8 +25,9 @@ rule run_napsu:
     input:
         expand("data/datasets/{dataset}",dataset=dataset_files)
     output:
-        expand("models/napsu_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms),
-        "napsu_MCMC_time_vs_epsilon_comparison.csv"
+        expand("models/napsu_{{experiment_id}}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms),
+        "napsu_MCMC_time_vs_epsilon_comparison.csv",
+        "napsu_experiment_storage_output.csv"
     #log:
     #    expand("logs/napsu/napsu_{dataset}_{epsilon}e_{MCMC_algorithm}.log", dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     conda:
@@ -37,9 +38,9 @@ rule run_napsu:
 
 rule generate_synt_datasets:
     input:
-        expand("models/napsu_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms,)
+        expand("models/napsu_{{experiment_id}}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
     output:
-        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
     conda:
         "envs/napsu.yaml"
     script:
@@ -48,7 +49,7 @@ rule generate_synt_datasets:
 
 rule run_logistic_regression_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
     output:
         "results/synthetic_logistic_regression_results.csv"
     conda:
@@ -70,7 +71,7 @@ rule run_logistic_regression_on_original:
 
 rule run_classification_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
     output:
         "results/synthetic_classification_results.csv"
     conda:

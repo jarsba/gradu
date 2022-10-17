@@ -19,9 +19,13 @@ import numpyro
 import numpyro.infer.util as nummcmc_util
 from numpyro.diagnostics import summary
 from jax import random
-
+import numpy as np
 from . import maximum_entropy_model as mem
 from .markov_network_jax import MarkovNetworkJax
+from src.utils.experiment_storage import ExperimentStorage
+from scripts.run_napsu import experiment_id_ctx
+
+storage = ExperimentStorage()
 
 kernels = Literal['NUTS', 'HMC',]
 
@@ -35,9 +39,10 @@ def get_kernel(MCMC_algo: kernels):
         raise ValueError(f"{MCMC_algo} not recognized as MCMC inference algorithm")
 
 
-def print_stats_from_variable(trace, name, n_chains=4):
+def get_stats_from_variable(trace, n_chains=4):
     n = trace.shape[0]
     samples_per_chain = n // n_chains
+    stats = np.zeros(shape=(4, n_chains))
     for i in range(0, n_chains):
         slice_min = samples_per_chain * i
         slice_max = samples_per_chain * (i + 1)
@@ -55,7 +60,9 @@ def print_stats_from_variable(trace, name, n_chains=4):
         if jnp.isscalar(std):
             std = round(std, 6)
 
-        print(f"{name}\tChain {i + 1}: min-max: {min} - {max}\tmean (std): {mean} ({std})")
+        stats[, :0] = np.array([min, max, mean, std])
+
+    return stats
 
 
 def print_MCMC_diagnostics(mcmc):
@@ -70,10 +77,21 @@ def print_MCMC_diagnostics(mcmc):
     mean_accept_prob = mcmc.get_extra_fields()["mean_accept_prob"]
     diverging = mcmc.get_extra_fields()["diverging"]
 
-    print_stats_from_variable(poten, "Potential energy")
-    print_stats_from_variable(accept_prob, "Acceptance probability")
-    print_stats_from_variable(mean_accept_prob, "Mean acceptance probability")
-    print_stats_from_variable(diverging, "Diverging")
+    min, max, mean, std = get_stats_from_variable(poten)
+    print(f"Potential energy\tmin: {min}\tmax: {max}\tmean: {mean}\tstd: {std}")
+    min, max, mean, std = get_stats_from_variable(accept_prob)
+    print(f"Acceptance probability\tmin: {min}\tmax: {max}\tmean: {mean}\tstd: {std}")
+    min, max, mean, std = get_stats_from_variable(mean_accept_prob)
+    print(f"Mean acceptance probability\tmin: {min}\tmax: {max}\tmean: {mean}\tstd: {std}")
+    min, max, mean, std = get_stats_from_variable(diverging)
+    print(f"Diverging\tmin: {min}\tmax: {max}\tmean: {mean}\tstd: {std}")
+
+
+def store_MCMC_diagnostics(mcmc):
+    summary_dict = summary(mcmc.get_samples(), group_by_chain=True)
+    MCMC_diagnostics = {**summary_dict}
+    experiment_id = experiment_id_ctx.get()
+    storage.store(experiment_id, MCMC_diagnostics)
 
 
 def run_numpyro_mcmc(
@@ -93,6 +111,7 @@ def run_numpyro_mcmc(
              extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
 
     print_MCMC_diagnostics(mcmc)
+    store_MCMC_diagnostics(mcmc)
     return mcmc
 
 
@@ -114,8 +133,8 @@ def run_numpyro_mcmc_normalised(
     mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
              extra_fields=("potential_energy", "potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
 
-    mcmc.print_summary()
     print_MCMC_diagnostics(mcmc)
+    store_MCMC_diagnostics(mcmc)
 
     def backtransform(lambdas: jnp.ndarray) -> jnp.ndarray:
         return (L_guess @ lambdas.transpose()).transpose() + mean_guess
@@ -131,7 +150,6 @@ def run_numpyro_laplace_approximation(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
         prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=5
 ) -> Tuple[numpyro.distributions.MultivariateNormal, bool]:
-
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 

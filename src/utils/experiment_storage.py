@@ -1,5 +1,4 @@
 from typing import Mapping, List, Optional
-from src.utils.keygen import get_key
 import pandas as pd
 from singleton import Singleton
 
@@ -18,24 +17,23 @@ class ExperimentStorage(metaclass=Singleton):
     def storage(self, value: List[Mapping]):
         self.storage = value
 
-    def get_item(self, process_id: str) -> Mapping:
-        index = self.storage_index[process_id]
+    def get_item(self, experiment_id: str) -> Mapping:
+        index = self.storage_index[experiment_id]
         return self.storage[index]
 
-    def _has_key(self, process_id: str) -> bool:
-        if process_id in self.storage_index:
+    def _has_key(self, experiment_id: str) -> bool:
+        if experiment_id in self.storage_index:
             return True
         else:
             return False
 
-    def store(self, process_id: str, dict: Mapping) -> None:
-        if self._has_key(process_id):
-            item: dict = self.get_item(process_id)
+    def store(self, experiment_id: str, dict: Mapping) -> None:
+        if self._has_key(experiment_id):
+            item: dict = self.get_item(experiment_id)
             item.update(dict)
         else:
-            key = get_key()
             self.storage.append(dict)
-            self.storage_index[key] = len(self.storage) - 1
+            self.storage_index[experiment_id] = len(self.storage) - 1
 
     def to_df(self) -> Optional[pd.DataFrame]:
         if len(self.storage) == 0:

@@ -14,6 +14,7 @@ for model_path in models:
     model: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
     meta_info = model.meta
 
+    experiment_id = meta_info['experiment_id']
     dataset_name = meta_info['dataset_name']
     epsilon = meta_info['epsilon']
     MCMC_algorithm = meta_info['MCMC_algo']
@@ -25,5 +26,5 @@ for model_path in models:
 
     for i, df in enumerate(synt_datasets):
         path = os.path.join(SYNT_DATASETS_FOLDER,
-                            f"synthetic_dataset_{i}_{dataset_name}_{query}_{epsilon}e_{MCMC_algorithm}.csv")
+                            f"synthetic_dataset_{experiment_id}_{i}_{dataset_name}_{query}_{epsilon}e_{MCMC_algorithm}.csv")
         df.to_csv(path, index=False)

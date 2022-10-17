@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from .constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
-
+from src.napsu_mq.logistic_regression import logistic_regression
 from src.utils.path_utils import get_dataset_name, get_filename, get_metadata_from_synthetic_path, RESULTS_FOLDER
 
 dataset_paths = snakemake.input[0]
@@ -13,10 +13,11 @@ synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
 
 if synthetic_task:
     results = pd.DataFrame(
-        columns=["dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy", "balanced_accuracy", "F1",
+        columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy", "balanced_accuracy", "F1",
                  "coefficients"])
 else:
     results = pd.DataFrame(columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients"])
+
 
 for path in dataset_paths:
     df = pd.read_csv(path)
@@ -42,8 +43,8 @@ for path in dataset_paths:
     f1_score = cross_val_score(model, X_test, y_test, scoring='f1', n_jobs=-1, error_score='raise')
 
     if synthetic_task:
-        dataset_index, _, query, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
-        results.append([dataset_name, dataset_index, query, epsilon, MCMC_algorithm, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
+        experiment_id, dataset_index, _, query, epsilon, MCMC_algorithm = get_metadata_from_synthetic_path(path)
+        results.append([experiment_id, dataset_name, dataset_index, query, epsilon, MCMC_algorithm, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
     else:
         results.append([dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coeficcients])
 

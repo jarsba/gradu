@@ -34,6 +34,7 @@ from .markov_network_jax import MarkovNetworkJax
 from .mst import MST_selection
 from src.utils.timer import Timer
 from src.utils.query_utils import calculate_query_number
+from scripts.run_napsu import experiment_id_ctx
 
 timer = Timer()
 
@@ -49,9 +50,11 @@ class NapsuMQModel(InferenceModel):
         MCMC_algo = kwargs['MCMC_algo'] if 'MCMC_algo' in kwargs else 'NUTS'
         use_laplace_approximation = kwargs[
             'use_laplace_approximation'] if 'use_laplace_approximation' in kwargs else True
+        experiment_id = experiment_id_ctx.get()
 
         query_str = "".join(column_feature_set)
         timer_meta = {
+            "experiment_id": experiment_id,
             "dataset_name": dataset_name,
             "query": query_str,
             "epsilon": epsilon,
@@ -191,7 +194,7 @@ class NapsuMQResult(InferenceResult):
     def generate_extended(self, rng: PRNGState, num_data_per_parameter_sample: int, num_parameter_samples: int,
                           single_dataframe: Optional[bool] = False) -> Union[Iterable[pd.DataFrame], pd.DataFrame]:
 
-        dataframes = self._generate(rng, num_data_per_parameter_sample, num_parameter_samples)
+        dataframes = self.generate(rng, num_data_per_parameter_sample, num_parameter_samples)
 
         if single_dataframe is True:
             combined_dataframe = pd.concat(dataframes, ignore_index=True)
