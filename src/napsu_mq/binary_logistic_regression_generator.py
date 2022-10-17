@@ -19,6 +19,10 @@ import numpy as np
 import pandas as pd
 from scipy.special import expit
 
+TRUE_PARAMS_MAP = {
+    "3d": [1.0, 0.0],
+    "4d": [1.0, 0.0, 2.0]
+}
 
 class BinaryLogisticRegressionDataGenerator:
     """
@@ -73,7 +77,7 @@ class BinaryLogisticRegressionDataGenerator:
 
 
 if __name__ == '__main__':
-    data_generator4d = BinaryLogisticRegressionDataGenerator(np.array([1.0, 0.0, 2.0]))
+    data_generator4d = BinaryLogisticRegressionDataGenerator(np.array(TRUE_PARAMS_MAP["4d"]))
     rng_key = jax.random.PRNGKey(42)
     data: np.ndarray = jnp.asarray(data_generator4d.generate_data(150000, rng_key=rng_key))
 

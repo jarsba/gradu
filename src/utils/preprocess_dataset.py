@@ -2,6 +2,30 @@ import pandas as pd
 import os
 from src.utils.path_utils import DATASETS_FOLDER
 
+
+def clean_synthetic_binary(data) -> pd.DataFrame:
+    data = pd.to_numeric(data)
+    return data
+
+
+def clean_synthetic_adult(data) -> pd.DataFrame:
+    data['age'] = pd.to_numeric(data.age)
+    data['workclass'] = pd.Categorical(data['workclass'])
+    data['education-num'] = pd.Categorical(data['education-num'])
+    data['marital-status'] = pd.Categorical(data['marital-status'])
+    data['occupation'] = pd.Categorical(data['occupation'])
+    data['relationship'] = pd.Categorical(data['relationship'])
+    data['race'] = pd.Categorical(data['race'])
+    data['sex'] = pd.Categorical(data['sex'])
+    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
+    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
+    data['hours-per-week'] = pd.to_numeric(data['hours-per-week'])
+    data['native-country'] = pd.Categorical(data['native-country'])
+    data['compensation'] = pd.Categorical(data['compensation'])
+
+    return data
+
+
 def get_adult_train() -> pd.DataFrame:
     """
     Returns: Discretized Adult train dataset that has following columns removed:
