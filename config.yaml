@@ -1,3 +1,5 @@
+workdir: "/home/jarlehti/projects/gradu"
+
 datasets:
   "binary4d": "binary4d.csv"
   "binary3d": "binary3d.csv"

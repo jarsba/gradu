@@ -1,5 +1,5 @@
 {
-    "SBATCH_DEFAULTS": "",
-    "CLUSTER_NAME": "",
+    "SBATCH_DEFAULTS": "error=slurm-logs/slurm-%j.err output=slurm-logs/slurm-%j.out partition=short",
+    "CLUSTER_NAME": "vorna",
     "CLUSTER_CONFIG": ""
 }

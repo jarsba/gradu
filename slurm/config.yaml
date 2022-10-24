@@ -1,5 +1,6 @@
 cluster-sidecar: "slurm-sidecar.py"
 cluster-cancel: "scancel"
+directory: "/wrk-vakka/users/jarlehti/gradu"
 restart-times: "3"
 jobscript: "slurm-jobscript.sh"
 cluster: "slurm-submit.py"
@@ -12,7 +13,7 @@ use-conda: "True"
 use-singularity: "False"
 jobs: "4"
 printshellcmds: "False"
-workdir: "/wrk-vakka/users/jarlehti/gradu"
+jobname: "jakki-gradu.{name}.{jobid}"
 
 # Example resource configuration
 # default-resources:

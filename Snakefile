@@ -1,7 +1,7 @@
 from src.utils.snakemake_utils import query_dataset_product, generate_products
 
-# workdir: "/home/local/jarlehti/projects/gradu"
 configfile: "config.yaml"
+workdir: config['workdir']
 
 n_synt_datasets = config['n_synt_datasets']
 dataset = config['datasets']
