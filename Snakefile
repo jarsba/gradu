@@ -1,7 +1,6 @@
 from src.utils.snakemake_utils import query_dataset_product, generate_products
-from src.utils.keygen import get_key
 
-workdir: "/home/local/jarlehti/projects/gradu"
+# workdir: "/home/local/jarlehti/projects/gradu"
 configfile: "config.yaml"
 
 n_synt_datasets = config['n_synt_datasets']
