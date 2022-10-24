@@ -1,4 +1,5 @@
-from src.utils.snakemake_utils import query_dataset_product
+from src.utils.snakemake_utils import query_dataset_product, generate_products
+from src.utils.keygen import get_key
 
 workdir: "/home/local/jarlehti/projects/gradu"
 configfile: "config.yaml"
@@ -14,20 +15,32 @@ queries = config['queries']
 la_approx = ['LA', 'NoLA']
 
 queries_dataset_product = query_dataset_product(dataset_names,queries)
+experiment_products = generate_products(queries_dataset_product, epsilons, MCMC_algorithms)
+
+wildcard_constraints:
+    experiment_id="[a-zA-Z\d]{8}"
 
 rule all:
     input:
         expand("plots/lr_comparison_{dataset}.svg",dataset=dataset_names),
         expand("plots/clf_comparison_{dataset}.svg",dataset=dataset_names)
 
+rule csv_results:
+    input:
+        "results/original_logistic_regression_results.csv",
+        "results/synthetic_logistic_regression_results.csv",
+        "results/original_classification_results.csv",
+        "results/synthetic_classification_results.csv"
+
+
 
 rule run_napsu:
     input:
         expand("data/datasets/{dataset}",dataset=dataset_files)
     output:
-        expand("models/napsu_{{experiment_id}}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms),
-        "napsu_MCMC_time_vs_epsilon_comparison.csv",
-        "napsu_experiment_storage_output.csv"
+        expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products),
+    #"napsu_MCMC_time_vs_epsilon_comparison.csv",
+    #"napsu_experiment_storage_output.csv"
     #log:
     #    expand("logs/napsu/napsu_{dataset}_{epsilon}e_{MCMC_algorithm}.log", dataset=dataset_names, epsilon=epsilons, MCMC_algorithm=MCMC_algorithms)
     conda:
@@ -38,9 +51,9 @@ rule run_napsu:
 
 rule generate_synt_datasets:
     input:
-        expand("models/napsu_{{experiment_id}}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.dill",dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products)
     output:
-        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
     conda:
         "envs/napsu.yaml"
     script:
@@ -49,13 +62,13 @@ rule generate_synt_datasets:
 
 rule run_logistic_regression_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
     output:
         "results/synthetic_logistic_regression_results.csv"
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_lr.py"
+        "scripts/run_lr_on_synth.py"
 
 
 rule run_logistic_regression_on_original:
@@ -66,18 +79,18 @@ rule run_logistic_regression_on_original:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_lr.py"
+        "scripts/run_lr_on_synth.py"
 
 
 rule run_classification_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{{experiment_id}}_{i}_{dataset_query}_{epsilon}e_{MCMC_algorithm}.csv",i=dataset_index,dataset_query=queries_dataset_product,epsilon=epsilons,MCMC_algorithm=MCMC_algorithms)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
     output:
         "results/synthetic_classification_results.csv"
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_clf.py"
+        "scripts/run_clf_on_synth.py"
 
 
 rule run_classification_on_original:
@@ -88,7 +101,7 @@ rule run_classification_on_original:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_clf.py"
+        "scripts/run_clf_on_synth.py"
 
 
 #rule compare_datasets:
@@ -112,7 +125,7 @@ rule compare_lr_results:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/plot_results.py"
+        "scripts/plot_lr_results.py"
 
 
 rule compare_clf_results:
@@ -124,4 +137,4 @@ rule compare_clf_results:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/plot_results.py"
+        "scripts/plot_clf_results.py"

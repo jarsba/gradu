@@ -1,8 +1,12 @@
+import jax
 import pandas as pd
+from arviz.data.inference_data import InferenceDataT
+
 from src.napsu_mq.main import create_model
 from src.utils.timer import Timer
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage
+from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 import contextvars
 
 dataset_map = snakemake.config['datasets']
@@ -34,6 +38,7 @@ for dataset in datasets:
                 dataset_name = inverted_dataset_map[dataset]
                 n, d = dataframe.shape
                 query_str = "".join(query)
+                delta = (n ** (-2))
 
                 experiment_id = get_key()
                 experiment_id_ctx.set(experiment_id)
@@ -43,20 +48,34 @@ for dataset in datasets:
                     "dataset_name": dataset_name,
                     "query": query_str,
                     "epsilon": epsilon,
-                    "delta": (n ** (-2)),
+                    "delta": delta,
                     "MCMC_algo": "NUTS",
                     "laplace_approximation": True
                 }
 
                 pid = timer.start(f"Main run", **timer_meta)
 
-                model = create_model(
-                    input=dataframe,
+                print(
+                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query)}\n\tMCMC algo {algo}\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+
+                print("Initializing NapsuMQModel")
+                rng = jax.random.PRNGKey(6473286482)
+
+                model = NapsuMQModel()
+
+                result: NapsuMQResult
+                inf_data: InferenceDataT
+
+                result, inf_data = model.fit(
+                    data=dataframe,
                     dataset_name=dataset_name,
-                    epsilon=epsilon_str_to_float(epsilon),
-                    delta=(n ** (-2)),
-                    cliques=query,
+                    rng=rng,
+                    epsilon=epsilon,
+                    delta=delta,
+                    column_feature_set=query,
                     MCMC_algo=algo,
+                    use_laplace_approximation=True,
+                    return_inference_data=True
                 )
 
                 timer.stop(pid)
@@ -66,7 +85,12 @@ for dataset in datasets:
                 print("Writing model to file")
                 napsu_result_file = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon}e_{algo}.dill",
                                          "wb")
-                model.store(napsu_result_file)
+                result.store(napsu_result_file)
+
+                inference_result_filt = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon}e_{algo}.dill",
+                                         "wb")
+
+                inf_data.to_netcdf(f"logs/inf_data_{experiment_id}.nc")
 
 timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv")
 storage.to_csv("napsu_experiment_storage_output.csv")

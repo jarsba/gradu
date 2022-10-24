@@ -14,7 +14,7 @@
 
 
 import os
-from typing import Optional, Union, Iterable, BinaryIO, Mapping
+from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple
 
 import arviz as az
 import dill
@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 from d3p.random import PRNGState
 from mbi import Domain, Dataset
+from arviz.data.inference_data import InferenceDataT
 
 from . import maximum_entropy_inference as mei
 from . import privacy_accounting as privacy_accounting
@@ -39,17 +40,25 @@ from scripts.run_napsu import experiment_id_ctx
 timer = Timer()
 
 
+def check_kwargs(kwargs, name, default_value):
+    if name in kwargs:
+        return kwargs[name]
+    else:
+        return default_value
+
+
 class NapsuMQModel(InferenceModel):
 
     def __init__(self) -> None:
         super().__init__()
 
     def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGState, epsilon: float, delta: float,
-            **kwargs) -> 'NapsuMQResult':
-        column_feature_set = kwargs['column_feature_set'] if 'column_feature_set' in kwargs else []
-        MCMC_algo = kwargs['MCMC_algo'] if 'MCMC_algo' in kwargs else 'NUTS'
-        use_laplace_approximation = kwargs[
-            'use_laplace_approximation'] if 'use_laplace_approximation' in kwargs else True
+            **kwargs) -> Union['NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT]]:
+        column_feature_set = check_kwargs(kwargs, 'column_feature_set', [])
+        MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
+        use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
+        return_inference_data = check_kwargs(kwargs, 'return_inference_data', False)
+
         experiment_id = experiment_id_ctx.get()
 
         query_str = "".join(column_feature_set)
@@ -134,7 +143,10 @@ class NapsuMQModel(InferenceModel):
             posterior_values = inf_data.posterior.stack(draws=("chain", "draw"))
             posterior_values = posterior_values.lambdas.values.transpose()
 
-        return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta)
+        if return_inference_data:
+            return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta), inf_data
+        else:
+            return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta)
 
 
 class NapsuMQResult(InferenceResult):

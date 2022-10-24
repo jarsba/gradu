@@ -27,3 +27,10 @@ TEST_DATASET_SIZE_MAP = {
     "binary4d": 50000,
     "binary3d": 50000,
 }
+
+COLUMNS_FOR_DATASET = {
+    "adult": ['age', 'workclass', 'education-num', 'marital-status', 'occupation', 'relationship', 'race', 'sex',
+              'hours-per-week', 'native-country', 'compensation'],
+    "binary4d": ['A', 'B', 'C', 'D'],
+    "binary3d": ['A', 'B', 'C']
+}

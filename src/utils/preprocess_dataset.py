@@ -1,6 +1,36 @@
+import numpy as np
 import pandas as pd
 import os
 from src.utils.path_utils import DATASETS_FOLDER
+from pandas.api.types import is_integer_dtype, is_categorical_dtype
+
+ADULT_COLUMNS_TO_DROP = ['had-capital-gains', 'had-capital-losses']
+
+
+def convert_to_int_array(df: pd.DataFrame) -> np.ndarray:
+    int_df = df.copy()
+    for col in df.columns:
+        if is_categorical_dtype(df[col]):
+            int_df[col] = df[col].cat.codes
+        elif is_integer_dtype(df[col]):
+            int_df[col] = df[col]
+        else:
+            raise ValueError(f"DataFrame contains unsupported column type: {df[col].dtype}")
+
+    int_array = int_df.to_numpy()
+
+    return int_array
+
+
+def clean_dataset(df, dataset_name):
+    if dataset_name == 'adult':
+        df = clean_adult(df)
+    elif dataset_name == 'binary3d':
+        df = clean_synthetic_binary(df)
+    elif dataset_name == 'binary4d':
+        df = clean_synthetic_binary(df)
+
+    return df
 
 
 def clean_synthetic_binary(data) -> pd.DataFrame:
@@ -8,8 +38,8 @@ def clean_synthetic_binary(data) -> pd.DataFrame:
     return data
 
 
-def clean_synthetic_adult(data) -> pd.DataFrame:
-    data['age'] = pd.to_numeric(data.age)
+def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
+    data['age'] = pd.Categorical(data['age'])
     data['workclass'] = pd.Categorical(data['workclass'])
     data['education-num'] = pd.Categorical(data['education-num'])
     data['marital-status'] = pd.Categorical(data['marital-status'])
@@ -17,11 +47,14 @@ def clean_synthetic_adult(data) -> pd.DataFrame:
     data['relationship'] = pd.Categorical(data['relationship'])
     data['race'] = pd.Categorical(data['race'])
     data['sex'] = pd.Categorical(data['sex'])
-    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
-    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
-    data['hours-per-week'] = pd.to_numeric(data['hours-per-week'])
+    data['hours-per-week'] = pd.Categorical(data['hours-per-week'])
     data['native-country'] = pd.Categorical(data['native-country'])
     data['compensation'] = pd.Categorical(data['compensation'])
+
+    data.drop(columns=ADULT_COLUMNS_TO_DROP)
+
+    # Move "compensation" column to last
+    data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
 
     return data
 
@@ -58,6 +91,9 @@ def get_adult_train() -> pd.DataFrame:
     # Low information columns
     data.drop(columns=['had-capital-gains', 'had-capital-losses'], inplace=True)
 
+    # Move "compensation" column to last
+    data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
+
     return data
 
 
@@ -92,6 +128,9 @@ def get_adult_test() -> pd.DataFrame:
 
     # Low information columns
     data.drop(columns=['had-capital-gains', 'had-capital-losses'], inplace=True)
+
+    # Move "compensation" column to last
+    data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
 
     return data
 
