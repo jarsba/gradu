@@ -2,7 +2,6 @@ import jax
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 
-from src.napsu_mq.main import create_model
 from src.utils.timer import Timer
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage
