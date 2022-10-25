@@ -133,3 +133,22 @@ data/datasets/*
 data/synt_datasets/*
 !data/datasets/.gitkeep
 !data/synt_datasets/.gitkeep
+
+# Profiles
+profiles/*
+!profiles/.gitkeep
+
+# Models
+models/*
+!models/.gitkeep
+
+# Results
+results/*
+!results/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Local files
+local_run.sh
