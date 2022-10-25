@@ -27,6 +27,7 @@ for model_path in models:
     delta = meta_info['delta']
     MCMC_algorithm = meta_info['MCMC_algo']
     query = meta_info['query']
+    n_canonical_queries = meta_info['n_canonical_queries']
 
     n_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
@@ -42,7 +43,7 @@ for model_path in models:
         n_rows=n_rows,
         n_cols=n_cols,
         original_dataset=dataset_name,
-        query=query,
+        queries=query,
         inference_algorithm=MCMC_algorithm,
         epsilon=epsilon,
         delta=delta

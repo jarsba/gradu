@@ -65,7 +65,8 @@ class NapsuMQModel(InferenceModel):
         timer_meta = {
             "experiment_id": experiment_id,
             "dataset_name": dataset_name,
-            "query": query_str,
+            "query_str": query_str,
+            "query_list": column_feature_set,
             "epsilon": epsilon,
             "delta": delta,
             "MCMC_algo": MCMC_algo,

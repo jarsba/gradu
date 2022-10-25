@@ -10,7 +10,8 @@ class SynthDataObject:
     n_rows: int
     n_cols: int
     original_dataset: str
-    query: str
+    queries: object
+    n_canonical_queries: int
     inference_algorithm: str
     epsilon: float
     delta: float
