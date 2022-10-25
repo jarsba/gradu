@@ -6,7 +6,7 @@ from typing import Protocol
 import pandas as pd
 import numpy as np
 import os
-from .constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
+from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from base_clf import run_classification_on_adult
 
 from src.utils.path_utils import get_dataset_name, RESULTS_FOLDER

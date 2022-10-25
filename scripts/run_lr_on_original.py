@@ -4,7 +4,7 @@ sys.path.append(snakemake.config['workdir'])
 import os
 import pandas as pd
 from base_lr import run_logistic_regression
-from .constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
+from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from src.utils.path_utils import get_dataset_name, get_filename, RESULTS_FOLDER
 from src.utils.preprocess_dataset import clean_dataset, convert_to_int_array
 

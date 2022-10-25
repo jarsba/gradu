@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from src.utils.synthetic_data_object import SynthDataObject
-from .constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
+from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
 from src.utils.path_utils import RESULTS_FOLDER
 from base_lr import run_logistic_regression
 

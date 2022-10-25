@@ -11,7 +11,7 @@ import pickle
 from data_utils import dataframe_list_to_tensor
 from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.utils.synthetic_data_object import SynthDataObject
-from .constants import TRAIN_DATASET_SIZE_MAP
+from constants import TRAIN_DATASET_SIZE_MAP
 from src.utils.path_utils import SYNT_DATASETS_FOLDER
 
 models = snakemake.input[0]
