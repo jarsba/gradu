@@ -1,3 +1,6 @@
+import sys
+sys.path.append(snakemake.config['workdir'])
+
 import jax
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT

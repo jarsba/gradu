@@ -1,3 +1,6 @@
+import sys
+sys.path.append(snakemake.config['workdir'])
+
 import os
 import pandas as pd
 from base_lr import run_logistic_regression

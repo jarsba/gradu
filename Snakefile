@@ -1,7 +1,10 @@
+import sys
+
 from src.utils.snakemake_utils import query_dataset_product, generate_products
 
 configfile: "config.yaml"
 workdir: config['workdir']
+sys.path.append(config['workdir'])
 
 n_synt_datasets = config['n_synt_datasets']
 dataset = config['datasets']

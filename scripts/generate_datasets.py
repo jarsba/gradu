@@ -1,3 +1,6 @@
+import sys
+sys.path.append(snakemake.config['workdir'])
+
 import os
 from typing import List
 
@@ -44,6 +47,7 @@ for model_path in models:
         n_cols=n_cols,
         original_dataset=dataset_name,
         queries=query,
+        n_canonical_queries=n_canonical_queries,
         inference_algorithm=MCMC_algorithm,
         epsilon=epsilon,
         delta=delta
