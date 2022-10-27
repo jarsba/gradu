@@ -12,7 +12,9 @@ from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COL
 from src.utils.path_utils import RESULTS_FOLDER
 from base_lr import run_logistic_regression
 
-dataset_paths = snakemake.input[0]
+dataset_paths = snakemake.input
+
+print(dataset_paths)
 
 results = pd.DataFrame(
     columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy",

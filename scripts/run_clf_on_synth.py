@@ -10,7 +10,9 @@ from base_clf import run_classification_on_adult
 from src.utils.path_utils import RESULTS_FOLDER
 import pickle
 
-dataset_paths = snakemake.input[0]
+dataset_paths = snakemake.input
+
+print(dataset_paths)
 
 results = pd.DataFrame(
     columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "model_name",

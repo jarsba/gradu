@@ -11,7 +11,9 @@ from base_clf import run_classification_on_adult
 
 from src.utils.path_utils import get_dataset_name, RESULTS_FOLDER
 
-dataset_paths = snakemake.input[0]
+dataset_paths = snakemake.input
+
+print(dataset_paths)
 
 
 class ScikitModel(Protocol):

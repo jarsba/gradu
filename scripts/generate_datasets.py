@@ -14,8 +14,10 @@ from src.utils.synthetic_data_object import SynthDataObject
 from constants import TRAIN_DATASET_SIZE_MAP
 from src.utils.path_utils import SYNT_DATASETS_FOLDER
 
-models = snakemake.input[0]
+models = snakemake.input
 n_datasets = snakemake.config['n_datasets']
+
+print(models)
 
 rng = jax.random.PRNGKey(86933526)
 

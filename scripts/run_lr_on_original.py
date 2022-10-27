@@ -8,7 +8,9 @@ from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from src.utils.path_utils import get_dataset_name, get_filename, RESULTS_FOLDER
 from src.utils.preprocess_dataset import clean_dataset, convert_to_int_array
 
-dataset_paths = snakemake.input[0]
+dataset_paths = snakemake.input
+
+print(dataset_paths)
 
 synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
 

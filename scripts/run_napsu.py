@@ -15,7 +15,10 @@ dataset_map = snakemake.config['datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 dataset_names = [key for key in dataset_map.keys()]
 dataset_files = [value for value in dataset_map.values()]
-datasets = snakemake.input[0]
+datasets = snakemake.input
+
+print(datasets)
+
 epsilons = snakemake.config["epsilons"]
 MCMC_algorithms = snakemake.config['MCMC_algorithms']
 queries = snakemake.config['queries']
