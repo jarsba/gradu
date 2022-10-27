@@ -17,6 +17,8 @@ dataset_names = [key for key in dataset_map.keys()]
 dataset_files = [value for value in dataset_map.values()]
 datasets = snakemake.input
 
+target_files = snakemake.output
+
 epsilons = snakemake.config["epsilons"]
 MCMC_algorithms = snakemake.config['MCMC_algorithms']
 queries = snakemake.config['queries']
@@ -92,10 +94,6 @@ for dataset in datasets:
                 napsu_result_file = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
                                          "wb")
                 result.store(napsu_result_file)
-
-                inference_result_filt = open(
-                    f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
-                    "wb")
 
                 inf_data.to_netcdf(f"logs/inf_data_{experiment_id}.nc")
 

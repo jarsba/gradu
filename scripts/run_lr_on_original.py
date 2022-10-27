@@ -45,5 +45,4 @@ for path in dataset_paths:
     results.append([dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coefficients, point_estimates,
                     variance_estimates, confidence_intervals])
 
-result_path = os.path.join(RESULTS_FOLDER, "original_logistic_regression_results.csv")
-results.to_csv(result_path, index=False)
+results.to_csv(snakemake.output[0], index=False)

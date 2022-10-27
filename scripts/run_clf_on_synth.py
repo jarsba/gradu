@@ -26,7 +26,7 @@ for path in dataset_paths:
     datasets = synth_data_object.n_datasets
     dataset_name = synth_data_object.original_dataset
     experiment_id = synth_data_object.experiment_id
-    query = synth_data_object.query
+    query = synth_data_object.queries
     epsilon = synth_data_object.epsilon
     MCMC_algorithm = synth_data_object.inference_algorithm
 
@@ -60,5 +60,4 @@ for path in dataset_paths:
              balanced_accuracy, f1])
 
 
-result_path = os.path.join(RESULTS_FOLDER, "synthetic_classification_results.csv")
-results.to_csv(result_path, index=False)
+results.to_csv(snakemake.output[0], index=False)

@@ -1,4 +1,4 @@
-from .keygen import get_key
+from src.utils.keygen import get_key
 
 
 def query_dataset_product(datasets, queries):

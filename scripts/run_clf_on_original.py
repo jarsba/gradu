@@ -5,11 +5,8 @@ from typing import Protocol
 
 import pandas as pd
 import numpy as np
-import os
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from base_clf import run_classification_on_adult
-
-from src.utils.path_utils import RESULTS_FOLDER
 
 dataset_paths = snakemake.input
 dataset_map = snakemake.config['datasets']
@@ -45,5 +42,4 @@ for path in dataset_paths:
         model_name, accuracy, balanced_accuracy, f1 = model_score
         results.append([dataset_name, model_name, accuracy, balanced_accuracy, f1])
 
-result_path = os.path.join(RESULTS_FOLDER, "original_classification_results.csv")
-results.to_csv(result_path, index=False)
+results.to_csv(snakemake.output[0], index=False)
