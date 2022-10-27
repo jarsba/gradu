@@ -12,11 +12,10 @@ dataset_names = [key for key in dataset.keys()]
 dataset_files = [value for value in dataset.values()]
 epsilons = config['epsilons']
 MCMC_algorithms = config['MCMC_algorithms']
-dataset_index = [i for i in range(n_synt_datasets)]
 queries = config['queries']
 la_approx = ['LA', 'NoLA']
 
-queries_dataset_product = query_dataset_product(dataset_names,queries)
+queries_dataset_product = query_dataset_product(dataset_names, queries)
 experiment_products = generate_products(queries_dataset_product, epsilons, MCMC_algorithms)
 
 wildcard_constraints:
@@ -38,7 +37,7 @@ rule csv_results:
 
 rule run_napsu:
     input:
-        expand("{dataset_file}",dataset_file=dataset_files)
+        expand("{dataset_file}", dataset_file=dataset_files)
     output:
         expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products),
     #"napsu_MCMC_time_vs_epsilon_comparison.csv",

@@ -7,7 +7,7 @@ import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 
 from src.utils.timer import Timer
-from src.utils.keygen import get_key
+from src.utils.keygen import get_hash, get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 
@@ -91,11 +91,11 @@ for dataset in datasets:
                 dataset_query_str = f"{dataset}_{query_str}"
 
                 print("Writing model to file")
-                napsu_result_file = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
+                napsu_result_file = open(f"models/napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
                                          "wb")
                 result.store(napsu_result_file)
 
-                inf_data.to_netcdf(f"logs/inf_data_{experiment_id}.nc")
+                inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
 timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv")
 storage.to_csv("napsu_experiment_storage_output.csv")

@@ -41,14 +41,14 @@ def get_filename(path: str, with_suffix=False) -> str:
         return path.stem
 
 
-def get_metadata_from_synthetic_path(synthetic_path: str) -> Tuple[str, str, str, float, str]:
+def get_metadata_from_synthetic_path(synthetic_path: str) -> Tuple[str, str, float, str]:
     filename = get_filename(synthetic_path)
     filename_paths = filename.split("_")
-    experiment_id = filename_paths[2]
-    dataset_name = filename_paths[3]
-    query = filename_paths[4]
-    epsilon_str = filename_paths[5][0:2]
+    # experiment_id = filename_paths[2]
+    dataset_name = filename_paths[2]
+    query = filename_paths[3]
+    epsilon_str = filename_paths[4][0:2]
     epsilon = float(f"{epsilon_str[0]}.{epsilon_str[1]}")
-    MCMC_algorithm = filename_paths[6]
+    MCMC_algorithm = filename_paths[5]
 
-    return experiment_id, dataset_name, query, epsilon, MCMC_algorithm
+    return dataset_name, query, epsilon, MCMC_algorithm
