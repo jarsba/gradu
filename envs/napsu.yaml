@@ -17,5 +17,5 @@ dependencies:
   - pip:
         - git+https://github.com/DPBayes/d3p.git@master#egg=d3p
         - git+https://github.com/ryan112358/private-pgm.git
-variables:
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
+#variables:
+#  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib

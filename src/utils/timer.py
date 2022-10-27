@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 import pandas as pd
 from src.utils.keygen import get_key
-from singleton import Singleton
+from src.utils.singleton import Singleton
 
 
 class Timer(metaclass=Singleton):

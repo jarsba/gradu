@@ -9,11 +9,11 @@ import os
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from base_clf import run_classification_on_adult
 
-from src.utils.path_utils import get_dataset_name, RESULTS_FOLDER
+from src.utils.path_utils import RESULTS_FOLDER
 
 dataset_paths = snakemake.input
-
-print(dataset_paths)
+dataset_map = snakemake.config['datasets']
+inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
 
 class ScikitModel(Protocol):
@@ -32,7 +32,7 @@ for path in dataset_paths:
     print(path)
     train_df = pd.read_csv(path)
 
-    dataset_name = get_dataset_name(path)
+    dataset_name = inverted_dataset_map[path]
 
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
 

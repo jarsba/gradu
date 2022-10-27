@@ -38,7 +38,7 @@ rule csv_results:
 
 rule run_napsu:
     input:
-        expand("data/datasets/{dataset}",dataset=dataset_files)
+        expand("{dataset_file}",dataset_file=dataset_files)
     output:
         expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products),
     #"napsu_MCMC_time_vs_epsilon_comparison.csv",
@@ -79,11 +79,11 @@ rule run_logistic_regression_on_synt:
 
 rule run_logistic_regression_on_original:
     input:
-        expand("data/datasets/{dataset}",dataset=dataset_files)
+        expand("{dataset_file}",dataset_file=dataset_files)
     output:
         "results/original_logistic_regression_results.csv"
     log:
-        expand("logs/logistic_regression_original_dataset_{dataset}.log", dataset=dataset_files)
+        expand("logs/logistic_regression_original_dataset_{dataset}.log", dataset=dataset_names)
     conda:
         "envs/analysis.yaml"
     script:
@@ -105,11 +105,11 @@ rule run_classification_on_synt:
 
 rule run_classification_on_original:
     input:
-        expand("data/datasets/{dataset}",dataset=dataset_files)
+        expand("{dataset_file}",dataset_file=dataset_files)
     output:
         "results/original_classification_results.csv"
     log:
-        expand("logs/classification_original_dataset_{dataset}.log", dataset=dataset_files)
+        expand("logs/classification_original_dataset_{dataset}.log", dataset=dataset_names)
     conda:
         "envs/analysis.yaml"
     script:

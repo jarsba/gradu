@@ -35,7 +35,7 @@ from .markov_network_jax import MarkovNetworkJax
 from .mst import MST_selection
 from src.utils.timer import Timer
 from src.utils.query_utils import calculate_query_number
-from scripts.run_napsu import experiment_id_ctx
+from src.utils.experiment_storage import experiment_id_ctx
 
 timer = Timer()
 
@@ -96,6 +96,8 @@ class NapsuMQModel(InferenceModel):
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
         queries = queries.get_canonical_queries()
+
+        print(queries.queries)
 
         query_number = calculate_query_number(queries.queries)
         timer_meta['n_canonical_queries'] = query_number

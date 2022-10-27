@@ -5,14 +5,12 @@ import os
 import pandas as pd
 from base_lr import run_logistic_regression
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
-from src.utils.path_utils import get_dataset_name, get_filename, RESULTS_FOLDER
+from src.utils.path_utils import RESULTS_FOLDER
 from src.utils.preprocess_dataset import clean_dataset, convert_to_int_array
 
 dataset_paths = snakemake.input
-
-print(dataset_paths)
-
-synthetic_task = "synthetic_dataset" in get_filename(dataset_paths[0])
+dataset_map = snakemake.config['datasets']
+inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
 results = pd.DataFrame(
     columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients", "point_estimates",
@@ -21,10 +19,9 @@ results = pd.DataFrame(
 df_np_arrays = []
 
 for path in dataset_paths:
-    print(path)
     df = pd.read_csv(path)
 
-    dataset_name = get_dataset_name(path)
+    dataset_name = inverted_dataset_map[path]
 
     df = clean_dataset(df, dataset_name)
 

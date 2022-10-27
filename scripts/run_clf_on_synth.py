@@ -12,14 +12,11 @@ import pickle
 
 dataset_paths = snakemake.input
 
-print(dataset_paths)
-
 results = pd.DataFrame(
     columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "model_name",
              "accuracy", "balanced_accuracy", "F1"])
 
 for path in dataset_paths:
-    print(path)
     synth_file = open(path, "rb")
     synth_data_object: SynthDataObject = pickle.load(synth_file)
     dataset_tensor = synth_data_object.synth_data

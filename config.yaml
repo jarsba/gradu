@@ -1,9 +1,9 @@
 workdir: "/home/jarlehti/projects/gradu"
 
 datasets:
-  "binary4d": "binary4d.csv"
-  "binary3d": "binary3d.csv"
-  #"adult": "cleaned_adult_data_v2.csv"
+  "binary4d": "data/datasets/binary4d.csv"
+  "binary3d": "data/datasets/binary3d.csv"
+  #"adult": "data/datasets/cleaned_adult_data_v2.csv"
 epsilons:
   - "01"
   - "03"

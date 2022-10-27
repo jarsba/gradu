@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(snakemake.config['workdir'])
 
 import jax
@@ -7,9 +8,8 @@ from arviz.data.inference_data import InferenceDataT
 
 from src.utils.timer import Timer
 from src.utils.keygen import get_key
-from src.utils.experiment_storage import ExperimentStorage
+from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
-import contextvars
 
 dataset_map = snakemake.config['datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
@@ -17,15 +17,12 @@ dataset_names = [key for key in dataset_map.keys()]
 dataset_files = [value for value in dataset_map.values()]
 datasets = snakemake.input
 
-print(datasets)
-
 epsilons = snakemake.config["epsilons"]
 MCMC_algorithms = snakemake.config['MCMC_algorithms']
 queries = snakemake.config['queries']
 
 storage = ExperimentStorage()
 timer = Timer()
-experiment_id_ctx = contextvars.ContextVar('experiment_id')
 
 
 def epsilon_str_to_float(epsilon):
@@ -33,14 +30,18 @@ def epsilon_str_to_float(epsilon):
 
 
 for dataset in datasets:
-    for epsilon in epsilons:
+    for epsilon_str in epsilons:
+
+        epsilon = epsilon_str_to_float(epsilon_str)
+
         for algo in MCMC_algorithms:
 
-            queries_for_dataset = queries[dataset]
+            dataset_name = inverted_dataset_map[dataset]
+
+            queries_for_dataset = queries[dataset_name]
 
             for query in queries_for_dataset:
                 dataframe = pd.read_csv(dataset)
-                dataset_name = inverted_dataset_map[dataset]
                 n, d = dataframe.shape
                 query_str = "".join(query)
                 delta = (n ** (-2))
@@ -61,7 +62,7 @@ for dataset in datasets:
                 pid = timer.start(f"Main run", **timer_meta)
 
                 print(
-                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query)}\n\tMCMC algo {algo}\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query)}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
 
                 print("Initializing NapsuMQModel")
                 rng = jax.random.PRNGKey(6473286482)
@@ -88,12 +89,13 @@ for dataset in datasets:
                 dataset_query_str = f"{dataset}_{query_str}"
 
                 print("Writing model to file")
-                napsu_result_file = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon}e_{algo}.dill",
+                napsu_result_file = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
                                          "wb")
                 result.store(napsu_result_file)
 
-                inference_result_filt = open(f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon}e_{algo}.dill",
-                                         "wb")
+                inference_result_filt = open(
+                    f"models/napsu_{experiment_id}_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
+                    "wb")
 
                 inf_data.to_netcdf(f"logs/inf_data_{experiment_id}.nc")
 

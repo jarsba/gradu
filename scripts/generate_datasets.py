@@ -17,8 +17,6 @@ from src.utils.path_utils import SYNT_DATASETS_FOLDER
 models = snakemake.input
 n_datasets = snakemake.config['n_datasets']
 
-print(models)
-
 rng = jax.random.PRNGKey(86933526)
 
 for model_path in models:

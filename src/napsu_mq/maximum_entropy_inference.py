@@ -22,12 +22,11 @@ from jax import random
 import numpy as np
 from . import maximum_entropy_model as mem
 from .markov_network_jax import MarkovNetworkJax
-from src.utils.experiment_storage import ExperimentStorage
-from scripts.run_napsu import experiment_id_ctx
+from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 
 storage = ExperimentStorage()
 
-kernels = Literal['NUTS', 'HMC',]
+kernels = Literal['NUTS', 'HMC']
 
 
 def get_kernel(MCMC_algo: kernels):
@@ -60,7 +59,7 @@ def get_stats_from_variable(trace, n_chains=4):
         if jnp.isscalar(std):
             std = round(std, 6)
 
-        stats[, :0] = np.array([min, max, mean, std])
+        stats[:, 0] = np.array([min, max, mean, std])
 
     return stats
 

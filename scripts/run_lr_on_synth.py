@@ -14,15 +14,12 @@ from base_lr import run_logistic_regression
 
 dataset_paths = snakemake.input
 
-print(dataset_paths)
-
 results = pd.DataFrame(
     columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy",
              "balanced_accuracy", "F1",
              "coefficients", "point_estimates", "variance_estimates", "confidence_intervals"])
 
 for path in dataset_paths:
-    print(path)
     synth_file = open(path, "rb")
     synth_data_object: SynthDataObject = pickle.load(synth_file)
 

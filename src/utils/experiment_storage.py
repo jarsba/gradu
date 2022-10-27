@@ -1,6 +1,9 @@
 from typing import Mapping, List, Optional
 import pandas as pd
-from singleton import Singleton
+from src.utils.singleton import Singleton
+import contextvars
+
+experiment_id_ctx = contextvars.ContextVar('experiment_id')
 
 
 class ExperimentStorage(metaclass=Singleton):
@@ -8,14 +11,6 @@ class ExperimentStorage(metaclass=Singleton):
         self.storage = []
         # Hashmap for mapping process_id to list index in storage, so we get ~constant time read operation for storage item.
         self.storage_index = {}
-
-    @property
-    def storage(self) -> List:
-        return self.storage
-
-    @storage.setter
-    def storage(self, value: List[Mapping]):
-        self.storage = value
 
     def get_item(self, experiment_id: str) -> Mapping:
         index = self.storage_index[experiment_id]
