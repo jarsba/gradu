@@ -29,6 +29,7 @@ class ScikitModel(Protocol):
 results = pd.DataFrame(columns=["dataset_name", "model_name", "accuracy", "balanced_accuracy", "F1"])
 
 for path in dataset_paths:
+    print(path)
     train_df = pd.read_csv(path)
 
     dataset_name = get_dataset_name(path)

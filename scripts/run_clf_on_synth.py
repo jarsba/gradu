@@ -19,7 +19,7 @@ results = pd.DataFrame(
              "accuracy", "balanced_accuracy", "F1"])
 
 for path in dataset_paths:
-
+    print(path)
     synth_file = open(path, "rb")
     synth_data_object: SynthDataObject = pickle.load(synth_file)
     dataset_tensor = synth_data_object.synth_data

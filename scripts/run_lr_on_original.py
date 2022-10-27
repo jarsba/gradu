@@ -21,6 +21,7 @@ results = pd.DataFrame(
 df_np_arrays = []
 
 for path in dataset_paths:
+    print(path)
     df = pd.read_csv(path)
 
     dataset_name = get_dataset_name(path)

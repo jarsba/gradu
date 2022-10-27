@@ -55,7 +55,7 @@ rule generate_synt_datasets:
     input:
         expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products)
     output:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
     log:
         expand("logs/data_generation_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
     conda:
@@ -66,7 +66,7 @@ rule generate_synt_datasets:
 
 rule run_logistic_regression_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
     log:
         expand("logs/logistic_regression_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
     output:
@@ -92,7 +92,7 @@ rule run_logistic_regression_on_original:
 
 rule run_classification_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.csv", experiment_product=experiment_products)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
     output:
         "results/synthetic_classification_results.csv"
     log:
