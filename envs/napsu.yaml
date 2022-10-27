@@ -4,6 +4,8 @@ channels:
   - anaconda
   - bioconda
 dependencies:
+  - libgcc
+  - gcc=12.1.0
   - snakemake==7.16.0
   - python=3.8
   - jax=0.3.17
@@ -15,3 +17,5 @@ dependencies:
   - pip:
         - git+https://github.com/DPBayes/d3p.git@master#egg=d3p
         - git+https://github.com/ryan112358/private-pgm.git
+variables:
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
