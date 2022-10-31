@@ -48,7 +48,7 @@ rule run_napsu:
     threads: 4
     resources:
         time = "48:00:00",
-        mem_mb = 12000,
+        mem_mb = 16000,
         partition = "medium"
     conda:
         "envs/napsu.yaml"
