@@ -1,5 +1,7 @@
 import sys
 
+from query_utils import join_query_list
+
 sys.path.append(snakemake.config['workdir'])
 
 import jax
@@ -44,10 +46,10 @@ for dataset in datasets:
 
             queries_for_dataset = queries[dataset_name]
 
-            for query in queries_for_dataset:
+            for query_list in queries_for_dataset:
                 dataframe = pd.read_csv(dataset)
                 n, d = dataframe.shape
-                query_str = "".join(query)
+                query_str = join_query_list(query_list)
                 delta = (n ** (-2))
 
                 experiment_id = get_key()
@@ -66,7 +68,7 @@ for dataset in datasets:
                 pid = timer.start(f"Main run", **timer_meta)
 
                 print(
-                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query)}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query_str)}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
 
                 print("Initializing NapsuMQModel")
                 rng = jax.random.PRNGKey(6473286482)
@@ -82,7 +84,7 @@ for dataset in datasets:
                     rng=rng,
                     epsilon=epsilon,
                     delta=delta,
-                    column_feature_set=query,
+                    column_feature_set=query_list,
                     MCMC_algo=algo,
                     use_laplace_approximation=True,
                     return_inference_data=True

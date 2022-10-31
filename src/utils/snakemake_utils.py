@@ -1,16 +1,13 @@
 from src.utils.keygen import get_key, get_hash
-
+from src.utils.query_utils import join_query_list
 
 def query_dataset_product(datasets, queries):
     query_dataset_product = []
 
     for dataset in datasets:
         dataset_queries = queries[dataset]
-        for query in dataset_queries:
-            if query == []:
-                query_str = "empty"
-            else:
-                query_str = "".join(query)
+        for query_list in dataset_queries:
+            query_str = join_query_list(query_list)
             dataset_query = f"{dataset}_{query_str}"
             query_dataset_product.append(dataset_query)
 

@@ -15,6 +15,7 @@ MCMC_algorithms:
 n_synt_datasets: 10
 queries:
   "binary4d":
+    - []
     - [['A', 'B']]
     - [['A', 'B']]
     - [['A', 'C']]
