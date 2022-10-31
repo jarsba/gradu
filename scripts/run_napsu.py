@@ -91,7 +91,7 @@ for dataset in datasets:
 
                 timer.stop(pid)
 
-                dataset_query_str = f"{dataset}_{query_str}"
+                dataset_query_str = f"{dataset_name}_{query_str}"
 
                 print("Writing model to file")
                 napsu_result_file = open(f"models/napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill",

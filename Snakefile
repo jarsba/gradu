@@ -18,7 +18,6 @@ la_approx = ['LA', 'NoLA']
 queries_dataset_product = query_dataset_product(dataset_names, queries)
 experiment_products = generate_products(queries_dataset_product, epsilons, MCMC_algorithms)
 
-print(experiment_products)
 
 wildcard_constraints:
     experiment_id="[a-zA-Z\d]{8}"
