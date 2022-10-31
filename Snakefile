@@ -46,6 +46,10 @@ rule run_napsu:
     log:
         expand("logs/napsu_{experiment_product}.log", experiment_product=experiment_products)
     threads: 4
+    resources:
+        time = "48:00:00",
+        mem_mb = 12000,
+        partition = "medium"
     conda:
         "envs/napsu.yaml"
     script:
