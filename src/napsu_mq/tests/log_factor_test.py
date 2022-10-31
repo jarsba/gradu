@@ -19,7 +19,7 @@ from jax.config import config
 
 config.update("jax_enable_x64", True)
 import jax.numpy as jnp
-from napsu_mq.log_factor import LogFactorJax
+from src.napsu_mq.log_factor import LogFactorJax
 
 class LogFactorJaxTest(unittest.TestCase):
 

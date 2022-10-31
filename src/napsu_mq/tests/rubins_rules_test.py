@@ -16,7 +16,7 @@ import unittest
 
 import numpy as np
 
-import napsu_mq.rubins_rules as rubins_rules
+import src.napsu_mq.rubins_rules as rubins_rules
 
 
 class RubinsRulesTest(unittest.TestCase):

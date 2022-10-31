@@ -15,8 +15,8 @@
 
 import unittest
 
-from napsu_mq.junction_tree import *
-from napsu_mq.undirected_graph import greedy_ordering, UndirectedGraph
+from src.napsu_mq.junction_tree import *
+from src.napsu_mq.undirected_graph import greedy_ordering, UndirectedGraph
 
 
 class JunctionTreeTest(unittest.TestCase):

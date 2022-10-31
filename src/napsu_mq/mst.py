@@ -22,7 +22,7 @@ and does not rely on public provisional data for measurement selection.
 """
 
 
-def MST_selection(data: Dataset, epsilon: float, delta: float, cliques_to_include: Iterable = []):
+def MST_selection(data: Dataset, epsilon: float, delta: float, cliques_to_include: Iterable[Tuple[str, str]] = []):
     rho = accounting.eps_delta_budget_to_rho_budget(epsilon, delta)
     sigma = np.sqrt(3 / (2 * rho))
     cliques = [(col,) for col in data.domain]
@@ -88,7 +88,7 @@ def exponential_mechanism(q: Any, eps: float, sensitivity: float, prng=np.random
     return prng.choice(q.size, p=probas)
 
 
-def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Iterable = []) -> List:
+def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Iterable[Tuple[str, str]] = []) -> List:
     engine = FactoredInference(data.domain, iters=1000)
     est = engine.estimate(measurement_log)
 

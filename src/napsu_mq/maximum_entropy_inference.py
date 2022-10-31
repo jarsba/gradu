@@ -152,6 +152,10 @@ def run_numpyro_laplace_approximation(
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 
+    print(f"Suff stats: {suff_stat}")
+    print(f"Sigma DP: {sigma_DP}")
+    print(f"MnJAX queries: {len(max_ent_dist.queries.queries)}")
+
     for i in range(0, max_retries + 1):
 
         rng = subkeys[i]
@@ -161,7 +165,11 @@ def run_numpyro_laplace_approximation(
             model_args=(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
         )
 
+        print(f"Init lambdas: {init_lambdas}")
+
         lambdas = init_lambdas[0]["lambdas"]
+
+        print(f"Lambdas: {lambdas}")
 
         result = jax.scipy.optimize.minimize(lambda l: potential_fn({"lambdas": l}), lambdas, method="BFGS", tol=1e-2)
         if not result.success:

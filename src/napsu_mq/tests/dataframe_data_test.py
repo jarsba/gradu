@@ -18,7 +18,7 @@ import unittest
 
 import pandas as pd
 
-from napsu_mq.dataframe_data import DataFrameData
+from src.napsu_mq.dataframe_data import DataFrameData
 
 
 class DataFrameDataTest(unittest.TestCase):

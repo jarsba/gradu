@@ -14,7 +14,7 @@
 
 import unittest
 
-from napsu_mq.utils import powerset
+from src.napsu_mq.utils import powerset
 
 
 class PowerSetTest(unittest.TestCase):

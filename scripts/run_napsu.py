@@ -3,6 +3,8 @@ import sys
 sys.path.append(snakemake.config['workdir'])
 
 import jax
+jax.config.update("jax_enable_x64", True)
+
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 

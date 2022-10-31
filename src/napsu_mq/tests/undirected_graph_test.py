@@ -15,7 +15,7 @@
 
 import unittest
 
-from napsu_mq.undirected_graph import *
+from src.napsu_mq.undirected_graph import *
 
 
 class UndirectedGraphTest(unittest.TestCase):

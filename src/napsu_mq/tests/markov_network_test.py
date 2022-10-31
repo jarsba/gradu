@@ -20,10 +20,10 @@ from jax.config import config
 config.update("jax_enable_x64", True)
 import jax
 import jax.numpy as jnp
-from napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
-from napsu_mq.marginal_query import *
-from napsu_mq.maximum_entropy_distribution import MaximumEntropyDistribution
-from napsu_mq.markov_network_jax import MarkovNetworkJax
+from src.napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
+from src.napsu_mq.marginal_query import *
+from src.napsu_mq.maximum_entropy_distribution import MaximumEntropyDistribution
+from src.napsu_mq.markov_network_jax import MarkovNetworkJax
 
 
 class MarkovNetworkTest(unittest.TestCase):

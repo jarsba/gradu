@@ -22,20 +22,25 @@ import string
 import numpy as np
 import pandas as pd
 import jax
-from napsu_mq.napsu_mq import NapsuMQResult, NapsuMQModel
-from napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
-from napsu_mq.tests.test_utils import create_test_directory, file_exists, TEST_DIRECTORY_PATH, purge_test_directory
+from src.napsu_mq.napsu_mq import NapsuMQResult, NapsuMQModel
+from src.napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
+from src.napsu_mq.tests.test_utils import create_test_directory, file_exists, TEST_DIRECTORY_PATH, purge_test_directory
+from src.utils.keygen import get_key
+from src.utils.experiment_storage import experiment_id_ctx
 
 
 class TestNapsuMQ(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        rng = jax.random.PRNGKey(6473286482)
+        rng = jax.random.PRNGKey(16778774)
         data_gen = BinaryLogisticRegressionDataGenerator(np.array([1.0, 0.0]))
         cls.data = data_gen.generate_data(n=2000, rng_key=rng)
         cls.dataframe = pd.DataFrame(cls.data, columns=['A', 'B', 'C'], dtype=int)
         cls.n, cls.d = cls.data.shape
+
+        experiment_id = get_key()
+        experiment_id_ctx.set(experiment_id)
 
     def setUp(self):
         self.data = self.__class__.data
@@ -53,12 +58,13 @@ class TestNapsuMQ(unittest.TestCase):
         ]
 
         rng = jax.random.PRNGKey(6473286482)
+        inference_rng, sampling_rng = jax.random.split(rng)
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, rng=rng, epsilon=1, delta=(self.n ** (-2)),
+        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
                            column_feature_set=column_feature_set,
                            use_laplace_approximation=False)
 
-        datasets = result.generate_extended(rng=rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (500, 3))
@@ -80,8 +86,10 @@ class TestNapsuMQ(unittest.TestCase):
         ]
 
         rng = jax.random.PRNGKey(6473286482)
+        inference_rng, sampling_rng = jax.random.split(rng)
+
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, rng=rng, epsilon=1, delta=(self.n ** (-2)),
+        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
                            column_feature_set=column_feature_set,
                            use_laplace_approximation=False)
 
@@ -94,7 +102,7 @@ class TestNapsuMQ(unittest.TestCase):
 
         napsu_result_read_file = open(f"{TEST_DIRECTORY_PATH}/napsu_test_result.dill", "rb")
         loaded_result: NapsuMQResult = NapsuMQResult._load_from_io(napsu_result_read_file)
-        datasets = loaded_result.generate_extended(rng=rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        datasets = loaded_result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (500, 3))
@@ -126,12 +134,14 @@ class TestNapsuMQ(unittest.TestCase):
         ]
 
         rng = jax.random.PRNGKey(6473286482)
+        inference_rng, sampling_rng = jax.random.split(rng)
+
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, rng=rng, epsilon=1, delta=(self.n ** (-2)),
+        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
                            column_feature_set=column_feature_set,
                            use_laplace_approximation=True)
 
-        datasets = result.generate_extended(rng=rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (500, 3))

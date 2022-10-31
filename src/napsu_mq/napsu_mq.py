@@ -62,6 +62,8 @@ class NapsuMQModel(InferenceModel):
         experiment_id = experiment_id_ctx.get()
 
         query_str = "".join(column_feature_set)
+
+
         timer_meta = {
             "experiment_id": experiment_id,
             "dataset_name": dataset_name,
@@ -106,22 +108,28 @@ class NapsuMQModel(InferenceModel):
         suff_stat = np.sum(queries.flatten()(dataframe.int_array), axis=0)
 
         sensitivity = np.sqrt(2 * len(query_sets))
+        inference_rng, dp_rng = jax.random.split(rng, 2)
 
         sigma_DP = privacy_accounting.sigma(epsilon, delta, sensitivity)
-        dp_suff_stat = jnp.asarray(np.random.normal(loc=suff_stat, scale=sigma_DP))
+
+        dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
+        dp_suff_stat = suff_stat + dp_noise
+
 
         if use_laplace_approximation is True:
 
+            approx_rng, mcmc_rng = jax.random.split(inference_rng, 2)
+
             pid = timer.start(f"Laplace approximation", **timer_meta)
 
-            laplace_approx, success = mei.run_numpyro_laplace_approximation(rng, dp_suff_stat, n, sigma_DP, mnjax)
+            laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP, mnjax)
 
             timer.stop(pid)
 
             pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc, backtransform = mei.run_numpyro_mcmc_normalised(
-                rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800, num_chains=4
+                mcmc_rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800, num_chains=4
             )
 
             timer.stop(pid)
@@ -135,7 +143,7 @@ class NapsuMQModel(InferenceModel):
             pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc = mei.run_numpyro_mcmc(
-                rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800, num_chains=4
+                inference_rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800, num_chains=4
             )
 
             timer.stop(pid)

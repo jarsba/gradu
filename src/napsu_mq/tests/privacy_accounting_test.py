@@ -17,8 +17,8 @@ import unittest
 import numpy as np
 from scipy import special
 
-import napsu_mq.privacy_accounting as privacy_accounting
-import napsu_mq.privacy_accounting_zcdp as privacy_accounting_zcdp
+import src.napsu_mq.privacy_accounting as privacy_accounting
+import src.napsu_mq.privacy_accounting_zcdp as privacy_accounting_zcdp
 
 
 def phi(t):

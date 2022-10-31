@@ -17,7 +17,7 @@ import unittest
 import jax.random
 import numpy as np
 
-from napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
+from src.napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
 
 
 class BinaryLogisticRegressionDataGeneratorTest(unittest.TestCase):

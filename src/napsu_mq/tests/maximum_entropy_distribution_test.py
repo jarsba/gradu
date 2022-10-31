@@ -19,9 +19,9 @@ import jax
 import numpy as np
 from scipy.special import softmax
 
-from napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
-from napsu_mq.marginal_query import MarginalQuery, QueryList, all_marginals, FullMarginalQuerySet
-from napsu_mq.maximum_entropy_distribution import MaximumEntropyDistribution
+from src.napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
+from src.napsu_mq.marginal_query import MarginalQuery, QueryList, all_marginals, FullMarginalQuerySet
+from src.napsu_mq.maximum_entropy_distribution import MaximumEntropyDistribution
 
 
 class MaximumEntropyDistributionTest(unittest.TestCase):
