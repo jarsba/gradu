@@ -147,9 +147,8 @@ class ConvergenceException(Exception):
 
 def run_numpyro_laplace_approximation(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
-        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=5
+        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=10
 ) -> Tuple[numpyro.distributions.MultivariateNormal, bool]:
-
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 
@@ -170,6 +169,8 @@ def run_numpyro_laplace_approximation(
         else:
             mean = result.x
             break
+
+        print(f"Failed {i}th time, rng: {rng}")
 
         if fail_count == max_retries:
             raise ConvergenceException(f"Minimize function failed to converge with {max_retries} retries")
