@@ -97,8 +97,6 @@ class NapsuMQModel(InferenceModel):
 
         queries = queries.get_canonical_queries()
 
-        print(queries.queries)
-
         query_number = calculate_query_number(queries.queries)
         timer_meta['n_canonical_queries'] = query_number
 

@@ -153,3 +153,8 @@ rule compare_clf_results:
         "envs/analysis.yaml"
     script:
         "scripts/plot_clf_results.py"
+
+
+rule clean_slurm_logs:
+    shell:
+        "rm slurm_logs/*"

@@ -149,6 +149,7 @@ def run_numpyro_laplace_approximation(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
         prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=5
 ) -> Tuple[numpyro.distributions.MultivariateNormal, bool]:
+
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 

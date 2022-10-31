@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Tuple
 
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__name__))
-print(PROJECT_ROOT_PATH)
 DATA_FOLDER = os.path.join(PROJECT_ROOT_PATH, "data")
 DATASETS_FOLDER = os.path.join(DATA_FOLDER, "datasets")
 SYNT_DATASETS_FOLDER = os.path.join(DATA_FOLDER, "synt_datasets")
