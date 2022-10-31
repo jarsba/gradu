@@ -1,4 +1,5 @@
 import sys
+import os
 
 sys.path.append(snakemake.config['workdir'])
 
@@ -8,6 +9,7 @@ jax.config.update("jax_enable_x64", True)
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 
+from src.utils.path_utils import MODELS_FOLDER
 from src.utils.timer import Timer
 from src.utils.keygen import get_hash, get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
@@ -94,9 +96,8 @@ for dataset in datasets:
                 dataset_query_str = f"{dataset_name}_{query_str}"
 
                 print("Writing model to file")
-                napsu_result_file = open(f"models/napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill",
-                                         "wb")
-                result.store(napsu_result_file)
+                model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
+                result.store(model_file_path)
 
                 inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
