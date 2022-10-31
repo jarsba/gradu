@@ -44,6 +44,7 @@ rule run_napsu:
     #"napsu_experiment_storage_output.csv"
     log:
         expand("logs/napsu_{experiment_product}.log", experiment_product=experiment_products)
+    threads: 4
     conda:
         "envs/napsu.yaml"
     script:
