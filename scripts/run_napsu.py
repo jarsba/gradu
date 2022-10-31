@@ -1,7 +1,5 @@
 import sys
 
-from query_utils import join_query_list
-
 sys.path.append(snakemake.config['workdir'])
 
 import jax
@@ -14,6 +12,7 @@ from src.utils.timer import Timer
 from src.utils.keygen import get_hash, get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
+from src.utils.query_utils import join_query_list
 
 dataset_map = snakemake.config['datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
