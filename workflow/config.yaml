@@ -11,9 +11,10 @@ local-cores: "4"
 latency-wait: "5"
 use-conda: "True"
 use-singularity: "False"
-jobs: "8"
+jobs: "10"
 printshellcmds: "True"
 jobname: "jakki-gradu.{name}.{jobid}"
+rerun-incomplete: "True"
 
 # Example resource configuration
 default-resources:

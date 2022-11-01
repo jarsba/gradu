@@ -49,6 +49,7 @@ rule run_napsu:
         expand("logs/napsu_{experiment_product}.log", experiment_product=experiment_products)
     threads: 4
     resources:
+        runtime = "2160",
         time = "36:00:00",
         mem_mb = 16000,
         partition = "medium"
