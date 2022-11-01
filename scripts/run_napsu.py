@@ -69,7 +69,7 @@ for dataset in datasets:
                 pid = timer.start(f"Main run", **timer_meta)
 
                 print(
-                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {''.join(query_str)}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+                    f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {query_str}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
 
                 print("Initializing NapsuMQModel")
                 rng = jax.random.PRNGKey(6473286482)
