@@ -22,6 +22,8 @@ experiment_products = generate_products(queries_dataset_product, epsilons, MCMC_
 wildcard_constraints:
     experiment_id="[a-zA-Z\d]{8}"
 
+localrules: all, csv_results
+
 rule all:
     input:
         expand("plots/lr_comparison_{dataset}.svg",dataset=dataset_names),
@@ -47,7 +49,7 @@ rule run_napsu:
         expand("logs/napsu_{experiment_product}.log", experiment_product=experiment_products)
     threads: 4
     resources:
-        time = "48:00:00",
+        time = "36:00:00",
         mem_mb = 16000,
         partition = "medium"
     conda:
