@@ -34,7 +34,7 @@ from .marginal_query import FullMarginalQuerySet
 from .markov_network_jax import MarkovNetworkJax
 from .mst import MST_selection
 from src.utils.timer import Timer
-from src.utils.query_utils import calculate_query_number
+from src.utils.query_utils import calculate_query_number, join_query_list
 from src.utils.experiment_storage import experiment_id_ctx
 
 timer = Timer()
@@ -61,7 +61,7 @@ class NapsuMQModel(InferenceModel):
 
         experiment_id = experiment_id_ctx.get()
 
-        query_str = "".join(column_feature_set)
+        query_str = join_query_list(column_feature_set)
 
 
         timer_meta = {
