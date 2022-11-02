@@ -67,7 +67,7 @@ class TestNapsuMQ(unittest.TestCase):
         datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
-        self.assertEqual(datasets[0].shape, (500, 3))
+        self.assertEqual(datasets[0].shape, (2000, 3))
 
         original_means = self.dataframe.mean()
         original_stds = self.dataframe.std()
@@ -105,7 +105,7 @@ class TestNapsuMQ(unittest.TestCase):
         datasets = loaded_result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
-        self.assertEqual(datasets[0].shape, (500, 3))
+        self.assertEqual(datasets[0].shape, (2000, 3))
 
         original_means = self.dataframe.mean()
         original_stds = self.dataframe.std()
@@ -144,7 +144,7 @@ class TestNapsuMQ(unittest.TestCase):
         datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
-        self.assertEqual(datasets[0].shape, (500, 3))
+        self.assertEqual(datasets[0].shape, (2000, 3))
 
         original_means = self.dataframe.mean()
         original_stds = self.dataframe.std()

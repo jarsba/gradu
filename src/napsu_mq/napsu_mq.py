@@ -14,7 +14,7 @@
 
 
 import os
-from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple
+from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple, List
 
 import arviz as az
 import dill
@@ -193,29 +193,32 @@ class NapsuMQResult(InferenceResult):
     def _load_from_io(cls, read_io: BinaryIO) -> 'NapsuMQResult':
         return NapsuMQResultIO.load_from_io(read_io)
 
-    def _generate(self,
-                  rng: PRNGState,
-                  dataset_size: int,
-                  num_datasets: Optional[int] = 1,
-                  ) -> Iterable[pd.DataFrame]:
+    def generate_extended(self, rng: jax.random.PRNGKey, num_data_per_parameter_sample: int,
+                          num_parameter_samples: int,
+                          single_dataframe: Optional[bool] = False) -> Union[List[pd.DataFrame], pd.DataFrame]:
+        """Generate new synthetic datasets from NAPSU-MQ model
+
+        Args:
+            rng (d3p.random.PRNGState): d3p PRNG key
+            num_data_per_parameter_sample: Number of synthetic datapoints for each dataset
+            num_parameter_samples: Number of datasets
+            single_dataframe: Return generated data in single dataframe vs list of dataframes
+
+        Returns:
+            List[pd.Dataframe] or pd.Dataframe: Synthetic dataset/datasets
+        """
+
         mnjax = self._markov_network
         posterior_values = self.posterior_values
-        inds = jax.random.choice(key=rng, a=posterior_values.shape[0], shape=[num_datasets])
+        inds = jax.random.choice(key=rng, a=posterior_values.shape[0], shape=[num_parameter_samples])
         posterior_sample = posterior_values[inds, :]
-        rng, *data_keys = jax.random.split(rng, num_datasets + 1)
-        syn_datasets = [mnjax.sample(syn_data_key, jnp.array(posterior_value), dataset_size) for
+        rng, *data_keys = jax.random.split(rng, num_parameter_samples + 1)
+        syn_datasets = [mnjax.sample(syn_data_key, jnp.array(posterior_value), num_data_per_parameter_sample) for
                         syn_data_key, posterior_value
                         in list(zip(data_keys, posterior_sample))]
 
-        categorical_syn_data_dfs = [DataFrameData.apply_category_mapping(syn_data, self._category_mapping) for syn_data
-                                    in syn_datasets]
-
-        return categorical_syn_data_dfs
-
-    def generate_extended(self, rng: PRNGState, num_data_per_parameter_sample: int, num_parameter_samples: int,
-                          single_dataframe: Optional[bool] = False) -> Union[Iterable[pd.DataFrame], pd.DataFrame]:
-
-        dataframes = self.generate(rng, num_data_per_parameter_sample, num_parameter_samples)
+        dataframes = [DataFrameData.apply_category_mapping(syn_data, self._category_mapping) for syn_data
+                      in syn_datasets]
 
         if single_dataframe is True:
             combined_dataframe = pd.concat(dataframes, ignore_index=True)
