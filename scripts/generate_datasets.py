@@ -29,7 +29,8 @@ for model_path in models:
     epsilon = meta_info['epsilon']
     delta = meta_info['delta']
     MCMC_algorithm = meta_info['MCMC_algo']
-    query = meta_info['query']
+    query = meta_info['query_list']
+    query_str = meta_info['query_str']
     n_canonical_queries = meta_info['n_canonical_queries']
 
     n_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
@@ -54,7 +55,7 @@ for model_path in models:
     )
 
     path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_{dataset_name}_{query}_{epsilon}e_{MCMC_algorithm}.pickle")
+                        f"synthetic_dataset_{dataset_name}_{query_str}_{epsilon}e_{MCMC_algorithm}.pickle")
 
     with open(path, "wb") as file:
         pickle.dump(synth_data_object, file)
