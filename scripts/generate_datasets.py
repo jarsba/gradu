@@ -8,7 +8,7 @@ import jax
 import numpy as np
 import pandas as pd
 import pickle
-from data_utils import dataframe_list_to_tensor
+from src.utils.data_utils import dataframe_list_to_tensor
 from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TRAIN_DATASET_SIZE_MAP
@@ -17,7 +17,7 @@ from src.utils.path_utils import SYNT_DATASETS_FOLDER
 models = snakemake.input
 n_datasets = snakemake.config['n_datasets']
 
-rng = jax.random.PRNGKey(86933526)
+sampling_rng = jax.random.PRNGKey(86933526)
 
 for model_path in models:
     napsu_result_read_file = open(f"{model_path}", "rb")
@@ -34,7 +34,7 @@ for model_path in models:
 
     n_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
-    synt_datasets: List[pd.DataFrame] = model.generate_extended(rng, n_samples, n_datasets)
+    synt_datasets: List[pd.DataFrame] = model.generate_extended(sampling_rng, n_samples, n_datasets, single_dataframe=False)
     np_tensor: np.ndarray = dataframe_list_to_tensor(synt_datasets)
 
     n_datasets, n_rows, n_cols = np_tensor.shape
@@ -54,7 +54,7 @@ for model_path in models:
     )
 
     path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_{experiment_id}_{dataset_name}_{query}_{epsilon}e_{MCMC_algorithm}.pickle")
+                        f"synthetic_dataset_{dataset_name}_{query}_{epsilon}e_{MCMC_algorithm}.pickle")
 
     with open(path, "wb") as file:
         pickle.dump(synth_data_object, file)
