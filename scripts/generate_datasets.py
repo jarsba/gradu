@@ -17,9 +17,12 @@ from src.utils.path_utils import SYNT_DATASETS_FOLDER
 models = snakemake.input
 n_datasets = snakemake.config['n_synt_datasets']
 
+print(models)
+
 sampling_rng = jax.random.PRNGKey(86933526)
 
 for model_path in models:
+    print(f"Generating data for model {model_path}")
     napsu_result_read_file = open(f"{model_path}", "rb")
     model: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
     meta_info = model.meta

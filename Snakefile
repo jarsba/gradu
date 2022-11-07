@@ -66,6 +66,13 @@ rule generate_synt_datasets:
         expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
     log:
         expand("logs/data_generation_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
+    threads: 4
+    resources:
+        runtime = "120",
+        time = "02:00:00",
+        mem_mb = 16000,
+        disk_mb = 50000,
+        partition = "short"
     conda:
         "envs/napsu.yaml"
     script:
