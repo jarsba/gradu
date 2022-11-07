@@ -55,10 +55,10 @@ class Timer(metaclass=Singleton):
             df = pd.DataFrame(self.times)
             return df
 
-    def to_csv(self, file_path: str) -> None:
+    def to_csv(self, file_path: str, **kwargs) -> None:
         df = self.to_df()
 
         if df is None:
             raise Exception("Timer has not recorded any timestamps")
         else:
-            df.to_csv(file_path)
+            df.to_csv(file_path, **kwargs)

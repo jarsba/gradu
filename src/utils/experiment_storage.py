@@ -37,10 +37,10 @@ class ExperimentStorage(metaclass=Singleton):
             df = pd.DataFrame(self.storage)
             return df
 
-    def to_csv(self, file_path: str) -> None:
+    def to_csv(self, file_path: str, **kwargs) -> None:
         df = self.to_df()
 
         if df is None:
             raise Exception("Storage has not recorded any items")
         else:
-            df.to_csv(file_path)
+            df.to_csv(file_path, **kwargs)

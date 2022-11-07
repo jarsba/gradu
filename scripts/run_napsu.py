@@ -101,5 +101,5 @@ for dataset in datasets:
 
                 inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
-timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv")
-storage.to_csv("napsu_experiment_storage_output.csv")
+timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv", mode="a")
+storage.to_csv("napsu_experiment_storage_output.csv", mode="a")
