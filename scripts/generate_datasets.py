@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(snakemake.config['workdir'])
 
 import os
@@ -9,13 +10,14 @@ import numpy as np
 import pandas as pd
 import pickle
 from src.utils.data_utils import dataframe_list_to_tensor
+from src.utils.string_utils import epsilon_float_to_str
 from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TRAIN_DATASET_SIZE_MAP
 from src.utils.path_utils import SYNT_DATASETS_FOLDER
 
 models = snakemake.input
-n_datasets = snakemake.config['n_synt_datasets']
+n_synt_datasets = snakemake.config['n_synt_datasets']
 
 print(models)
 
@@ -36,9 +38,10 @@ for model_path in models:
     query_str = meta_info['query_str']
     n_canonical_queries = meta_info['n_canonical_queries']
 
-    n_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
+    n_synt_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
-    synt_datasets: List[pd.DataFrame] = model.generate_extended(sampling_rng, n_samples, n_datasets, single_dataframe=False)
+    synt_datasets: List[pd.DataFrame] = model.generate_extended(sampling_rng, n_synt_samples, n_synt_datasets,
+                                                                single_dataframe=False)
     np_tensor: np.ndarray = dataframe_list_to_tensor(synt_datasets)
 
     n_datasets, n_rows, n_cols = np_tensor.shape
@@ -57,8 +60,11 @@ for model_path in models:
         delta=delta
     )
 
+    epsilon_str = epsilon_float_to_str(epsilon)
+
     path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_{dataset_name}_{query_str}_{epsilon}e_{MCMC_algorithm}.pickle")
+                        f"synthetic_dataset_{dataset_name}_{query_str}_{epsilon_str}e_{MCMC_algorithm}.pickle")
 
     with open(path, "wb") as file:
         pickle.dump(synth_data_object, file)
+        file.close()

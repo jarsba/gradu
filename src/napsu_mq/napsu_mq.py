@@ -208,6 +208,8 @@ class NapsuMQResult(InferenceResult):
             List[pd.Dataframe] or pd.Dataframe: Synthetic dataset/datasets
         """
 
+        print(f"Generating data with {num_data_per_parameter_sample} points and {num_parameter_samples} datasets")
+
         mnjax = self._markov_network
         posterior_values = self.posterior_values
         inds = jax.random.choice(key=rng, a=posterior_values.shape[0], shape=[num_parameter_samples])

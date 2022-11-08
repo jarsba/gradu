@@ -18,8 +18,8 @@ def join_query_list(query_list: List[Tuple[str, str]]) -> str:
     if len(query_list) == 0:
         return "empty"
 
-    for i, tuple in enumerate(query_list):
-        marginal_str = "".join(tuple)
+    for i, pair in enumerate(query_list):
+        marginal_str = "".join(pair)
         if i == len(query_list) - 1:
             query_str += f"{marginal_str}"
         else:

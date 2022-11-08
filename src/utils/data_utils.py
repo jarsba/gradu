@@ -13,9 +13,8 @@ def dataframe_list_to_tensor(df_list: List[pd.DataFrame]) -> np.ndarray:
     Returns:
         Numpy tensor (n, rows, cols)
     """
+
     np_list = [df.to_numpy() for df in df_list]
-    np_tensor = np.dstack(np_list)
-    print(np_list[0].shape)
-    print(np_tensor.shape)
+    np_tensor = np.stack(np_list)
 
     return np_tensor

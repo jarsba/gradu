@@ -14,6 +14,7 @@
 
 import functools
 from typing import Optional, List, Dict, Iterable
+import warnings
 
 import jax
 import jax.numpy as jnp
@@ -28,7 +29,8 @@ from .markov_network import MarkovNetwork
 class MarkovNetworkJax(MarkovNetwork):
     """Jax implementation of MarkovNetwork."""
 
-    def __init__(self, domain: Dict, queries: FullMarginalQuerySet, elimination_order: Optional[Iterable] = None, debug_checks: Optional[bool] = True):
+    def __init__(self, domain: Dict, queries: FullMarginalQuerySet, elimination_order: Optional[Iterable] = None,
+                 debug_checks: Optional[bool] = True):
         super().__init__(domain, queries, elimination_order, debug_checks)
         self.suff_stat_mean = jax.jit(jax.grad(self.lambda0))
         self.suff_stat_cov = jax.jit(jax.hessian(self.lambda0))
@@ -66,8 +68,19 @@ class MarkovNetworkJax(MarkovNetwork):
             marginal = self.marginal_distribution_logits(batch_factors, [variable])
             rng, key = jax.random.split(rng)
             values = jax.random.categorical(key, marginal)
-            batch_factors = [factor.batch_condition(variable, values) if variable in factor.scope else factor for factor in batch_factors]
-            df.loc[:, variable] = np.array(values)
+            batch_factors = [factor.batch_condition(variable, values) if variable in factor.scope else factor for factor
+                             in batch_factors]
+            # Change to use non-depricated function
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    category=FutureWarning,
+                    message=(
+                        ".*will attempt to set the values inplace instead of always setting a new array. "
+                        "To retain the old behavior, use either.*"
+                    ),
+                )
+                df.loc[:, variable] = np.array(values)
 
         return df
 
@@ -80,10 +93,9 @@ class MarkovNetworkJax(MarkovNetwork):
 
     def compute_factors(self, lambdas: jnp.ndarray) -> List[LogFactorJax]:
         return [
-            LogFactorJax(factor_scope, self.log_factor_vector(lambdas, factor_scope), self.debug_checks)
-            for factor_scope in self.variable_associations.keys()
-        ] + [
-            LogFactorJax((variable,), jnp.zeros(len(self.domain[variable])), self.debug_checks)
-            for variable in self.variables_not_in_queries
-        ]
-
+                   LogFactorJax(factor_scope, self.log_factor_vector(lambdas, factor_scope), self.debug_checks)
+                   for factor_scope in self.variable_associations.keys()
+               ] + [
+                   LogFactorJax((variable,), jnp.zeros(len(self.domain[variable])), self.debug_checks)
+                   for variable in self.variables_not_in_queries
+               ]
