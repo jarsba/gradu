@@ -19,6 +19,7 @@ results = pd.DataFrame(
 df_np_arrays = []
 
 for path in dataset_paths:
+    print(path)
     df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]
@@ -34,7 +35,7 @@ for path in dataset_paths:
     X_train, y_train = df.drop(columns=[target_column]), df[target_column]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
-    test_df = pd.read_csv(path)
+    test_df = pd.read_csv(test_df_path)
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
     accuracy_score, balanced_accuracy_score, f1_score, \

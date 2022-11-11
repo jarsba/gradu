@@ -34,7 +34,7 @@ for path in dataset_paths:
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
-    test_df = pd.read_csv(path)
+    test_df = pd.read_csv(test_df_path)
 
     scores = run_classification_on_adult(train_df, test_df, target_column)
 
