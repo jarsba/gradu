@@ -34,7 +34,7 @@ for path in dataset_paths:
 
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
-    test_df = pd.read_csv(path)
+    test_df = pd.read_csv(test_df_path)
 
     for i in range(datasets):
         train_df = pd.DataFrame(dataset_tensor[i], columns=[COLUMNS_FOR_DATASET[dataset_name]])

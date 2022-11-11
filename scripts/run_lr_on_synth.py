@@ -41,7 +41,7 @@ for path in dataset_paths:
     feature_columns = [col for col in dataset_columns if col != target_column]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
-    test_df = pd.read_csv(path)
+    test_df = pd.read_csv(test_df_path)
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
     for i in range(datasets):
