@@ -20,8 +20,10 @@ results = pd.DataFrame(
              "coefficients", "point_estimates", "variance_estimates", "confidence_intervals"])
 
 for path in dataset_paths:
+    print(path)
     synth_file = open(path, "rb")
     synth_data_object: SynthDataObject = pickle.load(synth_file)
+    synth_file.close()
 
     dataset_tensor = synth_data_object.synth_data
 
