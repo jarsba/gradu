@@ -102,7 +102,7 @@ rule run_logistic_regression_on_original:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_lr_on_synth.py"
+        "scripts/run_lr_on_original.py"
 
 
 rule run_classification_on_synt:
@@ -128,7 +128,7 @@ rule run_classification_on_original:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_clf_on_synth.py"
+        "scripts/run_clf_on_original.py"
 
 
 #rule compare_datasets:
