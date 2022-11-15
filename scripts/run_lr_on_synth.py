@@ -10,7 +10,7 @@ import pandas as pd
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
 from src.utils.path_utils import RESULTS_FOLDER
-from base_lr import run_logistic_regression
+from base_lr import run_logistic_regression_on_3d, run_logistic_regression_on_2d
 
 dataset_paths = snakemake.input
 
@@ -50,7 +50,7 @@ for path in dataset_paths:
         X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
 
         accuracy_score, balanced_accuracy_score, f1_score, \
-        coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression(df_np,
+        coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np,
                                                                                                           X_train,
                                                                                                           y_train,
                                                                                                           X_test,
@@ -64,7 +64,7 @@ for path in dataset_paths:
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=[COLUMNS_FOR_DATASET[dataset_name]])
     X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
     accuracy_score, balanced_accuracy_score, f1_score, \
-    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression(dataset_tensor,
+    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_3d(dataset_tensor,
                                                                                                       X_train,
                                                                                                       y_train, X_test,
                                                                                                       y_test)

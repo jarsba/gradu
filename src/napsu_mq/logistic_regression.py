@@ -124,3 +124,61 @@ def logistic_regression_regularised(
         return q, u, conf_ints
     else:
         return q,
+
+
+def logistic_regression_on_2d(
+        dataset, col_to_predict=None, add_constant=True, return_intervals=False, return_results=False, conf_levels=[],
+        weight=1
+):
+    """Logistic regression for single dataset.
+    Args:
+        dataset (ndarray): dataset with shape (n, d).
+        col_to_predict (int, optional): The dependent variable column index. Defaults to using the last column.
+        add_constant (bool, optional): Whether to add a bias term to the logistic regression. Defaults to True.
+        return_intervals (bool, optional): Whether to return confidence intervals. Requires specifying conf_levels. Defaults to False.
+        return_results (bool, optional): Whether to return the statsmodels result objects. Defaults to False.
+        conf_levels (list, optional): The confidence levels for returned confidence intervals. Defaults to [].
+        weight (float, optional): A weight that is used for all datapoints. Defaults to 1.
+    Returns:
+        tuple: A tuple of results (point estimates, variance estimates, confidence interval, result object).
+        The last two items may not be present depending on argument values.
+    """
+    n, d = dataset.shape
+    if col_to_predict is None: col_to_predict = d - 1
+    feature_cols = set(range(d))
+    feature_cols.remove(col_to_predict)
+    feature_cols = list(feature_cols)
+
+    num_coefs = d if add_constant else d - 1
+    q = np.zeros((1, num_coefs))
+    u = np.zeros((1, num_coefs))
+    conf_ints = {conf_level: np.zeros((1, num_coefs, 2)) for conf_level in conf_levels}
+
+    feature_array = sm.add_constant(dataset[:, feature_cols], has_constant="add") if add_constant else dataset[:,
+                                                                                                       feature_cols]
+    y_array = dataset[:, col_to_predict]
+
+    try:
+        syn_model = sm.GLM(y_array, feature_array, family=sm.families.Binomial(), freq_weights=np.repeat(weight, n))
+        syn_result = syn_model.fit()
+
+        for conf_level in conf_levels:
+            conf_ints[conf_level][0, :, :] = syn_result.conf_int(1 - conf_level)
+
+        q[0, :] = syn_result.params
+        u[0, :] = syn_result.bse ** 2
+
+
+    except PerfectSeparationError:
+        raise
+
+    if return_intervals:
+        if return_results:
+            return q, u, conf_ints, syn_result
+        else:
+            return q, u, conf_ints
+    else:
+        if return_results:
+            return q, u, syn_result
+        else:
+            return q, u

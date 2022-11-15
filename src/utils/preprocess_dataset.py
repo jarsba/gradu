@@ -33,8 +33,8 @@ def clean_dataset(df, dataset_name):
     return df
 
 
-def clean_synthetic_binary(data) -> pd.DataFrame:
-    data = pd.to_numeric(data)
+def clean_synthetic_binary(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.apply(pd.to_numeric)
     return data
 
 

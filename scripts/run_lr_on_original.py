@@ -3,7 +3,7 @@ sys.path.append(snakemake.config['workdir'])
 
 import os
 import pandas as pd
-from base_lr import run_logistic_regression
+from base_lr import run_logistic_regression_on_2d
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from src.utils.path_utils import RESULTS_FOLDER
 from src.utils.preprocess_dataset import clean_dataset, convert_to_int_array
@@ -19,7 +19,6 @@ results = pd.DataFrame(
 df_np_arrays = []
 
 for path in dataset_paths:
-    print(path)
     df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]
@@ -39,7 +38,7 @@ for path in dataset_paths:
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
     accuracy_score, balanced_accuracy_score, f1_score, \
-    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression(df_np, X_train,
+    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np, X_train,
                                                                                                       y_train, X_test,
                                                                                                       y_test)
 
