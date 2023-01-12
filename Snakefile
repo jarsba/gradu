@@ -15,14 +15,13 @@ MCMC_algorithms = config['MCMC_algorithms']
 queries = config['queries']
 la_approx = ['LA', 'NoLA']
 
-queries_dataset_product = query_dataset_product(dataset_names, queries)
-experiment_products = generate_products(queries_dataset_product, epsilons, MCMC_algorithms)
-
+queries_dataset_product = query_dataset_product(dataset_names,queries)
+experiment_products = generate_products(queries_dataset_product,epsilons,MCMC_algorithms)
 
 wildcard_constraints:
     experiment_id="[a-zA-Z\d]{8}"
 
-localrules: all, csv_results
+localrules: all,csv_results
 
 rule all:
     input:
@@ -37,42 +36,58 @@ rule csv_results:
         "results/synthetic_classification_results.csv"
 
 
-
 rule run_napsu:
     input:
-        expand("{dataset_file}", dataset_file=dataset_files)
+        expand("{dataset_file}",dataset_file=dataset_files)
     output:
-        expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products),
-    #"napsu_MCMC_time_vs_epsilon_comparison.csv",
-    #"napsu_experiment_storage_output.csv"
+        expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products)
     log:
-        expand("logs/napsu_{experiment_product}.log", experiment_product=experiment_products)
+        expand("logs/napsu_{experiment_product}.log",experiment_product=experiment_products)
     threads: 4
     resources:
-        runtime = "2160",
-        time = "36:00:00",
-        mem_mb = 16000,
-        partition = "medium"
+        runtime="2160",
+        time="36:00:00",
+        mem_mb=16000,
+        partition="medium"
     conda:
         "envs/napsu.yaml"
     script:
         "scripts/run_napsu.py"
 
 
-rule generate_synt_datasets:
+rule create_models_for_independence_pruning:
     input:
-        expand("models/napsu_{experiment_product}.dill", experiment_product=experiment_products)
+        "data/datasets/cleaned_adult_train_data.csv"
     output:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
+        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
     log:
-        expand("logs/data_generation_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
+        "logs/napsu_independence_pruning_{query}_missing_{epsilon}e.log"
     threads: 4
     resources:
-        runtime = "120",
-        time = "02:00:00",
-        mem_mb = 16000,
-        disk_mb = 50000,
-        partition = "short"
+        runtime="2160",
+        time="36:00:00",
+        mem_mb=16000,
+        partition="medium"
+    conda:
+        "envs/napsu.yaml"
+    script:
+        "scripts/create_adult_models_for_independence_pruning.py"
+
+
+rule generate_synt_datasets:
+    input:
+        expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products)
+    output:
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle",experiment_product=experiment_products)
+    log:
+        expand("logs/data_generation_synthetic_dataset_{experiment_product}.log",experiment_product=experiment_products)
+    threads: 4
+    resources:
+        runtime="120",
+        time="02:00:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
     conda:
         "envs/napsu.yaml"
     script:
@@ -81,9 +96,9 @@ rule generate_synt_datasets:
 
 rule run_logistic_regression_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle",experiment_product=experiment_products)
     log:
-        expand("logs/logistic_regression_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
+        expand("logs/logistic_regression_synthetic_dataset_{experiment_product}.log",experiment_product=experiment_products)
     output:
         "results/synthetic_logistic_regression_results.csv"
     conda:
@@ -98,7 +113,7 @@ rule run_logistic_regression_on_original:
     output:
         "results/original_logistic_regression_results.csv"
     log:
-        expand("logs/logistic_regression_original_dataset_{dataset}.log", dataset=dataset_names)
+        expand("logs/logistic_regression_original_dataset_{dataset}.log",dataset=dataset_names)
     conda:
         "envs/analysis.yaml"
     script:
@@ -107,11 +122,11 @@ rule run_logistic_regression_on_original:
 
 rule run_classification_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle", experiment_product=experiment_products)
+        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle",experiment_product=experiment_products)
     output:
         "results/synthetic_classification_results.csv"
     log:
-        expand("logs/classification_synthetic_dataset_{experiment_product}.log", experiment_product=experiment_products)
+        expand("logs/classification_synthetic_dataset_{experiment_product}.log",experiment_product=experiment_products)
     conda:
         "envs/analysis.yaml"
     script:
@@ -124,7 +139,7 @@ rule run_classification_on_original:
     output:
         "results/original_classification_results.csv"
     log:
-        expand("logs/classification_original_dataset_{dataset}.log", dataset=dataset_names)
+        expand("logs/classification_original_dataset_{dataset}.log",dataset=dataset_names)
     conda:
         "envs/analysis.yaml"
     script:

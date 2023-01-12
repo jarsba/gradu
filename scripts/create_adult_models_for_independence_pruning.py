@@ -2,17 +2,18 @@ import sys
 import os
 
 sys.path.append(snakemake.config['workdir'])
-
+#sys.path.append("/home/jarlehti/projects/gradu")
 import jax
 
 jax.config.update("jax_enable_x64", True)
 
 import itertools
 from arviz.data.inference_data import InferenceDataT
+import pandas as pd
 
-from src.utils.path_utils import MODELS_FOLDER
+from src.utils.path_utils import MODELS_FOLDER, DATASETS_FOLDER
 from src.utils.timer import Timer
-from src.utils.preprocess_dataset import get_adult_train
+from src.utils.preprocess_dataset import get_adult_train, clean_adult
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
@@ -30,11 +31,8 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 """
 
-dataset_map = snakemake.config['datasets']
-inverted_dataset_map = {v: k for k, v in dataset_map.items()}
-dataset_names = [key for key in dataset_map.keys()]
-dataset_files = [value for value in dataset_map.values()]
-datasets = snakemake.input
+adult_dataset = pd.read_csv(snakemake.input)
+# adult_dataset = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
 
 epsilons = [0.1]
 
@@ -50,7 +48,7 @@ immutable_set_remove = lambda element, list_obj: list(filter(lambda x: set(x) !=
 # List of lists with tuples of all 2-way marginals
 test_queries = [immutable_set_remove(pair, full_set_of_marginals) for pair in marginal_pairs]
 
-adult_train_df = get_adult_train()
+adult_train_df = clean_adult(adult_dataset)
 
 storage = ExperimentStorage()
 timer = Timer()

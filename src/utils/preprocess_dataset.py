@@ -39,7 +39,10 @@ def clean_synthetic_binary(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
-    data['age'] = pd.Categorical(data['age'])
+
+    age_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
+
+    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, 10), right=False, labels=age_labels))
     data['workclass'] = pd.Categorical(data['workclass'])
     data['education-num'] = pd.Categorical(data['education-num'])
     data['marital-status'] = pd.Categorical(data['marital-status'])
@@ -47,11 +50,16 @@ def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
     data['relationship'] = pd.Categorical(data['relationship'])
     data['race'] = pd.Categorical(data['race'])
     data['sex'] = pd.Categorical(data['sex'])
-    data['hours-per-week'] = pd.Categorical(data['hours-per-week'])
+    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
+    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
+    hours_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
+    data['hours-per-week'] = pd.Categorical(
+        pd.cut(data['hours-per-week'], range(0, 105, 10), right=False, labels=hours_labels)
+    )
     data['native-country'] = pd.Categorical(data['native-country'])
     data['compensation'] = pd.Categorical(data['compensation'])
 
-    data.drop(columns=ADULT_COLUMNS_TO_DROP)
+    data.drop(columns=ADULT_COLUMNS_TO_DROP, inplace=True)
 
     # Move "compensation" column to last
     data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
@@ -69,32 +77,9 @@ def get_adult_train() -> pd.DataFrame:
     """
 
     data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
-    age_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
+    cleaned_adult = clean_adult(data)
 
-    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, 10), right=False, labels=age_labels))
-    data['workclass'] = pd.Categorical(data['workclass'])
-    data['education-num'] = pd.Categorical(data['education-num'])
-    data['marital-status'] = pd.Categorical(data['marital-status'])
-    data['occupation'] = pd.Categorical(data['occupation'])
-    data['relationship'] = pd.Categorical(data['relationship'])
-    data['race'] = pd.Categorical(data['race'])
-    data['sex'] = pd.Categorical(data['sex'])
-    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
-    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
-    hours_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
-    data['hours-per-week'] = pd.Categorical(
-        pd.cut(data['hours-per-week'], range(0, 105, 10), right=False, labels=hours_labels)
-    )
-    data['native-country'] = pd.Categorical(data['native-country'])
-    data['compensation'] = pd.Categorical(data['compensation'])
-
-    # Low information columns
-    data.drop(columns=['had-capital-gains', 'had-capital-losses'], inplace=True)
-
-    # Move "compensation" column to last
-    data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
-
-    return data
+    return cleaned_adult
 
 
 def get_adult_test() -> pd.DataFrame:
@@ -107,32 +92,9 @@ def get_adult_test() -> pd.DataFrame:
     """
 
     data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
-    age_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
+    cleaned_adult = clean_adult(data)
 
-    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, 10), right=False, labels=age_labels))
-    data['workclass'] = pd.Categorical(data['workclass'])
-    data['education-num'] = pd.Categorical(data['education-num'])
-    data['marital-status'] = pd.Categorical(data['marital-status'])
-    data['occupation'] = pd.Categorical(data['occupation'])
-    data['relationship'] = pd.Categorical(data['relationship'])
-    data['race'] = pd.Categorical(data['race'])
-    data['sex'] = pd.Categorical(data['sex'])
-    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
-    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
-    hours_labels = ["{0} - {1}".format(i, i + 9) for i in range(0, 100, 10)]
-    data['hours-per-week'] = pd.Categorical(
-        pd.cut(data['hours-per-week'], range(0, 105, 10), right=False, labels=hours_labels)
-    )
-    data['native-country'] = pd.Categorical(data['native-country'])
-    data['compensation'] = pd.Categorical(data['compensation'])
-
-    # Low information columns
-    data.drop(columns=['had-capital-gains', 'had-capital-losses'], inplace=True)
-
-    # Move "compensation" column to last
-    data = data.reindex(columns=[col for col in data.columns if col != 'compensation'] + ['compensation'])
-
-    return data
+    return cleaned_adult
 
 
 def get_binary3d_train() -> pd.DataFrame:
