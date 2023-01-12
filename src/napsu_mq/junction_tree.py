@@ -175,8 +175,8 @@ class JunctionTree:
         self.edges[edge] = set(e1).intersection(set(e2))
 
     def remove_redundant_nodes(self) -> None:
-        """Prune the juction tree to remove redundant nodes.
-        """
+        """Prune the junction tree to remove redundant nodes."""
+
         while True:
             res = self.find_redundant_node()
             if res is not None:

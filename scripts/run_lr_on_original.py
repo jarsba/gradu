@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(snakemake.config['workdir'])
 
 import os
@@ -16,8 +17,6 @@ results = pd.DataFrame(
     columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients", "point_estimates",
              "variance_estimates", "confidence_intervals"])
 
-df_np_arrays = []
-
 for path in dataset_paths:
     df = pd.read_csv(path)
 
@@ -26,7 +25,6 @@ for path in dataset_paths:
     df = clean_dataset(df, dataset_name)
 
     df_np = convert_to_int_array(df)
-    df_np_arrays.append(df_np)
 
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
     feature_columns = [col for col in df.columns if col != target_column]
@@ -38,11 +36,14 @@ for path in dataset_paths:
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
     accuracy_score, balanced_accuracy_score, f1_score, \
-    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np, X_train,
-                                                                                                      y_train, X_test,
-                                                                                                      y_test)
+    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np,
+                                                                                                            X_train,
+                                                                                                            y_train,
+                                                                                                            X_test,
+                                                                                                            y_test)
 
-    results.append([dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coefficients, point_estimates,
-                    variance_estimates, confidence_intervals])
+    results.loc[len(results)] = [dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coefficients,
+                                 point_estimates,
+                                 variance_estimates, confidence_intervals]
 
 results.to_csv(snakemake.output[0], index=False)

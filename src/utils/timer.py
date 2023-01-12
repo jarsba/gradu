@@ -1,6 +1,5 @@
 from timeit import default_timer as timer
-from typing import Optional, Tuple
-
+from typing import Optional
 import pandas as pd
 from src.utils.keygen import get_key
 from src.utils.singleton import Singleton

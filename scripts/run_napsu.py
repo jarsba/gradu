@@ -11,10 +11,11 @@ from arviz.data.inference_data import InferenceDataT
 
 from src.utils.path_utils import MODELS_FOLDER
 from src.utils.timer import Timer
-from src.utils.keygen import get_hash, get_key
+from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
+from src.utils.string_utils import epsilon_str_to_float
 
 dataset_map = snakemake.config['datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
@@ -30,11 +31,6 @@ queries = snakemake.config['queries']
 
 storage = ExperimentStorage()
 timer = Timer()
-
-
-def epsilon_str_to_float(epsilon):
-    return float(f"{epsilon[0]}.{epsilon[1]}")
-
 
 for dataset in datasets:
     for epsilon_str in epsilons:
