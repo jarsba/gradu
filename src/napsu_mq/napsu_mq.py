@@ -58,11 +58,11 @@ class NapsuMQModel(InferenceModel):
         MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
         use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
         return_inference_data = check_kwargs(kwargs, 'return_inference_data', False)
+        missing_query = check_kwargs(kwargs, "missing_query", None)
 
         experiment_id = experiment_id_ctx.get()
 
         query_str = join_query_list(column_feature_set)
-
 
         timer_meta = {
             "experiment_id": experiment_id,
@@ -72,7 +72,8 @@ class NapsuMQModel(InferenceModel):
             "epsilon": epsilon,
             "delta": delta,
             "MCMC_algo": MCMC_algo,
-            "laplace_approximation": use_laplace_approximation
+            "laplace_approximation": use_laplace_approximation,
+            "missing_query": missing_query
         }
 
         dataframe = DataFrameData(data)

@@ -55,25 +55,6 @@ rule run_napsu:
         "scripts/run_napsu.py"
 
 
-rule create_models_for_independence_pruning:
-    input:
-        "data/datasets/cleaned_adult_train_data.csv"
-    output:
-        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
-    log:
-        "logs/napsu_independence_pruning_{query}_missing_{epsilon}e.log"
-    threads: 4
-    resources:
-        runtime="2160",
-        time="36:00:00",
-        mem_mb=16000,
-        partition="medium"
-    conda:
-        "envs/napsu.yaml"
-    script:
-        "scripts/create_adult_models_for_independence_pruning.py"
-
-
 rule generate_synt_datasets:
     input:
         expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products)
@@ -184,6 +165,45 @@ rule compare_clf_results:
         "envs/analysis.yaml"
     script:
         "scripts/plot_clf_results.py"
+
+
+rule create_models_for_independence_pruning:
+    input:
+        "data/datasets/cleaned_adult_train_data.csv"
+    output:
+        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
+    log:
+        "logs/napsu_independence_pruning_{query}_missing_{epsilon}e.log"
+    threads: 4
+    resources:
+        runtime="2160",
+        time="36:00:00",
+        mem_mb=16000,
+        partition="medium"
+    conda:
+        "envs/napsu.yaml"
+    script:
+        "scripts/create_adult_models_for_independence_pruning.py"
+
+
+rule create_datasets_for_independence_pruning:
+    input:
+        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
+    output:
+        "data/synt_datasets/synthetic_dataset_independence_pruning_{query}_missing_{epsilon}e.pickle"
+    log:
+        "logs/data_generation_independence_pruning_{query}_missing_{epsilon}e.log"
+    resources:
+        runtime="120",
+        time="02:00:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/napsu.yaml"
+    script:
+        "scripts/generate_independence_pruning_datasets.py"
+
 
 
 rule clean_slurm_logs:

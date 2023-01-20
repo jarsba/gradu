@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(snakemake.config['workdir'])
+#sys.path.append(snakemake.config['workdir'])
 #sys.path.append("/home/jarlehti/projects/gradu")
 import jax
 
@@ -31,8 +31,8 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 """
 
-adult_dataset = pd.read_csv(snakemake.input)
-# adult_dataset = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+#adult_dataset = pd.read_csv(snakemake.input)
+adult_dataset = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
 
 epsilons = [0.1]
 
@@ -63,6 +63,7 @@ for epsilon in epsilons:
         n, d = adult_train_df.shape
         query_str = join_query_list(query_list)
         missing_query = list(set(full_set_of_marginals) - set(test_queries[0]))
+        query_removed = ["+".join(map(str, pair)) for pair in missing_query][0]
 
         if len(missing_query) != 1:
             print(f"Missing too many queries! Queries missing: {missing_query}")
@@ -76,7 +77,7 @@ for epsilon in epsilons:
             "experiment_id": experiment_id,
             "dataset_name": dataset_name,
             "query": query_str,
-            "missing_query": missing_query,
+            "missing_query": query_removed,
             "epsilon": epsilon,
             "delta": delta,
             "MCMC_algo": "NUTS",
@@ -105,12 +106,11 @@ for epsilon in epsilons:
             column_feature_set=query_list,
             MCMC_algo="NUTS",
             use_laplace_approximation=True,
-            return_inference_data=True
+            return_inference_data=True,
+            missing_query=missing_query,
         )
 
         timer.stop(pid)
-
-        query_removed = ["+".join(map(str, pair)) for pair in missing_query][0]
 
         dataset_query_str = f"{dataset_name}_{query_removed}"
 
