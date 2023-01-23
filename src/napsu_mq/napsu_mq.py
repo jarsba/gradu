@@ -103,6 +103,8 @@ class NapsuMQModel(InferenceModel):
         query_number = calculate_query_number(queries.queries)
         timer_meta['n_canonical_queries'] = query_number
 
+        print(f"Canonical queries: {query_number}")
+
         timer.stop(pid)
 
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)

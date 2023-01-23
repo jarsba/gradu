@@ -130,7 +130,7 @@ def run_numpyro_mcmc_normalised(
     mean_guess = laplace_approx.mean
     L_guess = jnp.linalg.cholesky(laplace_approx.covariance_matrix)
     mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
-             extra_fields=("potential_energy", "potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
+             extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
 
     print_MCMC_diagnostics(mcmc)
     store_MCMC_diagnostics(mcmc)
