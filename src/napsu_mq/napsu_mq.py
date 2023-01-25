@@ -118,7 +118,6 @@ class NapsuMQModel(InferenceModel):
         dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
         dp_suff_stat = suff_stat + dp_noise
 
-
         if use_laplace_approximation is True:
 
             approx_rng, mcmc_rng = jax.random.split(inference_rng, 2)
