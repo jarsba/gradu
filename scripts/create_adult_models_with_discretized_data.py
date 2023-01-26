@@ -65,7 +65,7 @@ for epsilon in epsilons:
     query = []
     delta = (n ** (-2))
 
-    for name, dataset in dataset_dict.values():
+    for name, dataset in dataset_dict.items():
         experiment_id = get_key()
         experiment_id_ctx.set(experiment_id)
 
