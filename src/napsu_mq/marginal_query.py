@@ -137,6 +137,7 @@ class FullMarginalQuerySet:
         clique_set = set([tuple(val) for val in clique_list])
         canonical_queries = {}
 
+
         for clique in tqdm(clique_set):
             clique = set(clique)
             clique_ordered = tuple(clique)

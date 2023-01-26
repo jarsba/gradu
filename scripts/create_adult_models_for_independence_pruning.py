@@ -13,7 +13,7 @@ import pandas as pd
 
 from src.utils.path_utils import MODELS_FOLDER, DATASETS_FOLDER
 from src.utils.timer import Timer
-from src.utils.preprocess_dataset import get_adult_train, clean_adult
+from src.utils.preprocess_dataset import get_adult_train, clean_adult, clean_adult_with_discretization
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
@@ -48,10 +48,10 @@ immutable_set_remove = lambda element, list_obj: list(filter(lambda x: set(x) !=
 # List of lists with tuples of all 2-way marginals
 test_queries = [immutable_set_remove(pair, full_set_of_marginals) for pair in marginal_pairs]
 
-adult_train_df = clean_adult(adult_dataset)
+adult_train_df = clean_adult_with_discretization(adult_dataset, bucket_size=10)
 
-storage = ExperimentStorage()
-timer = Timer()
+storage = ExperimentStorage(file_path="napsu_independence_pruning_storage.csv", mode="replace")
+timer = Timer(file_path="napsu_independence_pruning_timer.csv", mode="replace")
 
 for epsilon in epsilons:
 
@@ -120,5 +120,8 @@ for epsilon in epsilons:
 
         inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{dataset_query_str}_missing_{epsilon_str}e.nc")
 
-timer.to_csv("napsu_independence_pruning_timer.csv", mode="a")
-storage.to_csv("napsu_independence_pruning_storage.csv", mode="a")
+        timer.save()
+        storage.save()
+
+timer.save()
+storage.save()
