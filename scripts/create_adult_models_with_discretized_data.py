@@ -49,8 +49,8 @@ adult_train_no_discretization = get_adult_train_no_discretization()
 adult_train_discretized_low = get_adult_train_low_discretization()
 adult_train_discretized_high = get_adult_train_high_discretization()
 
-storage = ExperimentStorage()
-timer = Timer()
+storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", mode="replace")
+timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
 
 dataset_dict = {
     'no_discretization': adult_train_no_discretization,
@@ -66,7 +66,6 @@ for epsilon in epsilons:
     delta = (n ** (-2))
 
     for name, dataset in dataset_dict.values():
-
         experiment_id = get_key()
         experiment_id_ctx.set(experiment_id)
 
@@ -117,5 +116,9 @@ for epsilon in epsilons:
 
         inf_data.to_netcdf(f"logs/inf_data_discretization_test_{dataset_discretization_str}_{epsilon_str}e.nc")
 
-timer.to_csv("napsu_discretization_test_timer.csv", mode="a")
-storage.to_csv("napsu_discretization_test_storage.csv", mode="a")
+        # Save storage and timer results every iteration
+        storage.save()
+        timer.save()
+
+storage.save()
+timer.save()
