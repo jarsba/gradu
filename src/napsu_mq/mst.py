@@ -85,6 +85,7 @@ def exponential_mechanism(q: Any, eps: float, sensitivity: float, prng=np.random
     coef = 1.0 if monotonic else 0.5
     scores = coef * eps / sensitivity * q
     probas = np.exp(scores - logsumexp(scores))
+    print(f"Prbablities: {probas}")
     return prng.choice(q.size, p=probas)
 
 
@@ -93,16 +94,24 @@ def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Ite
     est = engine.estimate(measurement_log)
 
     weights = {}
+    # Candidates are all pairs of attributes
     candidates = list(itertools.combinations(data.domain.attrs, 2))
+
     for a, b in candidates:
         xhat = est.project([a, b]).datavector()
         x = data.project([a, b]).datavector()
+        # Calculate the L1 distance between the true and estimated data for each pair of attributes
         weights[a, b] = np.linalg.norm(x - xhat, 1)
+
+    print(f"Len weights: {len(weights)}")
+    print(f"Weights: {weights}")
+    print(f"Sorted weights: {sorted(weights.items(), key=lambda x: x[1])}")
 
     T = nx.Graph()
     T.add_nodes_from(data.domain.attrs)
     ds = DisjointSet()
 
+    print(f"Cliques: {cliques}")
     for e in cliques:
         T.add_edge(*e)
         ds.union(*e)
@@ -112,10 +121,17 @@ def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Ite
     for i in range(r - 1):
         candidates = [e for e in candidates if not ds.connected(*e)]
         wgts = np.array([weights[e] for e in candidates])
+        print(f"Candidates: {candidates}")
+        print(f"Weights: {wgts}")
         idx = exponential_mechanism(wgts, epsilon, sensitivity=1.0)
+        print(f"Idx: {idx}")
         e = candidates[idx]
+        print(f"Edge: {e}")
         T.add_edge(*e)
         ds.union(*e)
+        print(f"T edges: {T.edges}")
+
+    print(f"T edges: {T.edges}")
 
     return list(T.edges)
 

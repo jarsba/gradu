@@ -42,8 +42,6 @@ capital-gains -> binary 0/1
 capital-losses -> binary 0/1
 """
 
-adult_dataset = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
-
 epsilons = [0.1, 0.3, 1.0, 3.0, 8.0]
 
 adult_train_discretized_low = get_adult_train_low_discretization()
@@ -61,7 +59,7 @@ for epsilon in epsilons:
 
     epsilon_str = epsilon_float_to_str(epsilon)
     n, d = adult_train_discretized_low.shape
-    query = []
+    query = [('age', 'sex')]
     delta = (n ** (-2))
 
     for name, dataset in dataset_dict.items():
