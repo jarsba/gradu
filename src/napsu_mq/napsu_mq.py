@@ -59,6 +59,7 @@ class NapsuMQModel(InferenceModel):
         use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
         return_inference_data = check_kwargs(kwargs, 'return_inference_data', False)
         missing_query = check_kwargs(kwargs, "missing_query", None)
+        enable_profiling = check_kwargs(kwargs, "enable_profiling", False)
 
         experiment_id = experiment_id_ctx.get()
 
@@ -124,14 +125,16 @@ class NapsuMQModel(InferenceModel):
 
             pid = timer.start(f"Laplace approximation", **timer_meta)
 
-            laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP, mnjax)
+            laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP,
+                                                                            mnjax)
 
             timer.stop(pid)
 
             pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc, backtransform = mei.run_numpyro_mcmc_normalised(
-                mcmc_rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800, num_chains=4
+                mcmc_rng, dp_suff_stat, n, sigma_DP, mnjax, laplace_approx, num_samples=2000, num_warmup=800,
+                num_chains=4, enable_profiling=enable_profiling
             )
 
             timer.stop(pid)
@@ -145,7 +148,8 @@ class NapsuMQModel(InferenceModel):
             pid = timer.start(f"MCMC", **timer_meta)
 
             mcmc = mei.run_numpyro_mcmc(
-                inference_rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800, num_chains=4
+                inference_rng, dp_suff_stat, n, sigma_DP, mnjax, MCMC_algo, num_samples=2000, num_warmup=800,
+                num_chains=4, enable_profiling=enable_profiling
             )
 
             timer.stop(pid)

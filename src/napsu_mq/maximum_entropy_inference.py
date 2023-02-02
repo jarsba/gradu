@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Union, Callable, Tuple, Literal
+import cProfile
+from pstats import SortKey
+import pstats
+import io
 
 import jax
 import jax.numpy as jnp
@@ -20,6 +24,7 @@ import numpyro.infer.util as nummcmc_util
 from numpyro.diagnostics import summary
 from jax import random
 import numpy as np
+
 from . import maximum_entropy_model as mem
 from .markov_network_jax import MarkovNetworkJax
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
@@ -98,6 +103,7 @@ def run_numpyro_mcmc(
         MCMC_algo: kernels = "NUTS", prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10,
         num_samples: int = 1000,
         num_warmup: int = 500, num_chains: int = 4, disable_progressbar: bool = True,
+        enable_profiling: bool = False,
 ) -> numpyro.infer.MCMC:
     MCMC_algorithm = get_kernel(MCMC_algo)
 
@@ -106,8 +112,24 @@ def run_numpyro_mcmc(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
         progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential",
     )
-    mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
-             extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
+
+    if enable_profiling:
+        pr = cProfile.Profile()
+        pr.enable()
+        mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
+                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+        pr.disable()
+        experiment_id = experiment_id_ctx.get()
+        pr.dump_stats(f"logs/MCMC_profile_{experiment_id}.prof")
+
+        s = io.StringIO()
+        sort_by = SortKey.CUMULATIVE
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.dump_stats(f"logs/MCMC_profile_stats_{experiment_id}.prof")
+        s.close()
+    else:
+        mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
+                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
 
     print_MCMC_diagnostics(mcmc)
     store_MCMC_diagnostics(mcmc)
@@ -118,6 +140,7 @@ def run_numpyro_mcmc_normalised(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
         laplace_approx: numpyro.distributions.MultivariateNormal, MCMC_algo: kernels = "NUTS", prior_sigma: float = 10,
         num_samples: int = 1000, num_warmup: int = 500, num_chains: int = 4, disable_progressbar: bool = True,
+        enable_profiling: bool = False
 ) -> Tuple[numpyro.infer.MCMC, Callable]:
     MCMC_algorithm = get_kernel(MCMC_algo)
 
@@ -129,8 +152,25 @@ def run_numpyro_mcmc_normalised(
 
     mean_guess = laplace_approx.mean
     L_guess = jnp.linalg.cholesky(laplace_approx.covariance_matrix)
-    mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
-             extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging"))
+
+    if enable_profiling is True:
+        pr = cProfile.Profile()
+        pr.enable()
+        mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
+                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+        pr.disable()
+        experiment_id = experiment_id_ctx.get()
+        pr.dump_stats(f"logs/MCMC_{experiment_id}.prof")
+
+        s = io.StringIO()
+        sort_by = SortKey.CUMULATIVE
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.dump_stats(f"logs/MCMC_profile_stats_{experiment_id}.prof")
+        s.close()
+
+    else:
+        mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
+                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
 
     print_MCMC_diagnostics(mcmc)
     store_MCMC_diagnostics(mcmc)
