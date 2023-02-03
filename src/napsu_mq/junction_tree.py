@@ -31,6 +31,14 @@ class TreeNode:
         self.messages = []
         self.result = None
 
+    def __str__(self):
+        children_variables = [child.variables for child in self.children] if self.children is not None else None
+        parent_variables = self.parent.variables if self.parent is not None else None
+        return f"TreeNode(variables={self.variables}, parent={parent_variables}, children={children_variables})"
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class EmptyFactor:
     def __init__(self, scope: Union[Tuple[T, ...], Set[T]]):
@@ -216,3 +224,46 @@ class JunctionTree:
                     node.children.append(new_node)
 
         return order
+
+    def calculate_tree_height(self, node: 'TreeNode', height) -> int:
+        """Calculate the height of the junction tree recursively.
+        Returns:
+            int: The height of the tree.
+        """
+
+        if node.children is None:
+            return height
+
+        max_height = height
+
+        for child in node.children:
+            child_height = self.calculate_tree_height(child, height + 1)
+
+            if child_height > max_height:
+                max_height = child_height
+
+        return max_height
+
+    def calculate_max_tree_width(self) -> int:
+        """Get the maximum width of the junction tree. Traverse through each level of the tree and calculate the number of
+        children for each level. Return the maximum width.
+        Returns:
+            int: The maximum width of the whole tree.
+        """
+        root_node = self.root_node
+        tree_height = self.calculate_tree_height(root_node, 0)
+        tree_widths = [0] * tree_height
+        tree_widths[0] = len(root_node.children)
+
+        nodes = [*root_node.children]
+        new_nodes = []
+
+        for i in range(1, tree_height):
+            for child in nodes:
+                new_nodes.extend(child.children)
+
+            tree_widths[i] = len(new_nodes)
+            nodes = new_nodes
+            new_nodes = []
+
+        return max(tree_widths)

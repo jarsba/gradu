@@ -109,7 +109,14 @@ class NapsuMQModel(InferenceModel):
         timer.stop(pid)
 
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)
+
+        junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
+        timer_meta['junction_tree_width'] = junction_tree_width
+        
         suff_stat = np.sum(queries.flatten()(dataframe.int_array), axis=0)
+
+        suff_stat_dim = suff_stat.shape
+        timer_meta['suff_stat_dim'] = suff_stat_dim
 
         sensitivity = np.sqrt(2 * len(query_sets))
         inference_rng, dp_rng = jax.random.split(rng, 2)
