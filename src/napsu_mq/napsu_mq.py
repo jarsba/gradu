@@ -36,6 +36,7 @@ from .mst import MST_selection
 from src.utils.timer import Timer
 from src.utils.query_utils import calculate_query_number, join_query_list
 from src.utils.experiment_storage import experiment_id_ctx
+from src.utils.keygen import get_key
 
 timer = Timer()
 
@@ -61,7 +62,13 @@ class NapsuMQModel(InferenceModel):
         missing_query = check_kwargs(kwargs, "missing_query", None)
         enable_profiling = check_kwargs(kwargs, "enable_profiling", False)
 
-        experiment_id = experiment_id_ctx.get()
+        try:
+            experiment_id = experiment_id_ctx.get()
+        except Exception as exc:
+            print(f"No experiment_id found: {exc}")
+            experiment_id = get_key()
+            print(f"Setting experiment_id to {experiment_id}")
+            experiment_id_ctx.set(experiment_id)
 
         query_str = join_query_list(column_feature_set)
 
@@ -112,7 +119,7 @@ class NapsuMQModel(InferenceModel):
 
         junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
         timer_meta['junction_tree_width'] = junction_tree_width
-        
+
         suff_stat = np.sum(queries.flatten()(dataframe.int_array), axis=0)
 
         suff_stat_dim = suff_stat.shape

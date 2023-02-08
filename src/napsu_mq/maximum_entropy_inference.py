@@ -212,6 +212,7 @@ def run_numpyro_laplace_approximation(
         print(f"Lambdas: {lambdas}")
 
         result = jax.scipy.optimize.minimize(lambda l: potential_fn({"lambdas": l}), lambdas, method="BFGS", tol=1e-2)
+        print(f"Result: {result}")
         if not result.success:
             fail_count += 1
         else:

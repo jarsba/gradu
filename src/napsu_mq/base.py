@@ -42,7 +42,7 @@ class InferenceResult(metaclass=abc.ABCMeta):
             - dataset_size: The size of a single generated data set.
             - num_datasets: How many data sets to generate.
         """
-        return self.generate_extended(rng, num_datasets, dataset_size, single_dataframe=False)
+        return self.generate_extended(rng, dataset_size, num_datasets, single_dataframe=False)
 
     @abc.abstractmethod
     def generate_extended(self,

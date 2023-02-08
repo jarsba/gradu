@@ -34,3 +34,8 @@ COLUMNS_FOR_DATASET = {
     "binary4d": ['A', 'B', 'C', 'D'],
     "binary3d": ['A', 'B', 'C']
 }
+
+TRUE_COEFFICIENTS_FOR_DATASETS = {
+    "binary3d": [1.0, 0.0],
+    "binary4d": [1.0, 0.0, 2.0]
+}
