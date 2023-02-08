@@ -41,6 +41,7 @@ class MarkovNetwork(ABC):
         self.domain = domain
         self.queries = queries
         self.d = len(self.domain.keys())
+        print(f"Domain d: {self.d}")
         variables_in_queries = set.union(*[set(feature_set) for feature_set in self.queries.feature_sets])
         self.variables_not_in_queries = set(domain.keys()).difference(variables_in_queries)
 
@@ -51,11 +52,15 @@ class MarkovNetwork(ABC):
         self.elimination_order = elimination_order
         self.junction_tree = JunctionTree.from_variable_elimination(queries.feature_sets, self.elimination_order)
         self.junction_tree.remove_redundant_nodes()
+        print(f"Nodes after removing: {self.junction_tree.nodes}")
+        print(f"Edges after removing: {self.junction_tree.edges}")
 
         self.flat_queries = self.queries.flatten()
         self.variable_associations = self.flat_queries.get_variable_associations(use_features=True)
         self.suff_stat_d = len(self.flat_queries.queries)
+        print(f"Suff stat d: {self.suff_stat_d}")
         self.lambda_d = self.suff_stat_d
+        print(f"Lambda d: {self.lambda_d}")
 
     @abstractmethod
     def lambda0(self, lambdas: np.ndarray) -> np.ndarray:

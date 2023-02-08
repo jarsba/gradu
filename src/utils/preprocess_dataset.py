@@ -96,6 +96,8 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
     data['relationship'] = pd.Categorical(data['relationship'])
     data['race'] = pd.Categorical(data['race'])
     data['sex'] = pd.Categorical(data['sex'])
+    data['capital-gain'] = data['capital-gain'].astype(int)
+    data['capital-loss'] = data['capital-loss'].astype(int)
     data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
     data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
     hours_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
@@ -113,29 +115,35 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
     return data
 
 
-def get_adult_train_raw() -> pd.DataFrame:
+def get_adult_train_raw(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Cleaned Adult train dataset without any other preprocessing.
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult(data)
 
     return cleaned_adult
 
 
-def get_adult_test_raw() -> pd.DataFrame:
+def get_adult_test_raw(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Cleaned Adult test dataset without any other preprocessing.
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult(data)
 
     return cleaned_adult
 
 
-def get_adult_train_no_discretization() -> pd.DataFrame:
+def get_adult_train_no_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subset of Adult train dataset that has columns discretized to buckets of 10 and that has following columns:
         - 'age'
@@ -149,7 +157,10 @@ def get_adult_train_no_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult(data)
 
     columns_to_drop = list(set(ADULT_COLUMNS) - set(ADULT_COLUMNS_DISCRETIZATION))
@@ -159,7 +170,7 @@ def get_adult_train_no_discretization() -> pd.DataFrame:
     return cleaned_adult
 
 
-def get_adult_test_no_discretization() -> pd.DataFrame:
+def get_adult_test_no_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subset of Adult test dataset that has columns discretized to buckets of 10 and that has following columns:
         - 'age'
@@ -173,7 +184,10 @@ def get_adult_test_no_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult(data)
 
     columns_to_drop = list(set(ADULT_COLUMNS) - set(ADULT_COLUMNS_DISCRETIZATION))
@@ -183,7 +197,7 @@ def get_adult_test_no_discretization() -> pd.DataFrame:
     return cleaned_adult
 
 
-def get_adult_train_low_discretization() -> pd.DataFrame:
+def get_adult_train_low_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subset of Adult train dataset that has following columns:
         - 'age'
@@ -197,14 +211,17 @@ def get_adult_train_low_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
 
 
-def get_adult_test_low_discretization() -> pd.DataFrame:
+def get_adult_test_low_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subset of Adult test dataset that has columns discretized to buckets of 10 and that has following columns:
         - 'age'
@@ -218,14 +235,17 @@ def get_adult_test_low_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
 
 
-def get_adult_train_high_discretization() -> pd.DataFrame:
+def get_adult_train_high_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subtset of Adult train dataset that has columns discretized to buckets of 5 and that has following columns:
         - 'age'
@@ -239,14 +259,17 @@ def get_adult_train_high_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=5,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
 
 
-def get_adult_test_high_discretization() -> pd.DataFrame:
+def get_adult_test_high_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Subtset of Adult test dataset that has columns discretized to buckets of 5 and that has following columns:
         - 'age'
@@ -260,14 +283,17 @@ def get_adult_test_high_discretization() -> pd.DataFrame:
         - 'compensation'
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=5,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
 
 
-def get_adult_train() -> pd.DataFrame:
+def get_adult_train(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Discretized Adult train dataset that has following columns removed:
         - `capital-gains`
@@ -276,13 +302,16 @@ def get_adult_train() -> pd.DataFrame:
         - `had-capital-losses`
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=10)
 
     return cleaned_adult
 
 
-def get_adult_test() -> pd.DataFrame:
+def get_adult_test(dataset_folder: str = None) -> pd.DataFrame:
     """
         Returns: Discretized Adult test dataset that has following columns removed:
             - `capital-gains`
@@ -291,17 +320,24 @@ def get_adult_test() -> pd.DataFrame:
             - `had-capital-losses`
     """
 
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_test_data.csv"))
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, bucket_size=10)
 
     return cleaned_adult
 
 
-def get_binary3d_train() -> pd.DataFrame:
+def get_binary3d_train(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Binary 3d dataset with 2 feature columns ('A', 'B') and one prediction column 'C' for logistic regression
     """
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "binary3d.csv"))
+
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "binary3d.csv"))
     data['A'] = pd.Categorical(data['A'])
     data['B'] = pd.Categorical(data['B'])
     data['C'] = pd.Categorical(data['C'])
@@ -309,11 +345,15 @@ def get_binary3d_train() -> pd.DataFrame:
     return data
 
 
-def get_binary3d_test() -> pd.DataFrame:
+def get_binary3d_test(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Binary 3d dataset with 2 feature columns ('A', 'B') and one prediction column 'C' for logistic regression
     """
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "binary3d_test.csv"))
+
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "binary3d_test.csv"))
     data['A'] = pd.Categorical(data['A'])
     data['B'] = pd.Categorical(data['B'])
     data['C'] = pd.Categorical(data['C'])
@@ -321,11 +361,15 @@ def get_binary3d_test() -> pd.DataFrame:
     return data
 
 
-def get_binary4d_train() -> pd.DataFrame:
+def get_binary4d_train(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Binary 4d dataset with 3 feature columns ('A', 'B', 'C') and one prediction column 'D' for logistic regression
     """
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "binary4d.csv"))
+
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "binary4d.csv"))
     data['A'] = pd.Categorical(data['A'])
     data['B'] = pd.Categorical(data['B'])
     data['C'] = pd.Categorical(data['C'])
@@ -334,11 +378,15 @@ def get_binary4d_train() -> pd.DataFrame:
     return data
 
 
-def get_binary4d_test() -> pd.DataFrame:
+def get_binary4d_test(dataset_folder: str = None) -> pd.DataFrame:
     """
     Returns: Binary 4d dataset with 3 feature columns ('A', 'B', 'C') and one prediction column 'D' for logistic regression
     """
-    data = pd.read_csv(os.path.join(DATASETS_FOLDER, "binary4d_test.csv"))
+
+    if dataset_folder is None:
+        dataset_folder = DATASETS_FOLDER
+
+    data = pd.read_csv(os.path.join(dataset_folder, "binary4d_test.csv"))
     data['A'] = pd.Categorical(data['A'])
     data['B'] = pd.Categorical(data['B'])
     data['C'] = pd.Categorical(data['C'])

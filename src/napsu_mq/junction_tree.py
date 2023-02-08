@@ -145,6 +145,9 @@ class JunctionTree:
             factors = JunctionTree.eliminate_var(factors, variable, nodes, edges)
 
         jt = JunctionTree(nodes, edges, feature_sets)
+        print(f"Nodes after elimination: {nodes}")
+        print(f"Edges after elimination: {edges}")
+
         return jt
 
     @staticmethod
@@ -201,6 +204,7 @@ class JunctionTree:
                 self.init_node_orders()
                 return
 
+
     def find_redundant_node(self) -> Tuple['TreeNode', 'TreeNode', List['TreeNode']]:
         for node in self.nodes:
             neighbours = self.get_neighbours(node)
@@ -251,7 +255,11 @@ class JunctionTree:
             int: The maximum width of the whole tree.
         """
         root_node = self.root_node
+        print(root_node.children)
         tree_height = self.calculate_tree_height(root_node, 0)
+        print(tree_height)
+        if tree_height == 0:
+            return 0
         tree_widths = [0] * tree_height
         tree_widths[0] = len(root_node.children)
 

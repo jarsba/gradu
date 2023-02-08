@@ -1,7 +1,7 @@
 # Originally from https://github.com/ryan112358/private-pgm/blob/master/mechanisms/mst.py
 # Modified by Authors under the Apache 2.0 license
 import itertools
-from typing import Iterable, List, Tuple, Any, Callable, Mapping
+from typing import Iterable, List, Tuple, Any, Callable, Mapping, Union
 
 import networkx as nx
 import numpy as np
@@ -22,12 +22,25 @@ and does not rely on public provisional data for measurement selection.
 """
 
 
-def MST_selection(data: Dataset, epsilon: float, delta: float, cliques_to_include: Iterable[Tuple[str, str]] = []):
+def check_kwargs(kwargs, name, default_value):
+    if name in kwargs:
+        return kwargs[name]
+    else:
+        return default_value
+
+
+def MST_selection(data: Dataset, epsilon: float, delta: float, cliques_to_include: Iterable[Tuple[str, str]] = [],
+                  **kwargs):
+    return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
+
     rho = accounting.eps_delta_budget_to_rho_budget(epsilon, delta)
     sigma = np.sqrt(3 / (2 * rho))
     cliques = [(col,) for col in data.domain]
     log1 = measure(data, cliques, sigma)
     data, log1, undo_compress_fn = compress_domain(data, log1)
+    if return_MST_weights is True:
+        cliques, weights = select(data, rho / 3.0, log1, cliques=cliques_to_include, **kwargs)
+        return cliques, weights
     cliques = select(data, rho / 3.0, log1, cliques=cliques_to_include)
     return cliques
 
@@ -89,7 +102,10 @@ def exponential_mechanism(q: Any, eps: float, sensitivity: float, prng=np.random
     return prng.choice(q.size, p=probas)
 
 
-def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Iterable[Tuple[str, str]] = []) -> List:
+def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Iterable[Tuple[str, str]] = [],
+           **kwargs) -> Union[Tuple[List, Mapping], List]:
+    return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
+
     engine = FactoredInference(data.domain, iters=1000)
     est = engine.estimate(measurement_log)
 
@@ -132,6 +148,9 @@ def select(data: Dataset, rho: float, measurement_log: List[Tuple], cliques: Ite
         print(f"T edges: {T.edges}")
 
     print(f"T edges: {T.edges}")
+
+    if return_MST_weights is True:
+        return list(T.edges), weights
 
     return list(T.edges)
 

@@ -54,13 +54,15 @@ class NapsuMQModel(InferenceModel):
         super().__init__()
 
     def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGState, epsilon: float, delta: float,
-            **kwargs) -> Union['NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT]]:
+            **kwargs) -> Union['NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT], Mapping]:
         column_feature_set = check_kwargs(kwargs, 'column_feature_set', [])
         MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
         use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
         return_inference_data = check_kwargs(kwargs, 'return_inference_data', False)
         missing_query = check_kwargs(kwargs, "missing_query", None)
         enable_profiling = check_kwargs(kwargs, "enable_profiling", False)
+        dry_run = check_kwargs(kwargs, "dry_run", False)
+        return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -94,8 +96,16 @@ class NapsuMQModel(InferenceModel):
         pid = timer.start(f"Query selection", **timer_meta)
 
         domain = Domain(domain_key_list, domain_value_count_list)
-        query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
-                                   cliques_to_include=column_feature_set)
+
+        if return_MST_weights is True:
+            query_sets, weights = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
+                                                cliques_to_include=column_feature_set,
+                                                return_MST_weights=return_MST_weights)
+            print(weights)
+
+        else:
+            query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
+                                       cliques_to_include=column_feature_set)
 
         timer.stop(pid)
 
@@ -118,6 +128,7 @@ class NapsuMQModel(InferenceModel):
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)
 
         junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
+        print(f"Junction tree width: {junction_tree_width}")
         timer_meta['junction_tree_width'] = junction_tree_width
 
         suff_stat = np.sum(queries.flatten()(dataframe.int_array), axis=0)
@@ -132,6 +143,20 @@ class NapsuMQModel(InferenceModel):
 
         dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
         dp_suff_stat = suff_stat + dp_noise
+
+        if dry_run is True:
+            meta = {
+                'original_queries': column_feature_set,
+                'canonical_query_number': query_number,
+                'tree_width': junction_tree_width,
+                'sigma_DP': sigma_DP,
+                'suff_stat_dim': suff_stat_dim,
+            }
+
+            if return_MST_weights is True:
+                meta['MST_weights'] = weights
+
+            return meta
 
         if use_laplace_approximation is True:
 
