@@ -42,27 +42,28 @@ capital-gains -> binary 0/1
 capital-losses -> binary 0/1
 """
 
-epsilons = [0.1, 0.3, 1.0, 3.0, 8.0]
+datasets = snakemake.input
 
-adult_train_discretized_low = get_adult_train_low_discretization()
-adult_train_discretized_high = get_adult_train_high_discretization()
+target_files = snakemake.output
+
+epsilons = snakemake.config["epsilons"]
 
 storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
 
-dataset_dict = {
-    'discretized_low': adult_train_discretized_low,
-    'discretized_high': adult_train_discretized_high
-}
+input_output_map = list(zip(datasets, target_files))
 
-for epsilon in epsilons:
+for dataset, target_file in input_output_map:
 
-    epsilon_str = epsilon_float_to_str(epsilon)
-    n, d = adult_train_discretized_low.shape
-    query = [('age', 'sex')]
-    delta = (n ** (-2))
+    dataframe = pd.read_csv(dataset)
+    discretization_level = "low" if "low" in dataset else "high"
 
-    for name, dataset in dataset_dict.items():
+    for epsilon in epsilons:
+
+        epsilon_str = epsilon_float_to_str(epsilon)
+        n, d = dataframe.shape
+        query = []
+        delta = (n ** (-2))
 
         experiment_id = get_key()
         experiment_id_ctx.set(experiment_id)
@@ -75,13 +76,13 @@ for epsilon in epsilons:
             "delta": delta,
             "MCMC_algo": "NUTS",
             "laplace_approximation": True,
-            "discretization": name
+            "discretization": discretization_level
         }
 
         pid = timer.start(f"Main run", **timer_meta)
 
         print(
-            f"PARAMS: \n\tdataset name ADULT\n\tdiscretization {name}\n\tMCMC algo: NUTS\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+            f"PARAMS: \n\tdataset name ADULT\n\tdiscretization {discretization_level}\n\tMCMC algo: NUTS\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
 
         print("Initializing NapsuMQModel")
         rng = jax.random.PRNGKey(6473286482)
@@ -93,7 +94,7 @@ for epsilon in epsilons:
 
         result, inf_data = model.fit(
             data=dataset,
-            dataset_name="adult",
+            dataset_name=f"adult_{discretization_level}_discretization",
             rng=rng,
             epsilon=epsilon,
             delta=delta,
@@ -105,14 +106,14 @@ for epsilon in epsilons:
 
         timer.stop(pid)
 
-        dataset_discretization_str = f"adult_{name}"
+        dataset_discretization_str = f"adult_{discretization_level}"
 
         print("Writing model to file")
         model_file_path = os.path.join(MODELS_FOLDER,
-                                       f"napsu_discretization_test_{dataset_discretization_str}_{epsilon_str}e.dill")
+                                       f"napsu_discretization_{dataset_discretization_str}_{epsilon_str}e.dill")
         result.store(model_file_path)
 
-        inf_data.to_netcdf(f"logs/inf_data_discretization_test_{dataset_discretization_str}_{epsilon_str}e.nc")
+        inf_data.to_netcdf(f"logs/inf_data_discretization_{dataset_discretization_str}_{epsilon_str}e.nc")
 
         # Save storage and timer results every iteration
         storage.save()

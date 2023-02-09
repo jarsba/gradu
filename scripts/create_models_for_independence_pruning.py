@@ -13,7 +13,7 @@ import pandas as pd
 
 from src.utils.path_utils import MODELS_FOLDER, DATASETS_FOLDER
 from src.utils.timer import Timer
-from src.utils.preprocess_dataset import get_adult_train, clean_adult, clean_adult_with_discretization
+from src.utils.preprocess_dataset import convert_to_categorical
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
@@ -31,12 +31,11 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 """
 
-#adult_dataset = pd.read_csv(snakemake.input)
-adult_dataset = pd.read_csv(os.path.join(DATASETS_FOLDER, "cleaned_adult_train_data.csv"))
+adult_dataset = pd.read_csv(snakemake.input)
 
-epsilons = [0.1]
+epsilons = snakemake.config["epsilons"]
 
-six_adult_columns = ["education-num", "relationship", "age", "sex", "hours-per-week", "compensation"]
+six_adult_columns = list(adult_dataset.columns)
 
 # Make set of sets
 marginal_pairs = list(itertools.combinations(six_adult_columns, 2))
@@ -47,8 +46,12 @@ immutable_set_remove = lambda element, list_obj: list(filter(lambda x: set(x) !=
 
 # List of lists with tuples of all 2-way marginals
 test_queries = [immutable_set_remove(pair, full_set_of_marginals) for pair in marginal_pairs]
+# Add also full and no queries
+test_queries.append(full_set_of_marginals)
+test_queries.append([])
 
-adult_train_df = clean_adult_with_discretization(adult_dataset, bucket_size=10)
+
+adult_train_df = convert_to_categorical(adult_dataset)
 
 storage = ExperimentStorage(file_path="napsu_independence_pruning_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_independence_pruning_timer.csv", mode="replace")
@@ -59,14 +62,24 @@ for epsilon in epsilons:
 
     for query_list in test_queries:
 
-        dataset_name = "adult"
+        dataset_name = "adult_small"
         n, d = adult_train_df.shape
         query_str = join_query_list(query_list)
-        missing_query = list(set(full_set_of_marginals) - set(test_queries[0]))
-        query_removed = ["+".join(map(str, pair)) for pair in missing_query][0]
 
-        if len(missing_query) != 1:
-            print(f"Missing too many queries! Queries missing: {missing_query}")
+        if len(query_list) == 0:
+            missing_query = "all"
+            query_removed = full_set_of_marginals
+
+        elif len(query_list) == len(full_set_of_marginals):
+            missing_query = "none"
+            query_removed = []
+        else:
+            missing_query = list(set(full_set_of_marginals) - set(test_queries[0]))
+            query_removed = ["+".join(map(str, pair)) for pair in missing_query][0]
+
+            if len(missing_query) != 1:
+                print(f"Missing too many queries! Queries missing: {missing_query}")
+                sys.exit(1)
 
         delta = (n ** (-2))
 

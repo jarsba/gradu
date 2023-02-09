@@ -1,9 +1,37 @@
 workdir: "/home/jarlehti/projects/gradu"
 
+
 datasets:
   "binary4d": "data/datasets/binary4d.csv"
   "binary3d": "data/datasets/binary3d.csv"
-  #"adult": "data/datasets/cleaned_adult_train_data.csv"
+  "adult": "data/datasets/cleaned_adult_train_data.csv"
+  "adult_small": "data/datasets/adult_small.csv"
+  "adult_large": "data/datasets/adult_large.csv"
+  "adult_no_discretization": "data/datasets/adult_no_discretization.csv"
+  "adult_low_discretization": "data/datasets/adult_low_discretization.csv"
+  "adult_high_discretization": "data/datasets/adult_high_discretization.csv",
+  "adult_small_test": "data/datasets/adult_small_test.csv"
+  "adult_large_test": "data/datasets/adult_large_test.csv"
+  "adult_no_discretization_test": "data/datasets/adult_no_discretization_test.csv"
+  "adult_low_discretization_test": "data/datasets/adult_low_discretization_test.csv"
+  "adult_high_discretization_test": "data/datasets/adult_high_discretization_test.csv"
+
+original_datasets:
+  "adult_small": "data/datasets/adult_small.csv"
+  "adult_large": "data/datasets/adult_large.csv"
+  "binary4d": "data/datasets/binary4d.csv"
+  "binary3d": "data/datasets/binary3d.csv"
+
+discretization_datasets:
+  "adult_low_discretization": "data/datasets/adult_low_discretization.csv"
+  "adult_high_discretization": "data/datasets/adult_high_discretization.csv"
+
+independence_pruning_datasets:
+  "adult_small": "data/datasets/adult_small.csv"
+
+
+
+
 epsilons:
   - "01"
   - "03"
@@ -12,22 +40,53 @@ epsilons:
   - "80"
 MCMC_algorithms:
   - "NUTS"
-n_synt_datasets: 10
+n_synt_datasets: 100
 queries:
   "binary4d":
     - []
-    - [['A', 'B']]
-    - [['A', 'C']]
     - [['A', 'D']]
-    - [['B', 'C']]
+    - [['B', 'D']]
     - [['C', 'D']]
-    - [['A', 'B'], ['A', 'C']]
-    - [['B', 'C'], ['C', 'D']]
-    - [['A', 'B'], ['B', 'C'], ['C', 'D']]
+    - [['A', 'D'], ['B', 'D']]
+    - [['B', 'D'], ['C', 'D']]
+    - [['A', 'D' ], ['C','D']]
+    - [['A', 'D'], ['B', 'D'], ['C', 'D']]
+    - [['A', 'B']]
 
   "binary3d":
     - []
-    - [['A', 'B']]
     - [['A', 'C']]
     - [['B', 'C']]
-    - [['A', 'B'], ['B', 'C'], ['A', 'C']]
+    - [['A', 'C'], ['B', 'C']]
+    - [['A', 'B']]
+
+  "adult_small":
+    - []
+    - [['age', 'compensation']]
+    - [['age', 'marital-status']]
+    - [['age', 'hours-per-week']]
+    - [['education-num', 'compensation']]
+    - [['hours-per-week', 'compensation']]
+    - [['sex', 'hours-per-week']]
+    - [['age', 'sex']]
+
+  "adult_large":
+    - []
+    - [['age', 'compensation']]
+    - [['age', 'marital-status']]
+    - [['age', 'hours-per-week']]
+    - [['education-num', 'compensation']]
+    - [['hours-per-week', 'compensation']]
+    - [['education-num', 'workclass']]
+    - [['sex', 'hours-per-week']]
+    - [['hours-per-week', 'workclass']]
+    - [['age', 'sex']]
+
+  "adult_no_discretization":
+    - []
+
+  "adult_low_discretization":
+    - []
+
+  "adult_high_discretization":
+    - []

@@ -18,7 +18,7 @@ dataset_paths = snakemake.input
 results = pd.DataFrame(
     columns=["experiment_id", "dataset_name", "dataset_index", "query", "epsilon", "MCMC_algorithm", "accuracy",
              "balanced_accuracy", "F1",
-             "coefficients", "point_estimates", "variance_estimates", "confidence_intervals"])
+             "coefficients", "point_estimates", "variance_estimates"])
 
 for path in dataset_paths:
     synth_file = open(path, "rb")
@@ -50,27 +50,25 @@ for path in dataset_paths:
         X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
 
         accuracy_score, balanced_accuracy_score, f1_score, \
-        coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np,
-                                                                                                                X_train,
-                                                                                                                y_train,
-                                                                                                                X_test,
-                                                                                                                y_test)
+        coefficients, point_estimates, variance_estimates = run_logistic_regression_on_2d(df_np,
+                                                                                          X_train,
+                                                                                          y_train,
+                                                                                          X_test,
+                                                                                          y_test)
 
         results.loc[len(results)] = [experiment_id, dataset_name, i, query, epsilon, MCMC_algorithm, accuracy_score,
                                      balanced_accuracy_score, f1_score, coefficients, point_estimates,
-                                     variance_estimates, confidence_intervals]
+                                     variance_estimates]
 
     dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
     X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
     accuracy_score, balanced_accuracy_score, f1_score, \
-        coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_3d(
-            dataset_tensor, X_train, y_train, X_test, y_test)
-
+    coefficients, point_estimates, variance_estimates = run_logistic_regression_on_3d(
+        dataset_tensor, X_train, y_train, X_test, y_test)
 
 
     results.loc[len(results)] = [experiment_id, dataset_name, np.nan, query, epsilon, MCMC_algorithm, accuracy_score,
-                                 balanced_accuracy_score, f1_score, coefficients, point_estimates, variance_estimates,
-                                 confidence_intervals]
+                                 balanced_accuracy_score, f1_score, coefficients, point_estimates, variance_estimates]
 
 results.to_csv(snakemake.output[0], index=False)

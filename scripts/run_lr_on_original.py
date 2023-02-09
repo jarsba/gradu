@@ -36,11 +36,14 @@ for path in dataset_paths:
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
     accuracy_score, balanced_accuracy_score, f1_score, \
-    coefficients, point_estimates, variance_estimates, confidence_intervals = run_logistic_regression_on_2d(df_np,
-                                                                                                            X_train,
-                                                                                                            y_train,
-                                                                                                            X_test,
-                                                                                                            y_test)
+    coefficients, point_estimates, variance_estimates, confidence_intervals = \
+        run_logistic_regression_on_2d(df_np,
+                                      X_train,
+                                      y_train,
+                                      X_test,
+                                      y_test,
+                                      return_confidence_intervals=True
+                                      )
 
     results.loc[len(results)] = [dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coefficients,
                                  point_estimates,
