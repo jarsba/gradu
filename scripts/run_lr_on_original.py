@@ -7,6 +7,7 @@ import pandas as pd
 from base_lr import run_logistic_regression_on_2d
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from src.utils.path_utils import RESULTS_FOLDER
+from src.utils.data_utils import transform_for_classification
 from src.utils.preprocess_dataset import clean_dataset, convert_to_int_array
 
 dataset_paths = snakemake.input
@@ -22,18 +23,23 @@ for path in dataset_paths:
 
     dataset_name = inverted_dataset_map[path]
 
-    df = clean_dataset(df, dataset_name)
+    df_transformed = transform_for_classification(dataset_name, df)
 
-    df_np = convert_to_int_array(df)
+    df_np = df_transformed.to_numpy()
 
-    target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
-    feature_columns = [col for col in df.columns if col != target_column]
+    target_column: str = TARGET_COLUMNS_FOR_DATASET[dataset_name]
+    feature_columns = [col for col in df_transformed.columns if col != target_column]
 
-    X_train, y_train = df.drop(columns=[target_column]), df[target_column]
+    X_train, y_train = df_transformed.drop(columns=[target_column]), df_transformed[target_column]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
     test_df = pd.read_csv(test_df_path)
-    X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
+
+    test_df_transformed = transform_for_classification(dataset_name, test_df)
+
+    target_column_index = df_transformed.columns.get_loc(target_column)
+
+    X_test, y_test = test_df_transformed.drop(columns=[target_column]), test_df_transformed[target_column]
 
     accuracy_score, balanced_accuracy_score, f1_score, \
     coefficients, point_estimates, variance_estimates, confidence_intervals = \
@@ -42,8 +48,8 @@ for path in dataset_paths:
                                       y_train,
                                       X_test,
                                       y_test,
-                                      return_confidence_intervals=True
-                                      )
+                                      return_confidence_intervals=True,
+                                      col_to_predict=target_column_index)
 
     results.loc[len(results)] = [dataset_name, accuracy_score, balanced_accuracy_score, f1_score, coefficients,
                                  point_estimates,

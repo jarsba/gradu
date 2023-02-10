@@ -16,6 +16,7 @@ from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
 from src.utils.string_utils import epsilon_str_to_float
+from src.utils.data_utils import transform_for_modeling
 
 dataset_map = snakemake.config['original_datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
@@ -38,13 +39,15 @@ for dataset in datasets:
 
         epsilon = epsilon_str_to_float(epsilon_str)
 
-
         dataset_name = inverted_dataset_map[dataset]
 
         queries_for_dataset = queries[dataset_name]
 
         for query_list in queries_for_dataset:
             dataframe = pd.read_csv(dataset)
+
+            dataframe = transform_for_modeling(dataset_name, dataframe)
+
             n, d = dataframe.shape
             query_str = join_query_list(query_list)
             delta = (n ** (-2))

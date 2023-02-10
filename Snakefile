@@ -119,8 +119,6 @@ rule create_models_for_independence_pruning:
         "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
     log:
         "logs/napsu_independence_pruning_{query}_missing_{epsilon}e.log",
-        "napsu_independence_pruning_storage.csv",
-        "napsu_independence_pruning_timer.csv",
         "logs/inf_data_independence_pruning_{query}_missing_{epsilon}e.nc"
     threads: 4
     resources:
@@ -159,9 +157,7 @@ rule create_models_for_discretization:
         "models/napsu_discretization_{discretization_level}_{epsilon}e.dill"
     log:
         "logs/inf_data_discretization_{discretization_level}_{epsilon}e.nc",
-        "logs/napsu_discretization_{discretization_level}_{epsilon}e.log"
-        "napsu_discretization_test_storage.csv",
-        "napsu_discretization_test_timer.csv",
+        "logs/napsu_discretization_{discretization_level}_{epsilon}e.log",
     threads: 4
     resources:
         runtime="2160",
@@ -270,22 +266,22 @@ rule run_logistic_regression_on_independence_pruning_datasets:
         "scripts/run_lr_on_synth.py"
 
 
-rule run_ci_coverage_on_original_datasets:
+rule run_ci_coverage_on_original_models:
     input:
-        expand("data/synt_datasets/synthetic_dataset_{experiment_product}.pickle",experiment_product=experiment_products)
+        expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products),
     output:
         "results/ci_coverage_original_data_results.csv"
     log:
-        expand("logs/ci_coverage_original_dataset_{experiment_product}.log",experiment_product=experiment_products)
+        expand("logs/ci_coverage_original_models_{experiment_product}.log",experiment_product=experiment_products)
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_ci_coverage_on_original_data.py"
+        "scripts/run_ci_coverage_on_original_models.py"
 
 
-rule run_ci_coverage_on_discretized_datasets:
+rule run_ci_coverage_on_discretized_models:
     input:
-        "data/synt_datasets/synthetic_dataset_discretization_{discretization_level}_{epsilon}e.pickle"
+        "models/napsu_discretization_{discretization_level}_{epsilon}e.dill"
     output:
         "results/ci_coverage_discretized_data_results.csv"
     log:
@@ -293,11 +289,11 @@ rule run_ci_coverage_on_discretized_datasets:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_ci_coverage_on_discretized_data.py"
+        "scripts/run_ci_coverage_on_discretized_models.py"
 
-rule run_ci_coverage_on_independence_pruning_datasets:
+rule run_ci_coverage_on_independence_pruning_models:
     input:
-        "data/synt_datasets/synthetic_dataset_independence_pruning_{query}_missing_{epsilon}e.pickle"
+        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
     output:
         "results/ci_coverage_independence_pruning_results.csv"
     log:
@@ -305,13 +301,13 @@ rule run_ci_coverage_on_independence_pruning_datasets:
     conda:
         "envs/analysis.yaml"
     script:
-        "scripts/run_ci_coverage_on_independence_pruning_data.py"
+        "scripts/run_ci_coverage_on_independence_pruning_models.py"
 
 
 rule compare_original_lr_results:
     input:
         "results/synthetic_logistic_regression_results.csv",
-        "results/original_logistic_regression_results.csv",
+        "results/original_logistic_regression_results.csv"
     output:
         report(expand("plots/lr_comparison_{dataset}.svg",dataset=original_datasets))
     log:

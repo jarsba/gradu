@@ -22,7 +22,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-from d3p.random import PRNGState
+from jax.random import PRNGKey
 from mbi import Domain, Dataset
 from arviz.data.inference_data import InferenceDataT
 
@@ -53,7 +53,7 @@ class NapsuMQModel(InferenceModel):
     def __init__(self) -> None:
         super().__init__()
 
-    def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGState, epsilon: float, delta: float,
+    def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGKey, epsilon: float, delta: float,
             **kwargs) -> Union['NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT], Mapping]:
         column_feature_set = check_kwargs(kwargs, 'column_feature_set', [])
         MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
@@ -63,6 +63,7 @@ class NapsuMQModel(InferenceModel):
         enable_profiling = check_kwargs(kwargs, "enable_profiling", False)
         dry_run = check_kwargs(kwargs, "dry_run", False)
         return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
+        discretization = check_kwargs(kwargs, "discretization", None)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -83,7 +84,8 @@ class NapsuMQModel(InferenceModel):
             "delta": delta,
             "MCMC_algo": MCMC_algo,
             "laplace_approximation": use_laplace_approximation,
-            "missing_query": missing_query
+            "missing_query": missing_query,
+            "discretization": discretization
         }
 
         dataframe = DataFrameData(data)

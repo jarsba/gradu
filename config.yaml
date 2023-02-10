@@ -1,5 +1,4 @@
-workdir: "/home/jarlehti/projects/gradu"
-
+workdir: "/home/locals/jarlehti/projects/gradu"
 
 datasets:
   "binary4d": "data/datasets/binary4d.csv"
@@ -9,7 +8,7 @@ datasets:
   "adult_large": "data/datasets/adult_large.csv"
   "adult_no_discretization": "data/datasets/adult_no_discretization.csv"
   "adult_low_discretization": "data/datasets/adult_low_discretization.csv"
-  "adult_high_discretization": "data/datasets/adult_high_discretization.csv",
+  "adult_high_discretization": "data/datasets/adult_high_discretization.csv"
   "adult_small_test": "data/datasets/adult_small_test.csv"
   "adult_large_test": "data/datasets/adult_large_test.csv"
   "adult_no_discretization_test": "data/datasets/adult_no_discretization_test.csv"
@@ -28,9 +27,6 @@ discretization_datasets:
 
 independence_pruning_datasets:
   "adult_small": "data/datasets/adult_small.csv"
-
-
-
 
 epsilons:
   - "01"

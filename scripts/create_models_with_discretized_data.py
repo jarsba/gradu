@@ -19,6 +19,7 @@ from src.utils.keygen import get_key
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.string_utils import epsilon_float_to_str
 from src.utils.timer import Timer
+from src.utils.data_utils import transform_for_modeling
 
 """
 
@@ -42,8 +43,10 @@ capital-gains -> binary 0/1
 capital-losses -> binary 0/1
 """
 
-datasets = snakemake.input
+dataset_map = snakemake.config['discretization_datasets']
+inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
+datasets = snakemake.input
 target_files = snakemake.output
 
 epsilons = snakemake.config["epsilons"]
@@ -55,7 +58,12 @@ input_output_map = list(zip(datasets, target_files))
 
 for dataset, target_file in input_output_map:
 
+    dataset_name = inverted_dataset_map[dataset]
+
     dataframe = pd.read_csv(dataset)
+
+    dataframe = transform_for_modeling(dataset_name, dataframe)
+
     discretization_level = "low" if "low" in dataset else "high"
 
     for epsilon in epsilons:
@@ -102,6 +110,7 @@ for dataset, target_file in input_output_map:
             MCMC_algo="NUTS",
             use_laplace_approximation=True,
             return_inference_data=True,
+            discretization=discretization_level
         )
 
         timer.stop(pid)

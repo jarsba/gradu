@@ -11,6 +11,7 @@ import pandas as pd
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
 from src.utils.path_utils import RESULTS_FOLDER
+from src.utils.data_utils import transform_for_classification
 from base_lr import run_logistic_regression_on_3d, run_logistic_regression_on_2d
 
 dataset_paths = snakemake.input
@@ -42,19 +43,27 @@ for path in dataset_paths:
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
     test_df = pd.read_csv(test_df_path)
-    X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
+
+    test_df_transformed = transform_for_classification(dataset_name, test_df)
+
+    target_column_index = test_df_transformed.columns.get_loc(target_column)
+
+    X_test, y_test = test_df_transformed.drop(columns=[target_column]), test_df_transformed[target_column]
 
     for i in range(datasets):
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
-        df_np = train_df.to_numpy()
-        X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
+        train_df_transformed = transform_for_classification(dataset_name, train_df)
+
+        df_np = train_df_transformed.to_numpy()
+        X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
 
         accuracy_score, balanced_accuracy_score, f1_score, \
         coefficients, point_estimates, variance_estimates = run_logistic_regression_on_2d(df_np,
                                                                                           X_train,
                                                                                           y_train,
                                                                                           X_test,
-                                                                                          y_test)
+                                                                                          y_test,
+                                                                                          col_to_predict=target_column_index)
 
         results.loc[len(results)] = [experiment_id, dataset_name, i, query, epsilon, MCMC_algorithm, accuracy_score,
                                      balanced_accuracy_score, f1_score, coefficients, point_estimates,
@@ -62,10 +71,12 @@ for path in dataset_paths:
 
     dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
-    X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
+    train_df_transformed = transform_for_classification(dataset_name, train_df)
+
+    X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
     accuracy_score, balanced_accuracy_score, f1_score, \
     coefficients, point_estimates, variance_estimates = run_logistic_regression_on_3d(
-        dataset_tensor, X_train, y_train, X_test, y_test)
+        dataset_tensor, X_train, y_train, X_test, y_test, col_to_predict=target_column_index)
 
 
     results.loc[len(results)] = [experiment_id, dataset_name, np.nan, query, epsilon, MCMC_algorithm, accuracy_score,

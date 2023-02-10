@@ -8,6 +8,8 @@ import pandas as pd
 import numpy as np
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from base_clf import run_classification
+from src.utils.data_utils import transform_for_classification
+
 
 dataset_paths = snakemake.input
 dataset_map = snakemake.config['datasets']
@@ -30,13 +32,16 @@ for path in dataset_paths:
     train_df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]
+    train_df_transformed = transform_for_classification(dataset_name, train_df)
 
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
     test_df = pd.read_csv(test_df_path)
 
-    scores = run_classification(train_df, test_df, target_column)
+    test_df_transformed = transform_for_classification(dataset_name, test_df)
+
+    scores = run_classification(train_df_transformed, test_df_transformed, target_column)
 
     for model_score in scores:
         model_name, accuracy, balanced_accuracy, f1 = model_score

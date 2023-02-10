@@ -1,11 +1,14 @@
+from typing import List
+
 import numpy as np
 import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 
 def logistic_regression(
-        datasets, col_to_predict=None, add_constant=True, return_intervals=False, return_results=False, conf_levels=[],
-        weight=1
+        datasets: np.ndarray, col_to_predict: int = None, add_constant: bool = True, return_intervals: bool = False,
+        return_results: bool = False, conf_levels: List = [],
+        weight: float = 1
 ):
     """Logistic regression for multiple synthetic datasets.
     Args:
@@ -66,8 +69,9 @@ def logistic_regression(
 
 
 def logistic_regression_regularised(
-        datasets, col_to_predict=None, add_constant=True, return_intervals=False, conf_levels=[], weight=1,
-        regularisation=0.00001, n_bootstrap_samples=50
+        datasets: np.ndarray, col_to_predict: int = None, add_constant: bool = True, return_intervals: bool = False,
+        conf_levels: List = [], weight: float = 1,
+        regularisation: float = 0.00001, n_bootstrap_samples: int = 50
 ):
     """Logistic regression for multiple synthetic datasets.
     Args:
@@ -127,8 +131,9 @@ def logistic_regression_regularised(
 
 
 def logistic_regression_on_2d(
-        dataset, col_to_predict=None, add_constant=True, return_intervals=False, return_results=False, conf_levels=[],
-        weight=1
+        dataset: np.ndarray, col_to_predict: int = None, add_constant: bool = True, return_intervals: bool = False,
+        return_results: bool = False, conf_levels: List = [],
+        weight: float = 1
 ):
     """Logistic regression for single dataset.
     Args:

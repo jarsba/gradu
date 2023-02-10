@@ -73,8 +73,8 @@ def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
     data['relationship'] = pd.Categorical(data['relationship'])
     data['race'] = pd.Categorical(data['race'])
     data['sex'] = pd.Categorical(data['sex'])
-    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
-    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
+    data['had-capital-gains'] = data['had-capital-gains'].astype(int)
+    data['had-capital-losses'] = data['had-capital-losses'].astype(int)
     data['capital-gain'] = data['capital-gain'].astype(int)
     data['capital-loss'] = data['capital-loss'].astype(int)
     data['hours-per-week'] = data['hours-per-week'].astype(int)
@@ -102,7 +102,7 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
         columns_to_drop = list(set(ADULT_COLUMNS) - set(columns))
 
     age_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
-    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, bucket_size), right=False, labels=age_labels))
+    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, bucket_size), right=False, labels=age_labels)).codes
     data['workclass'] = pd.Categorical(data['workclass'])
     data['education-num'] = pd.Categorical(data['education-num'])
     data['marital-status'] = pd.Categorical(data['marital-status'])
@@ -112,12 +112,12 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
     data['sex'] = pd.Categorical(data['sex'])
     data['capital-gain'] = data['capital-gain'].astype(int)
     data['capital-loss'] = data['capital-loss'].astype(int)
-    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
-    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
+    data['had-capital-gains'] = data['had-capital-gains'].astype(int)
+    data['had-capital-losses'] = data['had-capital-losses'].astype(int)
     hours_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
     data['hours-per-week'] = pd.Categorical(
         pd.cut(data['hours-per-week'], range(0, 105, bucket_size), right=False, labels=hours_labels)
-    )
+    ).codes
     data['native-country'] = pd.Categorical(data['native-country'])
     data['compensation'] = pd.Categorical(data['compensation'])
 

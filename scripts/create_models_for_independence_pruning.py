@@ -19,6 +19,7 @@ from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
 from src.utils.string_utils import epsilon_float_to_str
+from src.utils.data_utils import transform_for_modeling
 
 """
 
@@ -31,7 +32,12 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 """
 
-adult_dataset = pd.read_csv(snakemake.input)
+dataset_map = snakemake.config['independence_pruning_datasets']
+inverted_dataset_map = {v: k for k, v in dataset_map.items()}
+dataset = snakemake.input
+dataset_name = inverted_dataset_map[dataset]
+
+adult_dataset = pd.read_csv(dataset)
 
 epsilons = snakemake.config["epsilons"]
 
@@ -50,8 +56,7 @@ test_queries = [immutable_set_remove(pair, full_set_of_marginals) for pair in ma
 test_queries.append(full_set_of_marginals)
 test_queries.append([])
 
-
-adult_train_df = convert_to_categorical(adult_dataset)
+adult_train_df = transform_for_modeling("adult_small", adult_dataset)
 
 storage = ExperimentStorage(file_path="napsu_independence_pruning_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_independence_pruning_timer.csv", mode="replace")
@@ -62,7 +67,6 @@ for epsilon in epsilons:
 
     for query_list in test_queries:
 
-        dataset_name = "adult_small"
         n, d = adult_train_df.shape
         query_str = join_query_list(query_list)
 

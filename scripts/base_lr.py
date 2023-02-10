@@ -43,7 +43,7 @@ def create_model():
     return SMWrapper(binomial_GLM)
 
 
-def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test):
+def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int):
     model = create_model()
     model.fit(X_train, y_train)
 
@@ -55,14 +55,14 @@ def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test):
     f1 = f1_score(y_test, predictions)
 
     point_estimates, variance_estimates = logistic_regression(
-        df_np, add_constant=False, return_intervals=False)
+        df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False)
 
     coefficients = model.get_clf().params.to_numpy()
 
     return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates
 
 
-def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, return_confidence_intervals=False):
+def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int, return_confidence_intervals=False):
     model = create_model()
     model.fit(X_train, y_train)
 
@@ -75,12 +75,13 @@ def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, retur
 
     coefficients = model.get_clf().params.to_numpy()
 
+
     if return_confidence_intervals is True:
         point_estimates, variance_estimates, confidence_interval = logistic_regression(
-            df_np, add_constant=False, return_intervals=True, conf_levels=[0.95])
+            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=True, conf_levels=[0.95])
         return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates, confidence_interval
 
     else:
         point_estimates, variance_estimates = logistic_regression_on_2d(
-            df_np, add_constant=False, return_intervals=False)
+            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False)
         return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates
