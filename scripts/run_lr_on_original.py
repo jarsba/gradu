@@ -7,7 +7,7 @@ from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from src.utils.data_utils import transform_for_classification
 
 dataset_paths = snakemake.input
-dataset_map = snakemake.config['datasets']
+dataset_map = snakemake.config['original_datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
 results = pd.DataFrame(
