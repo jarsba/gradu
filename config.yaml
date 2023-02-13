@@ -1,9 +1,6 @@
-workdir: "/home/locals/jarlehti/projects/gradu"
+workdir: "/home/local/jarlehti/projects/gradu"
 
 datasets:
-  "binary4d": "data/datasets/binary4d.csv"
-  "binary3d": "data/datasets/binary3d.csv"
-  "adult": "data/datasets/cleaned_adult_train_data.csv"
   "adult_small": "data/datasets/adult_small.csv"
   "adult_large": "data/datasets/adult_large.csv"
   "adult_no_discretization": "data/datasets/adult_no_discretization.csv"
