@@ -32,7 +32,7 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 dataset_map = snakemake.config['independence_pruning_datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
-dataset = snakemake.input
+dataset = snakemake.input[0]
 dataset_name = inverted_dataset_map[dataset]
 
 adult_dataset = pd.read_csv(dataset)
