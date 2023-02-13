@@ -71,18 +71,15 @@ for epsilon_str in epsilons:
         if len(query_list) == 0:
             query_removed = full_set_of_marginals
             missing_query = "all"
-
-
         elif len(query_list) == len(full_set_of_marginals):
             query_removed = []
             missing_query = "none"
-
         else:
             query_removed = list(set(full_set_of_marginals) - set(query_list))
             missing_query = [f"{pair[0]}+{pair[1]}" for pair in query_removed][0]
 
-            if len(missing_query) != 1:
-                print(f"Missing too many queries! Queries missing: {missing_query}")
+            if len(query_removed) != 1:
+                print(f"Missing too many queries! Queries missing: {query_removed}")
                 sys.exit(1)
 
         delta = (n ** (-2))
