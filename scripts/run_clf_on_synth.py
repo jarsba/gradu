@@ -1,14 +1,11 @@
 import sys
-
 sys.path.append(snakemake.config['workdir'])
 
 import pandas as pd
-import os
 import numpy as np
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
 from base_clf import run_classification
-from src.utils.path_utils import RESULTS_FOLDER
 from src.utils.data_utils import transform_for_classification
 import pickle
 

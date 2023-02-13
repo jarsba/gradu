@@ -1,8 +1,7 @@
 import sys
 import os
+sys.path.append(snakemake.config['workdir'])
 
-#sys.path.append(snakemake.config['workdir'])
-#sys.path.append("/home/jarlehti/projects/gradu")
 import jax
 
 jax.config.update("jax_enable_x64", True)
@@ -11,9 +10,8 @@ import itertools
 from arviz.data.inference_data import InferenceDataT
 import pandas as pd
 
-from src.utils.path_utils import MODELS_FOLDER, DATASETS_FOLDER
+from src.utils.path_utils import MODELS_FOLDER
 from src.utils.timer import Timer
-from src.utils.preprocess_dataset import convert_to_categorical
 from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
@@ -71,15 +69,17 @@ for epsilon in epsilons:
         query_str = join_query_list(query_list)
 
         if len(query_list) == 0:
-            missing_query = "all"
             query_removed = full_set_of_marginals
+            missing_query = "all"
+
 
         elif len(query_list) == len(full_set_of_marginals):
-            missing_query = "none"
             query_removed = []
+            missing_query = "none"
+
         else:
-            missing_query = list(set(full_set_of_marginals) - set(test_queries[0]))
-            query_removed = ["+".join(map(str, pair)) for pair in missing_query][0]
+            query_removed = list(set(full_set_of_marginals) - set(query_list))
+            missing_query = [f"{pair[0]}+{pair[1]}" for pair in query_removed][0]
 
             if len(missing_query) != 1:
                 print(f"Missing too many queries! Queries missing: {missing_query}")
@@ -94,7 +94,7 @@ for epsilon in epsilons:
             "experiment_id": experiment_id,
             "dataset_name": dataset_name,
             "query": query_str,
-            "missing_query": query_removed,
+            "missing_query": missing_query,
             "epsilon": epsilon,
             "delta": delta,
             "MCMC_algo": "NUTS",
@@ -129,13 +129,11 @@ for epsilon in epsilons:
 
         timer.stop(pid)
 
-        dataset_query_str = f"{dataset_name}_{query_removed}"
-
         print("Writing model to file")
-        model_file_path = os.path.join(MODELS_FOLDER, f"napsu_independence_pruning_{dataset_query_str}_missing_{epsilon_str}e.dill")
+        model_file_path = os.path.join(MODELS_FOLDER, f"napsu_independence_pruning_{missing_query}_missing_{epsilon_str}e.dill")
         result.store(model_file_path)
 
-        inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{dataset_query_str}_missing_{epsilon_str}e.nc")
+        inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{missing_query}_missing_{epsilon_str}e.nc")
 
         timer.save()
         storage.save()

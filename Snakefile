@@ -1,6 +1,6 @@
 import sys
 
-from src.utils.snakemake_utils import query_dataset_product, generate_products
+from src.utils.snakemake_utils import query_dataset_product, generate_products, generate_dicretization_product, generate_independence_pruning_products, query_independence_pruning_product
 
 configfile: "config.yaml"
 workdir: config['workdir']
@@ -11,6 +11,7 @@ epsilons = config['epsilons']
 MCMC_algorithms = config['MCMC_algorithms']
 queries = config['queries']
 la_approx = ['LA', 'NoLA']
+discretization_levels = ['low', 'high']
 
 dataset = config['datasets']
 dataset_names = [key for key in dataset.keys()]
@@ -27,9 +28,15 @@ discretization_datasets = config['discretization_datasets']
 discretization_dataset_names = [key for key in discretization_datasets.keys()]
 discretization_dataset_files = [value for value in discretization_datasets.values()]
 
+discretization_products = generate_dicretization_product(epsilons, discretization_levels)
+
 independence_pruning_datasets = config['independence_pruning_datasets']
 independence_pruning_dataset_names = [key for key in independence_pruning_datasets.keys()]
 independence_pruning_dataset_files = [value for value in independence_pruning_datasets.values()]
+
+independence_pruning_queries = query_independence_pruning_product()
+independence_pruning_products = generate_independence_pruning_products(epsilons, independence_pruning_queries)
+
 
 wildcard_constraints:
     experiment_id="[a-zA-Z\d]{8}"
@@ -44,15 +51,12 @@ rule csv_results:
         "results/synthetic_classification_results.csv",
         "results/discretization_logistic_regression_results.csv",
         "results/independence_pruning_logistic_regression_results.csv",
-        "results/discretization_classification_results.csv",
         "results/ci_coverage_original_data_results.csv",
         "results/ci_coverage_discretized_data_results.csv",
         "results/ci_coverage_independence_pruning_results.csv"
 
 
 rule generate_original_datasets:
-    input:
-        expand("{dataset_name}",dataset_name=dataset_names)
     output:
         expand("{dataset_file}",dataset_file=dataset_files)
     log:
@@ -116,10 +120,10 @@ rule create_models_for_independence_pruning:
     input:
         expand("{dataset_file}",dataset_file=independence_pruning_dataset_files)
     output:
-        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
+        expand("models/napsu_independence_pruning_{independence_pruning_product}.dill", independence_pruning_product=independence_pruning_products)
     log:
-        "logs/napsu_independence_pruning_{query}_missing_{epsilon}e.log",
-        "logs/inf_data_independence_pruning_{query}_missing_{epsilon}e.nc"
+        expand("logs/napsu_independence_pruning_{independence_pruning_product}.log", independence_pruning_product=independence_pruning_products),
+        expand("logs/inf_data_independence_pruning_{independence_pruning_product}.nc", independence_pruning_product=independence_pruning_products)
     threads: 4
     resources:
         runtime="2160",
@@ -134,11 +138,11 @@ rule create_models_for_independence_pruning:
 
 rule generate_datasets_for_independence_pruning:
     input:
-        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
+        expand("models/napsu_independence_pruning_{independence_pruning_product}.dill", independence_pruning_product=independence_pruning_products)
     output:
-        "data/synt_datasets/synthetic_dataset_independence_pruning_{dataset_name}_{query}_missing_{epsilon}e_{MCMC_algorithm}.pickle"
+        expand("data/synt_datasets/synthetic_dataset_independence_pruning_{independence_pruning_product}.pickle", independence_pruning_product=independence_pruning_products)
     log:
-        "logs/data_generation_independence_pruning_{dataset_name}_{query}_missing_{epsilon}e_{MCMC_algorithm}.log"
+        expand("logs/data_generation_independence_pruning_{independence_pruning_product}.log", independence_pruning_product=independence_pruning_products)
     resources:
         runtime="120",
         time="02:00:00",
@@ -154,10 +158,10 @@ rule create_models_for_discretization:
     input:
         expand("{dataset_file}",dataset_file=discretization_dataset_files)
     output:
-        "models/napsu_discretization_{discretization_level}_{epsilon}e.dill"
+        expand("models/napsu_discretization_{discretization_product}.dill", discretization_product=discretization_products)
     log:
-        "logs/inf_data_discretization_{discretization_level}_{epsilon}e.nc",
-        "logs/napsu_discretization_{discretization_level}_{epsilon}e.log",
+        expand("logs/inf_data_discretization_{discretization_product}.nc", discretization_product=discretization_products),
+        expand("logs/napsu_discretization_{discretization_product}.log", discretization_product=discretization_products)
     threads: 4
     resources:
         runtime="2160",
@@ -172,11 +176,11 @@ rule create_models_for_discretization:
 
 rule generate_datasets_for_discretized_data:
     input:
-        "models/napsu_discretization_{discretization_level}_{epsilon}e.dill"
+        expand("models/napsu_discretization_{discretization_product}.dill", discretization_product=discretization_products)
     output:
-        "data/synt_datasets/synthetic_dataset_discretization_{discretization_level}_{epsilon}e.pickle"
+        expand("data/synt_datasets/synthetic_dataset_discretization_{discretization_product}.pickle", discretization_product=discretization_products)
     log:
-        "logs/data_generation_discretization_{discretization_level}_{epsilon}e.log"
+        expand("logs/data_generation_discretization_{discretization_product}.log", discretization_product=discretization_products)
     resources:
         runtime="120",
         time="02:00:00",
@@ -243,11 +247,11 @@ rule run_classification_on_original:
 
 rule run_logistic_regression_on_discretized_data:
     input:
-        "data/synt_datasets/synthetic_dataset_discretization_{discretization_level}_{epsilon}e.pickle"
+        expand("data/synt_datasets/synthetic_dataset_discretization_{discretization_product}.pickle", discretization_product=discretization_products)
     output:
         "results/discretization_logistic_regression_results.csv"
     log:
-        expand("logs/logistic_regression_discretized_dataset_{dataset}.log",dataset=discretization_datasets)
+        expand("logs/logistic_regression_discretized_dataset_{discretization_product}.log", discretization_product=discretization_products)
     conda:
         "envs/analysis.yaml"
     script:
@@ -255,11 +259,11 @@ rule run_logistic_regression_on_discretized_data:
 
 rule run_logistic_regression_on_independence_pruning_datasets:
     input:
-        "data/synt_datasets/synthetic_dataset_independence_pruning_{query}_missing_{epsilon}e.pickle"
+        expand("data/synt_datasets/synthetic_dataset_independence_pruning_{independence_pruning_product}.pickle", independence_pruning_product=independence_pruning_products)
     output:
         "results/independence_pruning_logistic_regression_results.csv"
     log:
-        expand("logs/logistic_regression_independence_pruning_dataset_{dataset}.log",dataset=independence_pruning_datasets)
+        expand("logs/logistic_regression_independence_pruning_dataset_{independence_pruning_product}.log",independence_pruning_product=independence_pruning_products)
     conda:
         "envs/analysis.yaml"
     script:
@@ -268,7 +272,7 @@ rule run_logistic_regression_on_independence_pruning_datasets:
 
 rule run_ci_coverage_on_original_models:
     input:
-        expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products),
+        expand("models/napsu_{experiment_product}.dill",experiment_product=experiment_products)
     output:
         "results/ci_coverage_original_data_results.csv"
     log:
@@ -281,11 +285,11 @@ rule run_ci_coverage_on_original_models:
 
 rule run_ci_coverage_on_discretized_models:
     input:
-        "models/napsu_discretization_{discretization_level}_{epsilon}e.dill"
+        expand("models/napsu_discretization_{discretization_product}.dill", discretization_product=discretization_products)
     output:
         "results/ci_coverage_discretized_data_results.csv"
     log:
-        "logs/ci_coverage_discretization_{discretization_level}_{epsilon}e.log"
+        expand("logs/ci_coverage_discretization_{discretization_product}.log", discretization_product=discretization_products)
     conda:
         "envs/analysis.yaml"
     script:
@@ -293,11 +297,11 @@ rule run_ci_coverage_on_discretized_models:
 
 rule run_ci_coverage_on_independence_pruning_models:
     input:
-        "models/napsu_independence_pruning_{query}_missing_{epsilon}e.dill"
+        expand("models/napsu_independence_pruning_{independence_pruning_product}.dill", independence_pruning_product=independence_pruning_products)
     output:
         "results/ci_coverage_independence_pruning_results.csv"
     log:
-        "logs/ci_coverage_independence_pruning_{query}_missing_{epsilon}e.log"
+        expand("logs/ci_coverage_independence_pruning_{independence_pruning_product}.log", independence_pruning_product=independence_pruning_products)
     conda:
         "envs/analysis.yaml"
     script:

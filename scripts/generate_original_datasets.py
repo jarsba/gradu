@@ -1,5 +1,4 @@
 import sys
-import os
 sys.path.append(snakemake.config['workdir'])
 
 from src.utils.preprocess_dataset import \
@@ -10,9 +9,9 @@ from src.utils.preprocess_dataset import \
     get_adult_train_large, get_adult_test_large
 from src.utils.path_utils import DATASETS_FOLDER
 
-datasets = snakemake.input
-target_files = snakemake.output
-
+datasets = snakemake.config['datasets']
+dataset_names = [key for key in datasets.keys()]
+dataset_files = [value for value in datasets.values()]
 
 PREPROCESSING_FUNCTIONS = {
     "adult_small": get_adult_train_small,
@@ -27,7 +26,7 @@ PREPROCESSING_FUNCTIONS = {
     "adult_high_discretization_test": get_adult_test_high_discretization,
 }
 
-for dataset, target_file in zip(datasets, target_files):
+for dataset, target_file in zip(dataset_names, dataset_files):
 
     # Skip if the dataset is not in the preprocessing functions like for "adult", "binary3d" and "binary4d"
     if dataset not in PREPROCESSING_FUNCTIONS:

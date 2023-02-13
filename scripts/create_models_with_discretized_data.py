@@ -1,19 +1,16 @@
 import sys
 import os
+sys.path.append(snakemake.config['workdir'])
+
 
 from arviz.data.inference_data import InferenceDataT
-
-#sys.path.append(snakemake.config['workdir'])
-sys.path.append("/home/jarlehti/projects/gradu")
 import jax
 
 jax.config.update("jax_enable_x64", True)
 
 import pandas as pd
 
-from src.utils.path_utils import DATASETS_FOLDER, MODELS_FOLDER
-from src.utils.preprocess_dataset import get_adult_train_low_discretization, get_adult_train_high_discretization, \
-    get_adult_train_no_discretization
+from src.utils.path_utils import MODELS_FOLDER
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.utils.keygen import get_key
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
@@ -55,6 +52,8 @@ storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", m
 timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
 
 input_output_map = list(zip(datasets, target_files))
+
+print(input_output_map)
 
 for dataset, target_file in input_output_map:
 
@@ -115,14 +114,12 @@ for dataset, target_file in input_output_map:
 
         timer.stop(pid)
 
-        dataset_discretization_str = f"adult_{discretization_level}"
-
         print("Writing model to file")
         model_file_path = os.path.join(MODELS_FOLDER,
-                                       f"napsu_discretization_{dataset_discretization_str}_{epsilon_str}e.dill")
+                                       f"napsu_discretization_{discretization_level}_{epsilon_str}e.dill")
         result.store(model_file_path)
 
-        inf_data.to_netcdf(f"logs/inf_data_discretization_{dataset_discretization_str}_{epsilon_str}e.nc")
+        inf_data.to_netcdf(f"logs/inf_data_discretization_{discretization_level}_{epsilon_str}e.nc")
 
         # Save storage and timer results every iteration
         storage.save()

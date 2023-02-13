@@ -1,8 +1,7 @@
 import sys
-
+import os
 sys.path.append(snakemake.config['workdir'])
 
-import os
 from typing import List
 
 import jax
@@ -64,7 +63,7 @@ for model_path in models:
     epsilon_str = epsilon_float_to_str(epsilon)
 
     path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_independence_pruning_{dataset_name}_{query_str}_missing_{epsilon_str}e_{MCMC_algorithm}.pickle")
+                        f"synthetic_dataset_independence_pruning_{missing_query}_missing_{epsilon_str}e.pickle")
 
     with open(path, "wb") as file:
         pickle.dump(synth_data_object, file)

@@ -89,12 +89,7 @@ def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
 
 def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
                                     columns: List[str] = None) -> pd.DataFrame:
-    """ Clean Adult dataset with fixed level of discretization and by default following columns dropped:
-        - `capital-gains`
-        - `capital-losses`
-        - `had-capital-gains`
-        - `had-capital-losses`
-    """
+    """ Clean Adult dataset with fixed level of discretization."""
 
     if columns is None:
         columns_to_drop = ADULT_COLUMNS_TO_DROP
@@ -102,7 +97,7 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
         columns_to_drop = list(set(ADULT_COLUMNS) - set(columns))
 
     age_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
-    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, bucket_size), right=False, labels=age_labels)).codes
+    data['age'] = pd.Categorical(pd.cut(data.age, range(0, 105, bucket_size), right=False, labels=age_labels))
     data['workclass'] = pd.Categorical(data['workclass'])
     data['education-num'] = pd.Categorical(data['education-num'])
     data['marital-status'] = pd.Categorical(data['marital-status'])
@@ -117,7 +112,7 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = 10,
     hours_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
     data['hours-per-week'] = pd.Categorical(
         pd.cut(data['hours-per-week'], range(0, 105, bucket_size), right=False, labels=hours_labels)
-    ).codes
+    )
     data['native-country'] = pd.Categorical(data['native-country'])
     data['compensation'] = pd.Categorical(data['compensation'])
 

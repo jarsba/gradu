@@ -1,5 +1,4 @@
 import sys
-
 sys.path.append(snakemake.config['workdir'])
 
 from typing import Protocol

@@ -1,8 +1,6 @@
 import sys
-
 sys.path.append(snakemake.config['workdir'])
 
-import os
 from typing import List
 
 import jax
