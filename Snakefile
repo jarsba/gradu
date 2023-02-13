@@ -208,7 +208,7 @@ rule run_logistic_regression_on_synt:
 
 rule run_logistic_regression_on_original:
     input:
-        expand("{dataset_file}",dataset_file=original_datasets)
+        expand("{dataset_file}", dataset_file=original_dataset_files)
     output:
         "results/original_logistic_regression_results.csv"
     log:
@@ -234,7 +234,7 @@ rule run_classification_on_synt:
 
 rule run_classification_on_original:
     input:
-        expand("{dataset_file}",dataset_file=original_datasets)
+        expand("{dataset_file}", dataset_file=original_dataset_files)
     output:
         "results/original_classification_results.csv"
     log:
