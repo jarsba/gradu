@@ -16,7 +16,7 @@ from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
-from src.utils.string_utils import epsilon_float_to_str
+from src.utils.string_utils import epsilon_str_to_float
 from src.utils.data_utils import transform_for_modeling
 
 """
@@ -59,9 +59,9 @@ adult_train_df = transform_for_modeling("adult_small", adult_dataset)
 storage = ExperimentStorage(file_path="napsu_independence_pruning_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_independence_pruning_timer.csv", mode="replace")
 
-for epsilon in epsilons:
+for epsilon_str in epsilons:
 
-    epsilon_str = epsilon_float_to_str(epsilon)
+    epsilon = epsilon_str_to_float(epsilon_str)
 
     for query_list in test_queries:
 

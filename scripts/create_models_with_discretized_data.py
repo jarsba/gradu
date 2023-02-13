@@ -13,7 +13,7 @@ from src.utils.path_utils import MODELS_FOLDER
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.utils.keygen import get_key
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
-from src.utils.string_utils import epsilon_float_to_str
+from src.utils.string_utils import epsilon_str_to_float
 from src.utils.timer import Timer
 from src.utils.data_utils import transform_for_modeling
 
@@ -59,9 +59,9 @@ for dataset in datasets:
 
     discretization_level = "low" if "low" in dataset_name else "high"
 
-    for epsilon in epsilons:
+    for epsilon_str in epsilons:
 
-        epsilon_str = epsilon_float_to_str(epsilon)
+        epsilon = epsilon_str_to_float(epsilon_str)
         n, d = dataframe.shape
         query = []
         delta = (n ** (-2))
