@@ -6,6 +6,7 @@ from functools import partial
 import statsmodels.api as sm
 from sklearn.base import BaseEstimator, RegressorMixin
 
+
 class SMWrapper(BaseEstimator, RegressorMixin):
     """
         From https://stackoverflow.com/questions/41045752/using-statsmodel-estimations-with-scikit-learn-cross-validation-is-it-possible
@@ -62,7 +63,8 @@ def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test, col_t
     return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates
 
 
-def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int, return_confidence_intervals=False):
+def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int,
+                                  return_confidence_intervals=False):
     model = create_model()
     model.fit(X_train, y_train)
 
@@ -75,9 +77,8 @@ def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_t
 
     coefficients = model.get_clf().params.to_numpy()
 
-
     if return_confidence_intervals is True:
-        point_estimates, variance_estimates, confidence_interval = logistic_regression(
+        point_estimates, variance_estimates, confidence_interval = logistic_regression_on_2d(
             df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=True, conf_levels=[0.95])
         return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates, confidence_interval
 
