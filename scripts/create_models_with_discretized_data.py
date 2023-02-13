@@ -100,7 +100,7 @@ for dataset, target_file in input_output_map:
         inf_data: InferenceDataT
 
         result, inf_data = model.fit(
-            data=dataset,
+            data=dataframe,
             dataset_name=f"adult_{discretization_level}_discretization",
             rng=rng,
             epsilon=epsilon,
