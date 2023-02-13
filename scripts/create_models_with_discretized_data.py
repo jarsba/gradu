@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(snakemake.config['workdir'])
 
-
 from arviz.data.inference_data import InferenceDataT
 import jax
 
@@ -44,18 +43,13 @@ dataset_map = snakemake.config['discretization_datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
 datasets = snakemake.input
-target_files = snakemake.output
-
 epsilons = snakemake.config["epsilons"]
 
 storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
 
-input_output_map = list(zip(datasets, target_files))
 
-print(input_output_map)
-
-for dataset, target_file in input_output_map:
+for dataset in datasets:
 
     dataset_name = inverted_dataset_map[dataset]
 
@@ -63,7 +57,7 @@ for dataset, target_file in input_output_map:
 
     dataframe = transform_for_modeling(dataset_name, dataframe)
 
-    discretization_level = "low" if "low" in dataset else "high"
+    discretization_level = "low" if "low" in dataset_name else "high"
 
     for epsilon in epsilons:
 
