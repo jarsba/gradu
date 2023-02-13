@@ -80,6 +80,13 @@ for dataset in datasets:
             "discretization": discretization_level
         }
 
+        model_file_path = os.path.join(MODELS_FOLDER,
+                                       f"napsu_discretization_{discretization_level}_{epsilon_str}e.dill")
+        if os.path.exists(model_file_path):
+            print(f"Model already exists for {discretization_level} discretization and epsilon {epsilon_str}, skipping")
+            continue
+
+
         pid = timer.start(f"Main run", **timer_meta)
 
         print(

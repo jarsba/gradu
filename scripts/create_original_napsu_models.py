@@ -64,6 +64,13 @@ for dataset in datasets:
                 "laplace_approximation": True
             }
 
+            dataset_query_str = f"{dataset_name}_{query_str}"
+
+            model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
+            if os.path.exists(model_file_path):
+                print(f"Model already exists for {dataset_query_str} query and epsilon {epsilon_str}, skipping")
+                continue
+
             pid = timer.start(f"Main run", **timer_meta)
 
             print(
@@ -90,8 +97,6 @@ for dataset in datasets:
             )
 
             timer.stop(pid)
-
-            dataset_query_str = f"{dataset_name}_{query_str}"
 
             print("Writing model to file")
             model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")

@@ -87,6 +87,11 @@ for epsilon_str in epsilons:
 
         delta = (n ** (-2))
 
+        model_file_path = os.path.join(MODELS_FOLDER, f"napsu_independence_pruning_{missing_query}_missing_{epsilon_str}e.dill")
+        if os.path.exists(model_file_path):
+            print(f"Model already exists for {missing_query} missing, skipping")
+            continue
+
         experiment_id = get_key()
         experiment_id_ctx.set(experiment_id)
 
@@ -130,7 +135,6 @@ for epsilon_str in epsilons:
         timer.stop(pid)
 
         print("Writing model to file")
-        model_file_path = os.path.join(MODELS_FOLDER, f"napsu_independence_pruning_{missing_query}_missing_{epsilon_str}e.dill")
         result.store(model_file_path)
 
         inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{missing_query}_missing_{epsilon_str}e.nc")
