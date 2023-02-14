@@ -110,7 +110,7 @@ def run_numpyro_mcmc(
     kernel = MCMC_algorithm(model=mem.normal_prior_model_numpyro, max_tree_depth=12)
     mcmc = numpyro.infer.MCMC(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
-        progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential",
+        progress_bar=not disable_progressbar, jit_model_args=False, chain_method="parallel",
     )
 
     if enable_profiling:
@@ -147,7 +147,7 @@ def run_numpyro_mcmc_normalised(
     kernel = MCMC_algorithm(model=mem.normal_prior_normalised_model_numpyro, max_tree_depth=12)
     mcmc = numpyro.infer.MCMC(
         kernel, num_warmup=num_warmup, num_samples=num_samples, num_chains=num_chains,
-        progress_bar=not disable_progressbar, jit_model_args=False, chain_method="sequential"
+        progress_bar=not disable_progressbar, jit_model_args=False, chain_method="parallel"
     )
 
     mean_guess = laplace_approx.mean
@@ -192,10 +192,6 @@ def run_numpyro_laplace_approximation(
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 
-    print(f"Suff stats: {suff_stat}")
-    print(f"Sigma DP: {sigma_DP}")
-    print(f"MnJAX queries: {len(max_ent_dist.queries.queries)}")
-
     for i in range(0, max_retries + 1):
 
         rng = subkeys[i]
@@ -205,21 +201,14 @@ def run_numpyro_laplace_approximation(
             model_args=(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
         )
 
-        print(f"Init lambdas: {init_lambdas}")
-
         lambdas = init_lambdas[0]["lambdas"]
 
-        print(f"Lambdas: {lambdas}")
-
         result = jax.scipy.optimize.minimize(lambda l: potential_fn({"lambdas": l}), lambdas, method="BFGS", tol=1e-2)
-        print(f"Result: {result}")
         if not result.success:
             fail_count += 1
         else:
             mean = result.x
             break
-
-        print(f"Failed {i}th time, rng: {rng}")
 
         if fail_count == max_retries:
             raise ConvergenceException(f"Minimize function failed to converge with {max_retries} retries")

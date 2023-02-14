@@ -2,6 +2,7 @@ from src.utils.keygen import get_key, get_hash
 from src.utils.query_utils import join_query_list
 import itertools
 
+
 def query_dataset_product(datasets, queries):
     query_dataset_product = []
 
@@ -26,6 +27,7 @@ def query_independence_pruning_product():
     missing_queries.append('none')
 
     return missing_queries
+
 
 def generate_products(queries_dataset_product, epsilons, MCMC_algorithms):
     products = []

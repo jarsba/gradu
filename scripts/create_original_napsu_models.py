@@ -43,12 +43,14 @@ for dataset in datasets:
         queries_for_dataset = queries[dataset_name]
 
         for query_list in queries_for_dataset:
+            print(query_list)
             dataframe = pd.read_csv(dataset)
 
             dataframe = transform_for_modeling(dataset_name, dataframe)
 
             n, d = dataframe.shape
             query_str = join_query_list(query_list)
+            print(query_str)
             delta = (n ** (-2))
 
             experiment_id = get_key()
@@ -93,7 +95,8 @@ for dataset in datasets:
                 column_feature_set=query_list,
                 MCMC_algo=algo,
                 use_laplace_approximation=True,
-                return_inference_data=True
+                return_inference_data=True,
+                enable_profiling=True
             )
 
             timer.stop(pid)

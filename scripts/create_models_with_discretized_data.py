@@ -110,7 +110,8 @@ for dataset in datasets:
             MCMC_algo="NUTS",
             use_laplace_approximation=True,
             return_inference_data=True,
-            discretization=discretization_level
+            discretization=discretization_level,
+            enable_profiling = True
         )
 
         timer.stop(pid)
