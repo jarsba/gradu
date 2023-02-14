@@ -28,8 +28,8 @@ target_files = snakemake.output
 epsilons = snakemake.config["epsilons"]
 queries = snakemake.config['queries']
 
-storage = ExperimentStorage()
-timer = Timer()
+storage = ExperimentStorage(file_path="napsu_experiment_storage_output.csv", mode="replace")
+timer = Timer(file_path="napsu_MCMC_time_vs_epsilon_comparison.csv", mode="replace")
 
 algo = "NUTS"
 
@@ -105,5 +105,9 @@ for dataset in datasets:
 
             inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
-timer.to_csv("napsu_MCMC_time_vs_epsilon_comparison.csv", mode="a")
-storage.to_csv("napsu_experiment_storage_output.csv", mode="a")
+            # Save storage and timer results every iteration
+            storage.save()
+            timer.save()
+
+storage.save()
+timer.save()

@@ -3,6 +3,7 @@ sys.path.append(snakemake.config['workdir'])
 
 from typing import List
 
+import os
 import jax
 import numpy as np
 import pandas as pd
@@ -60,8 +61,7 @@ for model_path in models:
 
     epsilon_str = epsilon_float_to_str(epsilon)
 
-    path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_discretization_{dataset_name}_{epsilon_str}e_{MCMC_algorithm}.pickle")
+    path = os.path.join(SYNT_DATASETS_FOLDER, f"synthetic_dataset_discretization_{dataset_name}_{epsilon_str}e_{MCMC_algorithm}.pickle")
 
     with open(path, "wb") as file:
         pickle.dump(synth_data_object, file)
