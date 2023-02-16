@@ -1,5 +1,6 @@
 import sys
 import os
+
 sys.path.append(snakemake.config['workdir'])
 
 from arviz.data.inference_data import InferenceDataT
@@ -48,7 +49,6 @@ epsilons = snakemake.config["epsilons"]
 storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", mode="replace")
 timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
 
-
 for dataset in datasets:
 
     dataset_name = inverted_dataset_map[dataset]
@@ -86,7 +86,6 @@ for dataset in datasets:
             print(f"Model already exists for {discretization_level} discretization and epsilon {epsilon_str}, skipping")
             continue
 
-
         pid = timer.start(f"Main run", **timer_meta)
 
         print(
@@ -111,7 +110,7 @@ for dataset in datasets:
             use_laplace_approximation=True,
             return_inference_data=True,
             discretization=discretization_level,
-            enable_profiling = True
+            enable_profiling=True
         )
 
         timer.stop(pid)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from jax.config import config
+
 config.update("jax_enable_x64", True)
 
 import unittest
@@ -48,8 +49,6 @@ class TestNapsuMQ(unittest.TestCase):
         self.n = self.__class__.n
         self.d = self.__class__.d
 
-
-
     # Takes about ~ 1 minute to run
     @pytest.mark.slow
     def test_NAPSUMQ_model_without_IO(self):
@@ -60,11 +59,13 @@ class TestNapsuMQ(unittest.TestCase):
         rng = jax.random.PRNGKey(6473286482)
         inference_rng, sampling_rng = jax.random.split(rng)
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
+        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1,
+                           delta=(self.n ** (-2)),
                            column_feature_set=column_feature_set,
                            use_laplace_approximation=False)
 
-        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000,
+                                            num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (2000, 3))
@@ -89,20 +90,22 @@ class TestNapsuMQ(unittest.TestCase):
         inference_rng, sampling_rng = jax.random.split(rng)
 
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
+        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1,
+                           delta=(self.n ** (-2)),
                            column_feature_set=column_feature_set,
                            use_laplace_approximation=False)
 
         create_test_directory()
 
         napsu_result_file = open(f"{TEST_DIRECTORY_PATH}/napsu_test_result.dill", "wb")
-        result._store_to_io(napsu_result_file)
+        result.store(napsu_result_file)
 
         self.assertTrue(file_exists(f"{TEST_DIRECTORY_PATH}/napsu_test_result.dill"))
 
         napsu_result_read_file = open(f"{TEST_DIRECTORY_PATH}/napsu_test_result.dill", "rb")
-        loaded_result: NapsuMQResult = NapsuMQResult._load_from_io(napsu_result_read_file)
-        datasets = loaded_result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        loaded_result: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
+        datasets = loaded_result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000,
+                                                   num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (2000, 3))
@@ -125,10 +128,9 @@ class TestNapsuMQ(unittest.TestCase):
 
         purge_test_directory(TEST_DIRECTORY_PATH)
 
-
     # Takes about ~ 1 minute to run
     @pytest.mark.slow
-    def test_NAPSUMQ_model_without_IO(self):
+    def test_NAPSUMQ_model_without_IO_with_LA(self):
         column_feature_set = [
             ('A', 'B'), ('B', 'C'), ('A', 'C')
         ]
@@ -137,11 +139,13 @@ class TestNapsuMQ(unittest.TestCase):
         inference_rng, sampling_rng = jax.random.split(rng)
 
         model = NapsuMQModel()
-        result = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1, delta=(self.n ** (-2)),
-                           column_feature_set=column_feature_set,
-                           use_laplace_approximation=True)
+        result, inf_data = model.fit(data=self.dataframe, dataset_name="binary3d", rng=inference_rng, epsilon=1,
+                                     delta=(self.n ** (-2)),
+                                     column_feature_set=column_feature_set,
+                                     use_laplace_approximation=True, return_inference_data=True, enable_profiling=True)
 
-        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000, num_parameter_samples=5)
+        datasets = result.generate_extended(rng=sampling_rng, num_data_per_parameter_sample=2000,
+                                            num_parameter_samples=5)
 
         self.assertEqual(len(datasets), 5)
         self.assertEqual(datasets[0].shape, (2000, 3))

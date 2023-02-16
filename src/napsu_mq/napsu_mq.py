@@ -103,7 +103,6 @@ class NapsuMQModel(InferenceModel):
             query_sets, weights = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
                                                 cliques_to_include=column_feature_set,
                                                 return_MST_weights=return_MST_weights)
-            print(weights)
 
         else:
             query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,

@@ -23,6 +23,8 @@ dataset_names = [key for key in dataset_map.keys()]
 dataset_files = [value for value in dataset_map.values()]
 datasets = snakemake.input
 
+print(datasets)
+
 target_files = snakemake.output
 
 epsilons = snakemake.config["epsilons"]
@@ -84,6 +86,9 @@ for dataset in datasets:
             result: NapsuMQResult
             inf_data: InferenceDataT
 
+            print(dataframe.head())
+            print(dataframe.columns)
+
             result, inf_data = model.fit(
                 data=dataframe,
                 dataset_name=dataset_name,
@@ -99,7 +104,6 @@ for dataset in datasets:
 
             timer.stop(pid)
 
-            print("Writing model to file")
             model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
             result.store(model_file_path)
 

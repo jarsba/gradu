@@ -194,6 +194,8 @@ def run_numpyro_laplace_approximation(
 
     for i in range(0, max_retries + 1):
 
+        print(f"Attempting Laplace approximation, {i}th try")
+
         rng = subkeys[i]
 
         init_lambdas, potential_fn, t, mt = nummcmc_util.initialize_model(

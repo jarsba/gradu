@@ -137,6 +137,7 @@ class FullMarginalQuerySet:
         clique_set = set([tuple(val) for val in clique_list])
         canonical_queries = {}
 
+        print("Calculating canonical queries")
 
         for clique in tqdm(clique_set):
             clique = set(clique)
@@ -180,6 +181,8 @@ class FullMarginalQuerySet:
         for clique in tqdm(self.feature_sets):
             if clique not in original_clique_queries.keys():
                 original_clique_queries[clique] = []
+
+        print("Calculating new queries")
 
         for query in tqdm(not_original_clique_queries):
             original_clique = None
