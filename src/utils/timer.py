@@ -8,9 +8,7 @@ from src.utils.singleton import Singleton
 class Timer(metaclass=Singleton):
 
     def __init__(self, file_path: Optional[str] = None, mode: Optional[Literal["replace", "append"]] = None):
-        self.times = []
-        # Hashmap for mapping process_id to list index in times, so we get ~constant time read operation for times item.
-        self.times_index = {}
+        self.times = {}
         self.file_path = file_path
         self.mode = mode
 
@@ -24,28 +22,23 @@ class Timer(metaclass=Singleton):
         else:
             experiment_id = None
         start = timer()
-        self.times.append({
+
+        process_id = get_key()
+
+        self.times[process_id] = {
             'experiment_id': experiment_id,
             'start': start,
             'stop': None,
             'timedelta': None,
             'task': task,
             **kwargs
-        })
-
-        index = len(self.times) - 1
-        process_id = get_key()
-
-        self.times_index[process_id] = index
+        }
 
         return process_id
 
     def stop(self, process_id: str) -> None:
         stop = timer()
-
-        index = self.times_index[process_id]
-
-        times_obj: dict = self.times[index]
+        times_obj: dict = self.times[process_id]
         times_obj['stop'] = stop
         times_obj['timedelta'] = stop - times_obj['start']
 
@@ -53,7 +46,7 @@ class Timer(metaclass=Singleton):
         if len(self.times) == 0:
             return None
         else:
-            df = pd.DataFrame(self.times)
+            df = pd.DataFrame.from_records(self.times)
             return df
 
     def to_csv(self, file_path: Optional[str], **kwargs) -> None:
@@ -61,6 +54,8 @@ class Timer(metaclass=Singleton):
             raise Exception("File path is not defined.")
 
         df = self.to_df()
+
+        file_path = file_path if file_path is not None else self.file_path
 
         if df is None:
             raise Exception("Timer has not recorded any timestamps")
@@ -85,6 +80,9 @@ class Timer(metaclass=Singleton):
 
         if mode is None and self.mode is None:
             raise Exception("Mode is not defined.")
+
+        file_path = file_path if file_path is not None else self.file_path
+        mode = mode if mode is not None else self.mode
 
         if mode == 'replace':
             self.to_csv(file_path, mode="w")

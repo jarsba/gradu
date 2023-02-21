@@ -1,4 +1,4 @@
-from typing import Mapping, List, Optional, Literal
+from typing import Mapping, List, Optional, Literal, Union
 import pandas as pd
 from src.utils.singleton import Singleton
 import contextvars
@@ -8,36 +8,32 @@ experiment_id_ctx = contextvars.ContextVar('experiment_id')
 
 class ExperimentStorage(metaclass=Singleton):
     def __init__(self, file_path: Optional[str] = None, mode: Optional[Literal["replace", "append"]] = None):
-        self.storage = []
-        # Hashmap for mapping process_id to list index in storage, so we get ~constant time read operation for storage item.
-        self.storage_index = {}
+        self.storage = {}
         self.file_path = file_path
         self.mode = mode
 
-
-    def get_item(self, experiment_id: str) -> Mapping:
-        index = self.storage_index[experiment_id]
-        return self.storage[index]
+    def get_item(self, experiment_id: str) -> dict:
+        item = self.storage[experiment_id]
+        return item
 
     def _has_key(self, experiment_id: str) -> bool:
-        if experiment_id in self.storage_index:
+        if experiment_id in self.storage:
             return True
         else:
             return False
 
-    def store(self, experiment_id: str, dict: Mapping) -> None:
+    def store(self, experiment_id: Union[str, int], dict_to_store: Mapping) -> None:
         if self._has_key(experiment_id):
-            item: dict = self.get_item(experiment_id)
-            item.update(dict)
+            item = self.get_item(experiment_id)
+            item.update(dict_to_store)
         else:
-            self.storage.append(dict)
-            self.storage_index[experiment_id] = len(self.storage) - 1
+            self.storage[experiment_id] = dict_to_store
 
     def to_df(self) -> Optional[pd.DataFrame]:
         if len(self.storage) == 0:
             return None
         else:
-            df = pd.DataFrame(self.storage)
+            df = pd.DataFrame().from_records(self.storage)
             return df
 
     def to_csv(self, file_path: Optional[str], **kwargs) -> None:
@@ -69,6 +65,9 @@ class ExperimentStorage(metaclass=Singleton):
 
         if mode is None and self.mode is None:
             raise Exception("Mode is not defined.")
+
+        file_path = file_path if file_path is not None else self.file_path
+        mode = mode if mode is not None else self.mode
 
         if mode == 'replace':
             self.to_csv(file_path, mode="w")

@@ -3,7 +3,7 @@ import string
 import uuid
 
 
-def get_key():
+def get_key() -> str:
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
