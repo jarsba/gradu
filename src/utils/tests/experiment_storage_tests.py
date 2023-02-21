@@ -40,5 +40,12 @@ class ExperimentStorageTests(unittest.TestCase):
         self.experiment_storage.save()
         self.assertTrue(os.path.exists(self.file_path))
 
+    def test_singleton_storage(self):
+        key = get_key()
+        self.experiment_storage.store(key, {'lambdas': np.eye(10)})
+        self.experiment_storage.store(key, {'divergence': np.zeros(shape=100)})
 
-
+        experiment_storage = ExperimentStorage()
+        self.assertTrue(experiment_storage.file_path is not None)
+        self.assertTrue(experiment_storage.mode is not None)
+        self.assertTrue(experiment_storage._has_key(key))

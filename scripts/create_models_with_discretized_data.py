@@ -1,5 +1,6 @@
 import sys
 import os
+from typing import Literal
 
 sys.path.append(snakemake.config['workdir'])
 
@@ -46,8 +47,12 @@ inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 datasets = snakemake.input
 epsilons = snakemake.config["epsilons"]
 
-storage = ExperimentStorage(file_path="napsu_discretization_test_storage.csv", mode="replace")
-timer = Timer(file_path="napsu_discretization_test_timer.csv", mode="replace")
+storage_file_path = "napsu_discretization_test_storage.csv"
+mode: Literal["replace"] = "replace"
+timer_file_path = "napsu_discretization_test_timer.csv"
+
+storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+timer = Timer(file_path=timer_file_path, mode=mode)
 
 for dataset in datasets:
 
@@ -123,8 +128,8 @@ for dataset in datasets:
         inf_data.to_netcdf(f"logs/inf_data_discretization_{discretization_level}_{epsilon_str}e.nc")
 
         # Save storage and timer results every iteration
-        storage.save()
-        timer.save()
+        storage.save(file_path=storage_file_path, mode=mode)
+        timer.save(file_path=timer_file_path, mode=mode)
 
-storage.save()
-timer.save()
+storage.save(file_path=storage_file_path, mode=mode)
+timer.save(file_path=timer_file_path, mode=mode)

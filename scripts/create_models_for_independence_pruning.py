@@ -1,5 +1,7 @@
 import sys
 import os
+from typing import Literal
+
 sys.path.append(snakemake.config['workdir'])
 
 import jax
@@ -56,8 +58,12 @@ test_queries.append([])
 
 adult_train_df = transform_for_modeling("adult_small", adult_dataset)
 
-storage = ExperimentStorage(file_path="napsu_independence_pruning_storage.csv", mode="replace")
-timer = Timer(file_path="napsu_independence_pruning_timer.csv", mode="replace")
+storage_file_path = "napsu_independence_pruning_storage.csv"
+mode: Literal["replace"] = "replace"
+timer_file_path = "napsu_independence_pruning_timer.csv"
+
+storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+timer = Timer(file_path=timer_file_path, mode=mode)
 
 for epsilon_str in epsilons:
 
@@ -136,8 +142,8 @@ for epsilon_str in epsilons:
 
         inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{missing_query}_missing_{epsilon_str}e.nc")
 
-        timer.save()
-        storage.save()
+        storage.save(file_path=storage_file_path, mode=mode)
+        timer.save(file_path=timer_file_path, mode=mode)
 
-timer.save()
-storage.save()
+storage.save(file_path=storage_file_path, mode=mode)
+timer.save(file_path=timer_file_path, mode=mode)

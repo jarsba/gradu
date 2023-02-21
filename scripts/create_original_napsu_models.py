@@ -1,5 +1,7 @@
 import sys
 import os
+from typing import Literal
+
 sys.path.append(snakemake.config['workdir'])
 
 import jax
@@ -30,8 +32,12 @@ target_files = snakemake.output
 epsilons = snakemake.config["epsilons"]
 queries = snakemake.config['queries']
 
-storage = ExperimentStorage(file_path="napsu_experiment_storage_output.csv", mode="replace")
-timer = Timer(file_path="napsu_MCMC_time_vs_epsilon_comparison.csv", mode="replace")
+storage_file_path = "napsu_experiment_storage_output.csv"
+mode: Literal["replace"] = "replace"
+timer_file_path = "napsu_MCMC_time_vs_epsilon_comparison.csv"
+
+storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+timer = Timer(file_path=timer_file_path, mode=mode)
 
 algo = "NUTS"
 
@@ -110,8 +116,11 @@ for dataset in datasets:
             inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
             # Save storage and timer results every iteration
-            storage.save()
-            timer.save()
+            print(storage.file_path)
+            print(storage.mode)
 
-storage.save()
-timer.save()
+            storage.save(file_path=storage_file_path, mode=mode)
+            timer.save(file_path=timer_file_path, mode=mode)
+
+storage.save(file_path=storage_file_path, mode=mode)
+timer.save(file_path=timer_file_path, mode=mode)
