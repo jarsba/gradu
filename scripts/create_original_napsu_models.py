@@ -92,7 +92,9 @@ for dataset in datasets:
             result: NapsuMQResult
             inf_data: InferenceDataT
 
+            print(dataframe.dtypes)
             print(dataframe.head())
+            print(dataframe.shape)
             print(dataframe.columns)
 
             result, inf_data = model.fit(
@@ -103,7 +105,8 @@ for dataset in datasets:
                 delta=delta,
                 column_feature_set=query_list,
                 MCMC_algo=algo,
-                use_laplace_approximation=True,
+                # Change back
+                use_laplace_approximation=False,
                 return_inference_data=True,
                 enable_profiling=True
             )
@@ -116,9 +119,6 @@ for dataset in datasets:
             inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
             # Save storage and timer results every iteration
-            print(storage.file_path)
-            print(storage.mode)
-
             storage.save(file_path=storage_file_path, mode=mode)
             timer.save(file_path=timer_file_path, mode=mode)
 

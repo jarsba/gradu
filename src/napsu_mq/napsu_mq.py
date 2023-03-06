@@ -89,6 +89,7 @@ class NapsuMQModel(InferenceModel):
         }
 
         dataframe = DataFrameData(data)
+        print(f"Domain size: {dataframe.get_domain_size()}")
         category_mapping = DataFrameData.get_category_mapping(data)
         n, d = dataframe.int_array.shape
 
