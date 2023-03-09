@@ -14,7 +14,7 @@
 
 
 import os
-from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple, List
+from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple, List, Literal
 
 import arviz as az
 import dill
@@ -22,6 +22,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+import jaxopt
 from jax.random import PRNGKey
 from mbi import Domain, Dataset
 from arviz.data.inference_data import InferenceDataT
@@ -40,12 +41,20 @@ from src.utils.keygen import get_key
 
 timer = Timer()
 
+laplace_approximation_algorithms = Literal['jax_minimize', 'jaxopt_LBFGS', 'jaxopt_BFGS', 'tfp_LBFGS', 'tfp_BFGS']
+
 
 def check_kwargs(kwargs, name, default_value):
     if name in kwargs:
         return kwargs[name]
     else:
         return default_value
+
+
+laplace_approximation_mapping = {
+    'jax_minimize': mei.run_numpyro_laplace_approximation,
+    'jaxopt_LBGFS': mei.laplace_approximation_with_jaxopt,
+}
 
 
 class NapsuMQModel(InferenceModel):
@@ -64,6 +73,7 @@ class NapsuMQModel(InferenceModel):
         dry_run = check_kwargs(kwargs, "dry_run", False)
         return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
         discretization = check_kwargs(kwargs, "discretization", None)
+        laplace_approximation_algorithm = check_kwargs(kwargs, "laplace_approximation_algorithm", "jax_minimize")
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -85,13 +95,15 @@ class NapsuMQModel(InferenceModel):
             "MCMC_algo": MCMC_algo,
             "laplace_approximation": use_laplace_approximation,
             "missing_query": missing_query,
-            "discretization": discretization
+            "discretization": discretization,
         }
 
         dataframe = DataFrameData(data)
         print(f"Domain size: {dataframe.get_domain_size()}")
         category_mapping = DataFrameData.get_category_mapping(data)
         n, d = dataframe.int_array.shape
+        print(n)
+        print(d)
 
         domain_key_list = list(dataframe.values_by_col.keys())
         domain_value_count_list = [len(dataframe.values_by_col[key]) for key in domain_key_list]
@@ -100,6 +112,7 @@ class NapsuMQModel(InferenceModel):
 
         domain = Domain(domain_key_list, domain_value_count_list)
 
+        print("start MST selection")
         if return_MST_weights is True:
             query_sets, weights = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
                                                 cliques_to_include=column_feature_set,
@@ -109,12 +122,17 @@ class NapsuMQModel(InferenceModel):
             query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
                                        cliques_to_include=column_feature_set)
 
+        print("end MST selection")
+
         timer.stop(pid)
 
         pid = timer.start(f"Calculating full marginal query", **timer_meta)
 
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
+
+        #query_list = queries.flatten()
+        #print(query_list)
 
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
@@ -129,6 +147,14 @@ class NapsuMQModel(InferenceModel):
 
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)
 
+        print("start lambda0")
+        mnjax.lambda0(jnp.ones(mnjax.lambda_d))
+        print("end lambda0")
+
+        print("start suff stat mean and cov")
+        mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
+        print("end suff stat mean and cov")
+
         junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
         print(f"Junction tree width: {junction_tree_width}")
         timer_meta['junction_tree_width'] = junction_tree_width
@@ -136,12 +162,15 @@ class NapsuMQModel(InferenceModel):
         suff_stat = np.sum(queries.flatten()(dataframe.int_array), axis=0)
 
         suff_stat_dim = suff_stat.shape
+        print(suff_stat_dim)
         timer_meta['suff_stat_dim'] = suff_stat_dim
 
         sensitivity = np.sqrt(2 * len(query_sets))
         inference_rng, dp_rng = jax.random.split(rng, 2)
 
         sigma_DP = privacy_accounting.sigma(epsilon, delta, sensitivity)
+
+        print(sigma_DP)
 
         dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
         dp_suff_stat = suff_stat + dp_noise
@@ -162,12 +191,20 @@ class NapsuMQModel(InferenceModel):
 
         if use_laplace_approximation is True:
 
+            timer_meta['laplace_approximation_algorithm'] = laplace_approximation_algorithm
+
             approx_rng, mcmc_rng = jax.random.split(inference_rng, 2)
 
             pid = timer.start(f"Laplace approximation", **timer_meta)
 
-            laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP,
-                                                                            mnjax)
+            if laplace_approximation_algorithm == 'jax_minimize':
+                laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP,
+                                                                                mnjax)
+            elif laplace_approximation_algorithm == 'jaxopt_LBFGS':
+                laplace_approx, success = mei.laplace_approximation_with_jaxopt(approx_rng, dp_suff_stat, n, sigma_DP,
+                                                                                mnjax)
+            else:
+                raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 
             timer.stop(pid)
 

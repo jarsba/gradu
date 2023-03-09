@@ -69,7 +69,8 @@ for dataset in datasets:
                 "epsilon": epsilon,
                 "delta": delta,
                 "MCMC_algo": "NUTS",
-                "laplace_approximation": True
+                "laplace_approximation": True,
+                "laplace_approximation_algorithm": "jaxopt_LBFGS"
             }
 
             dataset_query_str = f"{dataset_name}_{query_str}"
@@ -105,10 +106,10 @@ for dataset in datasets:
                 delta=delta,
                 column_feature_set=query_list,
                 MCMC_algo=algo,
-                # Change back
-                use_laplace_approximation=False,
+                use_laplace_approximation=True,
                 return_inference_data=True,
-                enable_profiling=True
+                enable_profiling=True,
+                laplace_approximation_algorithm="jaxopt_LBFGS"
             )
 
             timer.stop(pid)

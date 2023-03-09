@@ -106,7 +106,8 @@ for epsilon_str in epsilons:
             "epsilon": epsilon,
             "delta": delta,
             "MCMC_algo": "NUTS",
-            "laplace_approximation": True
+            "laplace_approximation": True,
+            "laplace_approximation_algorithm": "jaxopt_LBFGS"
         }
 
         pid = timer.start(f"Main run", **timer_meta)
@@ -133,6 +134,7 @@ for epsilon_str in epsilons:
             use_laplace_approximation=True,
             return_inference_data=True,
             missing_query=missing_query,
+            laplace_approximation_algorithm="jaxopt_LBFGS"
         )
 
         timer.stop(pid)

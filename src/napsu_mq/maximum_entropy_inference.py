@@ -19,6 +19,7 @@ import io
 
 import jax
 import jax.numpy as jnp
+import jaxopt
 import numpyro
 import numpyro.infer.util as nummcmc_util
 from numpyro.diagnostics import summary
@@ -189,6 +190,7 @@ def run_numpyro_laplace_approximation(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
         prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=10
 ) -> Tuple[numpyro.distributions.MultivariateNormal, bool]:
+    print("Started NumPyro Laplace approximation")
     key, *subkeys = random.split(rng, max_retries + 1)
     fail_count = 0
 
@@ -203,9 +205,14 @@ def run_numpyro_laplace_approximation(
             model_args=(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
         )
 
+        print("Initialising model done")
+
         lambdas = init_lambdas[0]["lambdas"]
 
+        print("Minimising potential function")
+
         result = jax.scipy.optimize.minimize(lambda l: potential_fn({"lambdas": l}), lambdas, method="BFGS", tol=1e-2)
+        print(result)
         if not result.success:
             fail_count += 1
         else:
@@ -215,6 +222,53 @@ def run_numpyro_laplace_approximation(
         if fail_count == max_retries:
             raise ConvergenceException(f"Minimize function failed to converge with {max_retries} retries")
 
+    print("Calculating Hessian")
+
     prec = jax.hessian(lambda l: potential_fn({"lambdas": l}))(mean)
     laplace_approx = numpyro.distributions.MultivariateNormal(loc=mean, precision_matrix=prec)
     return laplace_approx, result.success
+
+
+def laplace_approximation_with_jaxopt(
+        rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
+        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=10) -> Tuple[
+    numpyro.distributions.MultivariateNormal, bool]:
+    print("Started Jaxopt Laplace approximation")
+    key, *subkeys = random.split(rng, max_retries + 1)
+
+    fail_count = 0
+
+    for i in range(0, max_retries + 1):
+        print(f"Attempting Laplace approximation, {i}th try")
+
+        rng = subkeys[i]
+
+        init_lambdas, potential_fn, t, mt = nummcmc_util.initialize_model(
+            rng, mem.normal_prior_model_numpyro,
+            model_args=(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
+        )
+
+        print("Initialising model done")
+
+        lambdas = init_lambdas[0]["lambdas"]
+
+        print("Minimising potential function")
+
+        solver = jaxopt.LBFGS(potential_fn, maxiter=1000)
+        params, state = solver.run(init_params={'lambdas': lambdas})
+
+        failed = state.failed_linesearch
+
+        if not failed:
+            mean = params['lambdas']
+            break
+        else:
+            print("Failed linesearch, try again")
+
+        if fail_count == max_retries:
+            raise ConvergenceException(f"Minimize function failed to converge with {max_retries} retries")
+
+    print("Calculating Hessian")
+    prec = jax.hessian(lambda l: potential_fn({"lambdas": l}))(mean)
+    laplace_approx = numpyro.distributions.MultivariateNormal(loc=mean, precision_matrix=prec)
+    return laplace_approx, True

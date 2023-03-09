@@ -82,7 +82,8 @@ for dataset in datasets:
             "delta": delta,
             "MCMC_algo": "NUTS",
             "laplace_approximation": True,
-            "discretization": discretization_level
+            "discretization": discretization_level,
+            "laplace_approximation_algorithm": "jaxopt_LBFGS"
         }
 
         model_file_path = os.path.join(MODELS_FOLDER,
@@ -115,7 +116,8 @@ for dataset in datasets:
             use_laplace_approximation=True,
             return_inference_data=True,
             discretization=discretization_level,
-            enable_profiling=True
+            enable_profiling=True,
+            laplace_approximation_algorithm="jaxopt_LBFGS"
         )
 
         timer.stop(pid)
