@@ -86,8 +86,8 @@ rule create_original_napsu_models:
         expand("logs/inf_data_{experiment_product}.nc",experiment_product=experiment_products)
     threads: 8
     resources:
-        runtime="4320",
-        time="72:00:00",
+        runtime="2880",
+        time="48:00:00",
         mem_mb=48000,
         partition="medium"
     conda:
@@ -126,8 +126,8 @@ rule create_models_for_independence_pruning:
         expand("logs/inf_data_independence_pruning_{independence_pruning_product}.nc", independence_pruning_product=independence_pruning_products)
     threads: 8
     resources:
-        runtime="4320",
-        time="72:00:00",
+        runtime="2880",
+        time="48:00:00",
         mem_mb=48000,
         partition="medium"
     conda:
@@ -165,8 +165,8 @@ rule create_models_for_discretization:
         expand("logs/napsu_discretization_{discretization_product}.log", discretization_product=discretization_products)
     threads: 8
     resources:
-        runtime="4320",
-        time="72:00:00",
+        runtime="2880",
+        time="48:00:00",
         mem_mb=48000,
         partition="medium"
     conda:
