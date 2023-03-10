@@ -30,6 +30,3 @@ default-resources:
 # set-resources:
 #   - high_memory_rule:mem_mb=12000
 #   - long_running_rule:runtime=1200
-set-threads:
-  - run_napsu=4
-  - create_models_for_independence_pruning=4
