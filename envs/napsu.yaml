@@ -4,17 +4,17 @@ channels:
   - anaconda
   - bioconda
 dependencies:
-  - python=3.8.10
+  - python=3.8.13
   - snakemake=7.24
   - jax=0.4.6
   - pandas=1.5
-  - arviz=0.15
   - dill=0.3.6
   - python-graphviz=0.20.1
   - pip
   - pip:
-        - git+https://github.com/DPBayes/d3p.git@master#egg=d3p@0.2.0
+        - git+https://github.com/DPBayes/d3p.git@73695a6a51ec74522adafaa23dc8ab6e81a37686
         - git+https://github.com/ryan112358/private-pgm.git@ee90ac4ea5901654a0e86f0be4e217ddcf5b53bd
-        - jaxopt=0.6
+        - jaxopt==0.6
+        - arviz==0.15
 #variables:
 #  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
