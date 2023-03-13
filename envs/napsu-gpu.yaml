@@ -1,12 +1,15 @@
-name: napsu-model-env
+name: napsu-gpu-model-env
 channels:
   - conda-forge
   - anaconda
   - bioconda
+  - nvidia
 dependencies:
   - python=3.8.13
   - snakemake=7.24
   - jax=0.4.6
+  - jaxlib=*=*cuda*
+  - cuda-nvcc
   - numpyro=0.11
   - pandas=1.5
   - dill=0.3.6

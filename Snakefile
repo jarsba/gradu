@@ -91,6 +91,7 @@ rule create_original_napsu_models:
         time="48:00:00",
         mem_mb=48000,
         partition="medium"
+        # gpu=4
     conda:
         "envs/napsu.yaml"
     script:
@@ -131,6 +132,7 @@ rule create_models_for_independence_pruning:
         time="48:00:00",
         mem_mb=48000,
         partition="medium"
+        # gpu=4
     conda:
         "envs/napsu.yaml"
     script:
@@ -170,6 +172,7 @@ rule create_models_for_discretization:
         time="48:00:00",
         mem_mb=48000,
         partition="medium"
+        # gpu=4
     conda:
         "envs/napsu.yaml"
     script:
