@@ -5,10 +5,10 @@ channels:
   - bioconda
 dependencies:
   - python=3.8.10
-  - snakemake=7.24.1
+  - snakemake=7.24
   - jax=0.4.6
-  - pandas=1.5.3
-  - arviz=0.15.1
+  - pandas=1.5
+  - arviz=0.15
   - dill=0.3.6
   - python-graphviz=0.20.1
   - pip
