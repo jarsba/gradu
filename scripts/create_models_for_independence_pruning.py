@@ -134,6 +134,7 @@ for epsilon_str in epsilons:
             use_laplace_approximation=True,
             return_inference_data=True,
             missing_query=missing_query,
+            enable_profiling=True,
             laplace_approximation_algorithm="jaxopt_LBFGS"
         )
 

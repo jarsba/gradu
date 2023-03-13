@@ -63,7 +63,9 @@ class NapsuMQModel(InferenceModel):
         super().__init__()
 
     def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGKey, epsilon: float, delta: float,
-            **kwargs) -> Union['NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT], Mapping]:
+            **kwargs) -> Union[
+        'NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT], Mapping, Tuple['NapsuMQResult', Timer], Tuple[
+            'NapsuMQResult', InferenceDataT, Timer]]:
         column_feature_set = check_kwargs(kwargs, 'column_feature_set', [])
         MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
         use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
@@ -74,6 +76,7 @@ class NapsuMQModel(InferenceModel):
         return_MST_weights = check_kwargs(kwargs, "return_MST_weights", False)
         discretization = check_kwargs(kwargs, "discretization", None)
         laplace_approximation_algorithm = check_kwargs(kwargs, "laplace_approximation_algorithm", "jax_minimize")
+        return_timer = check_kwargs(kwargs, "return_timer", False)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -131,8 +134,8 @@ class NapsuMQModel(InferenceModel):
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
 
-        #query_list = queries.flatten()
-        #print(query_list)
+        # query_list = queries.flatten()
+        # print(query_list)
 
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
@@ -147,13 +150,15 @@ class NapsuMQModel(InferenceModel):
 
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)
 
-        print("start lambda0")
+        pid = timer.start(f"Calculating lambda0", **timer_meta)
         mnjax.lambda0(jnp.ones(mnjax.lambda_d))
-        print("end lambda0")
+        timer.stop(pid)
+        print(timer.get_time(pid))
 
-        print("start suff stat mean and cov")
+        pid = timer.start(f"Calculating suff stat mean and cov", **timer_meta)
         mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
-        print("end suff stat mean and cov")
+        timer.stop(pid)
+        print(timer.get_time(pid))
 
         junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
         print(f"Junction tree width: {junction_tree_width}")
@@ -236,10 +241,16 @@ class NapsuMQModel(InferenceModel):
             posterior_values = inf_data.posterior.stack(draws=("chain", "draw"))
             posterior_values = posterior_values.lambdas.values.transpose()
 
-        if return_inference_data:
-            return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta), inf_data
+        if return_timer is True:
+            if return_inference_data is True:
+                return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta), inf_data, timer
+            else:
+                return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta), timer
         else:
-            return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta)
+            if return_inference_data is True:
+                return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta), inf_data
+            else:
+                return NapsuMQResult(mnjax, posterior_values, category_mapping, timer_meta)
 
 
 class NapsuMQResult(InferenceResult):

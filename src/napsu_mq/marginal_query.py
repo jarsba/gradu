@@ -154,7 +154,7 @@ class FullMarginalQuerySet:
                 value = np.zeros(len(clique), dtype=int)
                 value[conv_clique_indices] = np.asarray(val, dtype=int)
                 counter = np.zeros(tuple([len(self.values_by_int_feature[variable]) for variable in clique_ordered]),
-                                      dtype=int)
+                                   dtype=int)
                 subsets = powerset(clique)
                 for subset in subsets:
                     multiplier = (-1) ** (len(clique) - len(subset))

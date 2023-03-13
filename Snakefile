@@ -37,6 +37,7 @@ independence_pruning_dataset_files = [value for value in independence_pruning_da
 independence_pruning_queries = query_independence_pruning_product()
 independence_pruning_products = generate_independence_pruning_products(epsilons, independence_pruning_queries)
 
+singularity: "docker://continuumio/miniconda3:4.12.0"
 
 wildcard_constraints:
     experiment_id="[a-zA-Z\d]{8}"

@@ -15,6 +15,9 @@ class Timer(metaclass=Singleton):
     def get_times(self):
         return self.times
 
+    def get_time(self, process_id: str) -> dict:
+        return self.times[process_id]
+
     def start(self, task: str, **kwargs) -> str:
         print("Recording: ", task)
         if "experiment_id" in kwargs:

@@ -1,0 +1,9 @@
+pip3 install git+https://github.com/DPBayes/d3p.git@master#egg=d3p[compatible-dependencies]
+pip3 install snakemake==7.24.1
+pip3 install pandas==1.5.3
+pip3 install graphviz==0.20.1
+pip3 install arviz==0.15.1
+pip3 install dill==0.3.6
+pip3 install jaxopt==0.6
+pip3 install git+https://github.com/ryan112358/private-pgm.git
+pip3 install memray
