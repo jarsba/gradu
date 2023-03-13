@@ -4,12 +4,12 @@ channels:
   - bioconda
 dependencies:
   - python=3.8.10
-  - snakemake=7.16.0
-  - scikit-learn=1.1.2
-  - pandas=1.5.0
-  - xgboost=1.6.2
-  - lightgbm=3.3.2
-  - seaborn=0.12.0
+  - snakemake=7.24.1
+  - scikit-learn=1.2.2
+  - pandas=1.5.3
+  - xgboost=1.7.4
+  - lightgbm=3.3.5
+  - seaborn=0.12.2
 #variables:
 #  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
 
