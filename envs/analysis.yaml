@@ -12,6 +12,6 @@ dependencies:
   - xgboost=1.7
   - lightgbm=3.3
   - seaborn=0.12
-#variables:
-#  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
+variables:
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
 
