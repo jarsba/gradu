@@ -135,7 +135,8 @@ for epsilon_str in epsilons:
             return_inference_data=True,
             missing_query=missing_query,
             enable_profiling=True,
-            laplace_approximation_algorithm="jaxopt_LBFGS"
+            laplace_approximation_algorithm="jaxopt_LBFGS",
+            laplace_approximation_forward_mode=True
         )
 
         timer.stop(pid)

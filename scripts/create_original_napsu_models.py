@@ -109,7 +109,8 @@ for dataset in datasets:
                 use_laplace_approximation=True,
                 return_inference_data=True,
                 enable_profiling=True,
-                laplace_approximation_algorithm="jaxopt_LBFGS"
+                laplace_approximation_algorithm="jaxopt_LBFGS",
+                laplace_approximation_forward_mode=True
             )
 
             timer.stop(pid)
