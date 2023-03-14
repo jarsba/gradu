@@ -4,6 +4,8 @@ channels:
   - anaconda
   - bioconda
 dependencies:
+  - libgcc
+  - gcc=12.1.0
   - python=3.8.13
   - snakemake=7.24
   - jax=0.4.6
