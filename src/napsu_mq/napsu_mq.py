@@ -77,6 +77,7 @@ class NapsuMQModel(InferenceModel):
         discretization = check_kwargs(kwargs, "discretization", None)
         laplace_approximation_algorithm = check_kwargs(kwargs, "laplace_approximation_algorithm", "jax_minimize")
         return_timer = check_kwargs(kwargs, "return_timer", False)
+        laplace_approximation_forward_mode = check_kwargs(kwargs, "laplace_approximation_forward_mode", False)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -204,10 +205,12 @@ class NapsuMQModel(InferenceModel):
 
             if laplace_approximation_algorithm == 'jax_minimize':
                 laplace_approx, success = mei.run_numpyro_laplace_approximation(approx_rng, dp_suff_stat, n, sigma_DP,
-                                                                                mnjax)
+                                                                                mnjax,
+                                                                                use_forward_mode=laplace_approximation_forward_mode)
             elif laplace_approximation_algorithm == 'jaxopt_LBFGS':
                 laplace_approx, success = mei.laplace_approximation_with_jaxopt(approx_rng, dp_suff_stat, n, sigma_DP,
-                                                                                mnjax)
+                                                                                mnjax,
+                                                                                use_forward_mode=laplace_approximation_forward_mode)
             else:
                 raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 

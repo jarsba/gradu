@@ -157,7 +157,7 @@ def get_adult_train_small(dataset_folder: str = None) -> pd.DataFrame:
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5, columns=ADULT_COLUMNS_SMALL)
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10, columns=ADULT_COLUMNS_SMALL)
 
     return cleaned_adult
 
@@ -167,16 +167,17 @@ def get_adult_train_large(dataset_folder: str = None) -> pd.DataFrame:
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5, columns=ADULT_COLUMNS_LARGE)
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10, columns=ADULT_COLUMNS_LARGE)
 
     return cleaned_adult
+
 
 def get_adult_test_small(dataset_folder: str = None) -> pd.DataFrame:
     if dataset_folder is None:
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5, columns=ADULT_COLUMNS_SMALL)
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10, columns=ADULT_COLUMNS_SMALL)
 
     return cleaned_adult
 
@@ -186,10 +187,9 @@ def get_adult_test_large(dataset_folder: str = None) -> pd.DataFrame:
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5, columns=ADULT_COLUMNS_LARGE)
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10, columns=ADULT_COLUMNS_LARGE)
 
     return cleaned_adult
-
 
 
 def get_adult_train_no_discretization(dataset_folder: str = None) -> pd.DataFrame:
@@ -221,7 +221,7 @@ def get_adult_train_no_discretization(dataset_folder: str = None) -> pd.DataFram
 
 def get_adult_test_no_discretization(dataset_folder: str = None) -> pd.DataFrame:
     """
-    Returns: Subset of Adult test dataset that has columns discretized to buckets of 10 and that has following columns:
+    Returns: Subset of Adult test dataset that has following columns:
         - 'age'
         - 'sex'
         - 'education-num'
@@ -264,7 +264,7 @@ def get_adult_train_low_discretization(dataset_folder: str = None) -> pd.DataFra
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5,
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
@@ -288,7 +288,7 @@ def get_adult_test_low_discretization(dataset_folder: str = None) -> pd.DataFram
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=5,
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
@@ -312,7 +312,7 @@ def get_adult_train_high_discretization(dataset_folder: str = None) -> pd.DataFr
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=20,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
@@ -336,7 +336,7 @@ def get_adult_test_high_discretization(dataset_folder: str = None) -> pd.DataFra
         dataset_folder = DATASETS_FOLDER
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
-    cleaned_adult = clean_adult_with_discretization(data, bucket_size=10,
+    cleaned_adult = clean_adult_with_discretization(data, bucket_size=20,
                                                     columns=ADULT_COLUMNS_DISCRETIZATION)
 
     return cleaned_adult
