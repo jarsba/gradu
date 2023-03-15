@@ -12,15 +12,15 @@ ADULT_COLUMNS = ['age', 'workclass', 'education-num', 'marital-status',
                  'hours-per-week', 'native-country', 'had-capital-gains', 'had-capital-losses', 'compensation']
 
 ADULT_COLUMNS_SMALL = [
-    "education-num", "marital-status", "age", "sex", "hours-per-week", "compensation"
+    "education-num", "marital-status", "age", "hours-per-week", "compensation"
 ]
 
 ADULT_COLUMNS_LARGE = [
-    "age", "sex", "education-num", "hours-per-week", "workclass", "marital-status",
+    "age", "education-num", "hours-per-week", "workclass", "marital-status",
     "had-capital-gains", "had-capital-losses", "compensation"
 ]
 
-ADULT_COLUMNS_DISCRETIZATION = ['age', 'sex', 'education-num', 'hours-per-week', 'workclass', 'marital-status',
+ADULT_COLUMNS_DISCRETIZATION = ['age', 'education-num', 'hours-per-week', 'workclass', 'marital-status',
                                 'had-capital-gains', 'had-capital-losses', 'compensation']
 
 

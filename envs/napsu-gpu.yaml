@@ -6,7 +6,7 @@ channels:
   - nvidia
 dependencies:
   - libgcc
-  - gcc=12.1.0
+  - gcc
   - python=3.8.13
   - snakemake=7.24
   - jax=0.4.6
@@ -23,5 +23,5 @@ dependencies:
         - git+https://github.com/ryan112358/private-pgm.git@ee90ac4ea5901654a0e86f0be4e217ddcf5b53bd
         - jaxopt==0.6
         - arviz==0.15
-variables:
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
+#variables:
+#  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/wrk-vakka/users/jarlehti/miniconda3/lib
