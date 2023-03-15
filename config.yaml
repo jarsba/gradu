@@ -60,8 +60,6 @@ queries:
     - [['age', 'hours-per-week']]
     - [['education-num', 'compensation']]
     - [['hours-per-week', 'compensation']]
-    - [['sex', 'hours-per-week']]
-    - [['age', 'sex']]
 
   "adult_large":
     - []
@@ -71,9 +69,7 @@ queries:
     - [['education-num', 'compensation']]
     - [['hours-per-week', 'compensation']]
     - [['education-num', 'workclass']]
-    - [['sex', 'hours-per-week']]
     - [['hours-per-week', 'workclass']]
-    - [['age', 'sex']]
 
   "adult_no_discretization":
     - []
