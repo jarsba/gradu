@@ -5,8 +5,13 @@ from typing import Literal
 sys.path.append(snakemake.config['workdir'])
 
 import jax
-jax.config.update("jax_enable_x64", True)
+from jax.config import config
+config.update("jax_enable_x64", True)
 
+import torch
+torch.set_default_dtype(torch.float64)
+
+import numpy as np
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 
@@ -18,6 +23,11 @@ from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
 from src.utils.string_utils import epsilon_str_to_float
 from src.utils.data_utils import transform_for_modeling
+
+seed = snakemake.config['seed']
+torch.manual_seed(seed)
+rng = jax.random.PRNGKey(seed)
+np.random.seed(seed)
 
 dataset_map = snakemake.config['original_datasets']
 inverted_dataset_map = {v: k for k, v in dataset_map.items()}

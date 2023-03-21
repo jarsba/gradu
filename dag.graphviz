@@ -1,0 +1,47 @@
+digraph snakemake_dag {
+    ranksep = 2;
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "csv_results", color = "0.53 0.6 0.85", style="rounded"];
+	1[label = "run_logistic_regression_on_original", color = "0.10 0.6 0.85", style="rounded"];
+	2[label = "generate_original_datasets", color = "0.27 0.6 0.85", style="rounded"];
+	3[label = "run_logistic_regression_on_synt", color = "0.03 0.6 0.85", style="rounded"];
+	4[label = "generate_synthetic_datasets", color = "0.47 0.6 0.85", style="rounded"];
+	5[label = "create_original_napsu_models", color = "0.57 0.6 0.85", style="rounded"];
+	6[label = "run_classification_on_original", color = "0.07 0.6 0.85", style="rounded"];
+	7[label = "run_classification_on_synt", color = "0.30 0.6 0.85", style="rounded"];
+	8[label = "run_logistic_regression_on_discretized_data", color = "0.23 0.6 0.85", style="rounded"];
+	9[label = "generate_datasets_for_discretized_data", color = "0.50 0.6 0.85", style="rounded"];
+	10[label = "create_models_for_discretization", color = "0.40 0.6 0.85", style="rounded"];
+	11[label = "run_logistic_regression_on_independence_pruning_datasets", color = "0.00 0.6 0.85", style="rounded"];
+	12[label = "generate_datasets_for_independence_pruning", color = "0.17 0.6 0.85", style="rounded"];
+	13[label = "create_models_for_independence_pruning", color = "0.37 0.6 0.85", style="rounded"];
+	14[label = "run_ci_coverage_on_original_models", color = "0.13 0.6 0.85", style="rounded"];
+	15[label = "run_ci_coverage_on_discretized_models", color = "0.60 0.6 0.85", style="rounded"];
+	16[label = "run_ci_coverage_on_independence_pruning_models", color = "0.20 0.6 0.85", style="rounded"];
+	1 -> 0
+	3 -> 0
+	6 -> 0
+	7 -> 0
+	8 -> 0
+	11 -> 0
+	14 -> 0
+	15 -> 0
+	16 -> 0
+	2 -> 1
+	4 -> 3
+	5 -> 4
+	2 -> 5
+	2 -> 6
+	4 -> 7
+	9 -> 8
+	10 -> 9
+	2 -> 10
+	12 -> 11
+	13 -> 12
+	2 -> 13
+	5 -> 14
+	10 -> 15
+	13 -> 16
+}            

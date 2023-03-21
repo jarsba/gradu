@@ -51,7 +51,6 @@ class EmptyFactor:
     def marginalise(self, variable) -> 'EmptyFactor':
         return EmptyFactor(self.scope.difference({variable}))
 
-    @staticmethod
     def list_product(factors: Iterable['EmptyFactor']) -> 'EmptyFactor':
         factors = list(factors)
         product = factors[0]
@@ -128,7 +127,6 @@ class JunctionTree:
                 if neighbour not in marked_nodes:
                     node_stack.append(neighbour)
 
-    @staticmethod
     def from_variable_elimination(feature_sets: Iterable[Tuple[T, T]], elimination_order: Iterable) -> 'JunctionTree':
         """Create a junction tree from a variable elimination run.
         Args:
@@ -145,12 +143,9 @@ class JunctionTree:
             factors = JunctionTree.eliminate_var(factors, variable, nodes, edges)
 
         jt = JunctionTree(nodes, edges, feature_sets)
-        print(f"Nodes after elimination: {nodes}")
-        print(f"Edges after elimination: {edges}")
 
         return jt
 
-    @staticmethod
     def eliminate_var(factors: Iterable, variable: Iterable, nodes, edges) -> List:
         factors_in_prod = [factor for factor in factors if variable in factor.scope]
         factors_not_in_prod = [factor for factor in factors if variable not in factor.scope]
@@ -204,13 +199,14 @@ class JunctionTree:
                 self.init_node_orders()
                 return
 
-
-    def find_redundant_node(self) -> Tuple['TreeNode', 'TreeNode', List['TreeNode']]:
+    def find_redundant_node(self) -> Union[Tuple['TreeNode', 'TreeNode', List['TreeNode']], None]:
         for node in self.nodes:
             neighbours = self.get_neighbours(node)
             for neighbour in neighbours:
                 if set(node).issubset(set(neighbour)):
                     return node, neighbour, neighbours
+
+        return None
 
     def compute_downward_order(self, root_node: 'TreeNode') -> List:
         order = []
@@ -255,9 +251,7 @@ class JunctionTree:
             int: The maximum width of the whole tree.
         """
         root_node = self.root_node
-        print(root_node.children)
         tree_height = self.calculate_tree_height(root_node, 0)
-        print(tree_height)
         if tree_height == 0:
             return 0
         tree_widths = [0] * tree_height

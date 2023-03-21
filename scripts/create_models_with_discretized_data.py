@@ -4,11 +4,14 @@ from typing import Literal
 
 sys.path.append(snakemake.config['workdir'])
 
-from arviz.data.inference_data import InferenceDataT
 import jax
+from jax.config import config
+config.update("jax_enable_x64", True)
 
-jax.config.update("jax_enable_x64", True)
+import torch
+torch.set_default_dtype(torch.float64)
 
+from arviz.data.inference_data import InferenceDataT
 import pandas as pd
 
 from src.utils.path_utils import MODELS_FOLDER

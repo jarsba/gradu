@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Union, Callable, Tuple, Literal
+from typing import Union, Callable, Tuple, Literal, Optional
 import cProfile
 from pstats import SortKey
 import pstats
@@ -27,12 +27,31 @@ from numpyro.diagnostics import summary
 from jax import random
 import numpy as np
 
+import pyro.infer.mcmc.util as mcmc_util
+import torch
+import torch.autograd as autograd
+import torch.optim as optim
+from pyro.infer import MCMC, NUTS
+
 from . import maximum_entropy_model as mem
 from .markov_network_jax import MarkovNetworkJax
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 
 storage = ExperimentStorage()
 kernels = Literal['NUTS', 'HMC']
+
+
+def rng_state_set(generator: Optional[torch.Generator] = None) -> Optional[torch.Tensor]:
+    if generator is not None:
+        old_rng_state = torch.get_rng_state()
+        torch.set_rng_state(generator.get_state())
+        return old_rng_state
+    return None
+
+
+def rng_state_restore(old_rng_state: torch.Tensor) -> None:
+    if old_rng_state is not None:
+        torch.set_rng_state(old_rng_state)
 
 
 def get_kernel(MCMC_algo: kernels):
@@ -232,8 +251,9 @@ def run_numpyro_laplace_approximation(
 
 def laplace_approximation_with_jaxopt(
         rng: random.PRNGKey, suff_stat: jnp.ndarray, n: int, sigma_DP: float, max_ent_dist: MarkovNetworkJax,
-        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=10, use_forward_mode=False) -> Tuple[
-    numpyro.distributions.MultivariateNormal, bool]:
+        prior_mu: Union[float, jnp.ndarray] = 0, prior_sigma: float = 10, max_retries=10, use_forward_mode=False) -> \
+        Tuple[
+            numpyro.distributions.MultivariateNormal, bool]:
     print("Started Jaxopt Laplace approximation")
     key, *subkeys = random.split(rng, max_retries + 1)
 
@@ -277,4 +297,100 @@ def laplace_approximation_with_jaxopt(
     print("Calculating Hessian")
     prec = jax.hessian(lambda l: potential_fn({"lambdas": l}))(mean)
     laplace_approx = numpyro.distributions.MultivariateNormal(loc=mean, precision_matrix=prec)
+    return laplace_approx, True
+
+
+def run_mcmc(
+        suff_stat, n, sigma_DP, max_ent_dist,
+        prior_mu=0, prior_sigma=10,
+        num_samples=2000, warmup_steps=200, num_chains=4,
+        disable_progressbar=False, generator=Optional[torch.Generator]
+):
+    ors = rng_state_set(generator)
+    nuts_kernel = NUTS(mem.normal_prior_model, jit_compile=False)
+
+    mcmc = MCMC(
+        nuts_kernel, num_samples=num_samples,
+        warmup_steps=warmup_steps, num_chains=num_chains,
+        mp_context="forkserver", disable_progbar=disable_progressbar
+    )
+    mcmc.run(suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
+    rng_state_restore(ors)
+    return mcmc
+
+
+def run_mcmc_normalised(
+        suff_stat, n, sigma_DP, max_ent_dist, laplace_approx,
+        prior_sigma=10, num_samples=2000, warmup_steps=200, num_chains=4,
+        disable_progressbar=False, generator=Optional[torch.Generator]
+):
+    ors = rng_state_set(generator)
+    nuts_kernel = NUTS(mem.normal_prior_normalised_model, jit_compile=False)
+
+    mean_guess = laplace_approx.loc
+    L_guess = torch.linalg.cholesky(laplace_approx.covariance_matrix)
+    mcmc = MCMC(
+        nuts_kernel, num_samples=num_samples,
+        warmup_steps=warmup_steps, num_chains=num_chains,
+        mp_context="spawn", disable_progbar=disable_progressbar
+    )
+    mcmc.run(suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess)
+
+    def backtransform(lambdas):
+        return (L_guess.detach().numpy() @ lambdas.T).T + mean_guess.detach().numpy()
+
+    rng_state_restore(ors)
+    return mcmc, backtransform
+
+
+def laplace_optimisation_torch(lambdas, potential_fn, max_iters, tol, max_loss_jump):
+    print("Running Laplace optimization")
+    opt = optim.LBFGS([lambdas])
+    losses = []
+    for i in range(max_iters):
+        def closure():
+            opt.zero_grad()
+            output = potential_fn({"lambdas": lambdas})
+            losses.append(output.item())
+            output.backward()
+            return output
+
+        opt.step(closure)
+        if len(losses) > 1 and abs(losses[-1] - losses[-2]) < tol:
+            return True, lambdas, losses
+        if len(losses) > 1 and (losses[-1] - losses[-2]) > max_loss_jump:
+            return False, lambdas, losses
+
+    return False, lambdas, losses
+
+
+def laplace_approximation_normal_prior(
+        suff_stat, n, sigma_DP, max_ent_dist, prior_mu=0, prior_sigma=10, max_iters=500,
+        tol=1e-5, max_loss_jump=1e3, max_retries=10, generator: Optional[torch.Generator] = None
+):
+    ors = rng_state_set(generator)
+
+    fail_count = 0
+    for i in range(max_retries + 1):
+        init_lambdas, potential_fn, t, mt = mcmc_util.initialize_model(
+            mem.normal_prior_model, (suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist)
+        )
+        lambdas = init_lambdas["lambdas"].clone().requires_grad_(True)
+        success, lambdas, losses = laplace_optimisation_torch(lambdas, potential_fn, max_iters, tol, max_loss_jump)
+        if success is True:
+            hess = autograd.functional.hessian(lambda l: potential_fn({"lambdas": l}), lambdas)
+            try:
+                laplace_approx = torch.distributions.MultivariateNormal(lambdas, precision_matrix=hess)
+            except ValueError:
+                success = False
+        if success is True:
+            break
+        else:
+            fail_count += 1
+
+    rng_state_restore(ors)
+
+    if success is False:
+        raise ConvergenceException(f"Torch Laplace approximation L-BGFS failed to converge with {max_retries} retries")
+
     return laplace_approx, True

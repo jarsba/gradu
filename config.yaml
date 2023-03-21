@@ -13,10 +13,10 @@ datasets:
   "adult_high_discretization_test": "data/datasets/adult_high_discretization_test.csv"
 
 original_datasets:
-  "binary3d": "data/datasets/binary3d.csv"
-  "binary4d": "data/datasets/binary4d.csv"
   "adult_small": "data/datasets/adult_small.csv"
   "adult_large": "data/datasets/adult_large.csv"
+  "binary3d": "data/datasets/binary3d.csv"
+  "binary4d": "data/datasets/binary4d.csv"
 
 discretization_datasets:
   "adult_high_discretization": "data/datasets/adult_high_discretization.csv"

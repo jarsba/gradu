@@ -5,8 +5,11 @@ from typing import Literal
 sys.path.append(snakemake.config['workdir'])
 
 import jax
+from jax.config import config
+config.update("jax_enable_x64", True)
 
-jax.config.update("jax_enable_x64", True)
+import torch
+torch.set_default_dtype(torch.float64)
 
 import itertools
 from arviz.data.inference_data import InferenceDataT

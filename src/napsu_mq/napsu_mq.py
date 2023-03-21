@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from jax.config import config
+config.update("jax_enable_x64", True)
+
+import torch
+torch.set_default_dtype(torch.float64)
 
 import os
 from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple, List, Literal
@@ -19,14 +24,16 @@ from typing import Optional, Union, Iterable, BinaryIO, Mapping, Tuple, List, Li
 import arviz as az
 import dill
 import jax
+
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-import jaxopt
 from jax.random import PRNGKey
 from mbi import Domain, Dataset
 from arviz.data.inference_data import InferenceDataT
+from numpyro.distributions import MultivariateNormal
 
+from .markov_network_torch import MarkovNetworkTorch
 from . import maximum_entropy_inference as mei
 from . import privacy_accounting as privacy_accounting
 from .base import InferenceModel, InferenceResult, InvalidFileFormatException
@@ -65,7 +72,7 @@ class NapsuMQModel(InferenceModel):
     def fit(self, data: pd.DataFrame, dataset_name: str, rng: PRNGKey, epsilon: float, delta: float,
             **kwargs) -> Union[
         'NapsuMQResult', Tuple['NapsuMQResult', InferenceDataT], Mapping, Tuple['NapsuMQResult', Timer], Tuple[
-            'NapsuMQResult', InferenceDataT, Timer]]:
+            'NapsuMQResult', InferenceDataT, Timer], MultivariateNormal]:
         column_feature_set = check_kwargs(kwargs, 'column_feature_set', [])
         MCMC_algo = check_kwargs(kwargs, 'MCMC_algo', 'NUTS')
         use_laplace_approximation = check_kwargs(kwargs, 'use_laplace_approximation', True)
@@ -78,6 +85,8 @@ class NapsuMQModel(InferenceModel):
         laplace_approximation_algorithm = check_kwargs(kwargs, "laplace_approximation_algorithm", "jax_minimize")
         return_timer = check_kwargs(kwargs, "return_timer", False)
         laplace_approximation_forward_mode = check_kwargs(kwargs, "laplace_approximation_forward_mode", False)
+        only_laplace_approximation = check_kwargs(kwargs, "only_laplace_approximation", False)
+        no_privacy = check_kwargs(kwargs, "no_privacy", False)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -112,9 +121,17 @@ class NapsuMQModel(InferenceModel):
         domain_key_list = list(dataframe.values_by_col.keys())
         domain_value_count_list = [len(dataframe.values_by_col[key]) for key in domain_key_list]
 
+        print("Domain value count list")
+        print(domain_value_count_list)
+        print("Dataframe values by col")
+        print(dataframe.values_by_col)
         pid = timer.start(f"Query selection", **timer_meta)
 
         domain = Domain(domain_key_list, domain_value_count_list)
+
+        print("Dataframe int df")
+        print(dataframe.int_df)
+        print(dataframe.int_df.shape)
 
         print("start MST selection")
         if return_MST_weights is True:
@@ -135,8 +152,8 @@ class NapsuMQModel(InferenceModel):
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
 
-        # query_list = queries.flatten()
-        # print(query_list)
+        query_list = queries.flatten()
+        print(len(query_list.queries))
 
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
@@ -150,6 +167,11 @@ class NapsuMQModel(InferenceModel):
         timer.stop(pid)
 
         mnjax = MarkovNetworkJax(dataframe.values_by_col, queries)
+        mntorch = MarkovNetworkTorch(dataframe.values_by_col, queries)
+
+        # Compile functions
+        mnjax.lambda0(jnp.ones(mnjax.lambda_d))
+        mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
 
         pid = timer.start(f"Calculating lambda0", **timer_meta)
         mnjax.lambda0(jnp.ones(mnjax.lambda_d))
@@ -158,6 +180,16 @@ class NapsuMQModel(InferenceModel):
 
         pid = timer.start(f"Calculating suff stat mean and cov", **timer_meta)
         mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
+        timer.stop(pid)
+        print(timer.get_time(pid))
+
+        pid = timer.start(f"Calculating lambda0 torch", **timer_meta)
+        mntorch.lambda0(torch.ones(mntorch.lambda_d))
+        timer.stop(pid)
+        print(timer.get_time(pid))
+
+        pid = timer.start(f"Calculating suff stat mean and cov torch", **timer_meta)
+        mntorch.suff_stat_mean_and_cov(torch.ones(mntorch.lambda_d))
         timer.stop(pid)
         print(timer.get_time(pid))
 
@@ -174,12 +206,18 @@ class NapsuMQModel(InferenceModel):
         sensitivity = np.sqrt(2 * len(query_sets))
         inference_rng, dp_rng = jax.random.split(rng, 2)
 
-        sigma_DP = privacy_accounting.sigma(epsilon, delta, sensitivity)
-
-        print(sigma_DP)
-
-        dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
-        dp_suff_stat = suff_stat + dp_noise
+        if no_privacy is True:
+            print("WARNING: No privacy is used!")
+            sigma_DP = 0
+            print(sigma_DP)
+            dp_suff_stat = suff_stat
+            dp_suff_stat_torch = torch.from_numpy(np.asarray(dp_suff_stat))
+        else:
+            sigma_DP = privacy_accounting.sigma(epsilon, delta, sensitivity)
+            print(sigma_DP)
+            dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
+            dp_suff_stat = suff_stat + dp_noise
+            dp_suff_stat_torch = torch.from_numpy(np.asarray(dp_suff_stat))
 
         if dry_run is True:
             meta = {
@@ -211,10 +249,17 @@ class NapsuMQModel(InferenceModel):
                 laplace_approx, success = mei.laplace_approximation_with_jaxopt(approx_rng, dp_suff_stat, n, sigma_DP,
                                                                                 mnjax,
                                                                                 use_forward_mode=laplace_approximation_forward_mode)
+            elif laplace_approximation_algorithm == 'torch_LBFGS':
+                laplace_approx, success = mei.laplace_approximation_normal_prior(dp_suff_stat_torch, n, sigma_DP, mntorch)
             else:
                 raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 
             timer.stop(pid)
+
+            print(timer.get_time(pid))
+
+            if only_laplace_approximation is True:
+                return laplace_approx
 
             pid = timer.start(f"MCMC", **timer_meta)
 
