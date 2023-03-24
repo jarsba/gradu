@@ -61,6 +61,7 @@ def check_kwargs(kwargs, name, default_value):
 laplace_approximation_mapping = {
     'jax_minimize': mei.run_numpyro_laplace_approximation,
     'jaxopt_LBGFS': mei.laplace_approximation_with_jaxopt,
+    'torch_LBGFS': mei.laplace_approximation_normal_prior,
 }
 
 
@@ -170,28 +171,30 @@ class NapsuMQModel(InferenceModel):
         mntorch = MarkovNetworkTorch(dataframe.values_by_col, queries)
 
         # Compile functions
-        mnjax.lambda0(jnp.ones(mnjax.lambda_d))
-        mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
-
-        pid = timer.start(f"Calculating lambda0", **timer_meta)
-        mnjax.lambda0(jnp.ones(mnjax.lambda_d))
-        timer.stop(pid)
-        print(timer.get_time(pid))
-
-        pid = timer.start(f"Calculating suff stat mean and cov", **timer_meta)
-        mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
-        timer.stop(pid)
-        print(timer.get_time(pid))
-
-        pid = timer.start(f"Calculating lambda0 torch", **timer_meta)
-        mntorch.lambda0(torch.ones(mntorch.lambda_d))
-        timer.stop(pid)
-        print(timer.get_time(pid))
-
-        pid = timer.start(f"Calculating suff stat mean and cov torch", **timer_meta)
-        mntorch.suff_stat_mean_and_cov(torch.ones(mntorch.lambda_d))
-        timer.stop(pid)
-        print(timer.get_time(pid))
+        # mnjax.lambda0(jnp.ones(mnjax.lambda_d))
+        # mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
+        #
+        # pid = timer.start(f"Calculating lambda0", **timer_meta)
+        # mnjax.lambda0(jnp.ones(mnjax.lambda_d))
+        # timer.stop(pid)
+        # print(timer.get_time(pid))
+        #
+        # pid = timer.start(f"Calculating suff stat mean and cov", **timer_meta)
+        # mnjax.suff_stat_mean_and_cov(jnp.ones(mnjax.lambda_d))
+        # timer.stop(pid)
+        # print(timer.get_time(pid))
+        #
+        # pid = timer.start(f"Calculating lambda0 torch", **timer_meta)
+        # mntorch.lambda0(torch.ones(mntorch.lambda_d))
+        # timer.stop(pid)
+        # print(timer.get_time(pid))
+        #
+        # pid = timer.start(f"Calculating suff stat mean and cov torch", **timer_meta)
+        # mntorch.suff_stat_mean_and_cov(torch.ones(mntorch.lambda_d))
+        # timer.stop(pid)
+        # print(timer.get_time(pid))
+        #
+        # print(jax.make_jaxpr(mnjax.lambda0)(jnp.ones(mnjax.lambda_d)))
 
         junction_tree_width = mnjax.junction_tree.calculate_max_tree_width()
         print(f"Junction tree width: {junction_tree_width}")
@@ -255,8 +258,6 @@ class NapsuMQModel(InferenceModel):
                 raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 
             timer.stop(pid)
-
-            print(timer.get_time(pid))
 
             if only_laplace_approximation is True:
                 return laplace_approx

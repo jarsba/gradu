@@ -38,7 +38,7 @@ class MarkovNetworkJax(MarkovNetwork):
         self.suff_stat_cov_bp = jax.jit(jax.jacrev(self.suff_stat_mean_bp))
         self.log_factor_class = LogFactorJax
 
-    @functools.partial(jax.jit, static_argnums=0)
+    @functools.partial(jax.jit, static_argnums=(0,))
     def lambda0(self, lambdas: jnp.ndarray) -> jnp.ndarray:
         factors = self.compute_factors(lambdas)
         result_factor = self.variable_elimination(factors, self.elimination_order)
@@ -91,6 +91,20 @@ class MarkovNetworkJax(MarkovNetwork):
             vec = vec.at[tuple(query_val)].set(lambdas[query_ind])
         return vec
 
+    def log_factor_vector_vmapped(self, lambdas: jnp.ndarray, variables: Iterable) -> jnp.ndarray:
+        shape = tuple(len(self.domain[var]) for var in variables)
+        vec = jnp.zeros(shape)
+        indices = jnp.array(np.ndindex(shape))
+
+        # get the query indices and values for the given variables
+        query_indices = self.variable_associations[variables]
+        query_values = jnp.array([self.flat_queries.queries[ind].value for ind in query_indices], dtype=int)
+
+        # update the empty array with the corresponding lambda values
+        vec = vec.at[indices[query_values]].set(lambdas[query_indices])
+
+        return vec
+
     def compute_factors(self, lambdas: jnp.ndarray) -> List[LogFactorJax]:
         return [
                    LogFactorJax(factor_scope, self.log_factor_vector(lambdas, factor_scope), self.debug_checks)
@@ -99,3 +113,15 @@ class MarkovNetworkJax(MarkovNetwork):
                    LogFactorJax((variable,), jnp.zeros(len(self.domain[variable])), self.debug_checks)
                    for variable in self.variables_not_in_queries
                ]
+
+    def compute_factors_vmapped(self, lambdas: jnp.ndarray) -> List[LogFactorJax]:
+        factor_scopes = list(self.variable_associations.keys())
+
+        log_factors_batch = jax.vmap(self.log_factor_vector)
+        log_factor_vectors = [log_factors_batch(lambdas, factor_scope) for factor_scope in factor_scopes]
+
+        first_list = [LogFactorJax(scope, log_factor, self.debug_checks) for scope, log_factor in zip(factor_scopes, log_factor_vectors)]
+        second_list = [LogFactorJax((variable,), jnp.zeros(len(self.domain[variable])), self.debug_checks)
+                       for variable in self.variables_not_in_queries]
+
+        return first_list + second_list

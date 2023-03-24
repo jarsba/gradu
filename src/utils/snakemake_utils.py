@@ -1,6 +1,31 @@
-from src.utils.keygen import get_key, get_hash
 from src.utils.query_utils import join_query_list
 import itertools
+from src.utils.preprocess_dataset import ADULT_COLUMNS_SMALL
+from src.utils.string_utils import format_job_parameter_for_napsu_original
+
+
+def get_query_list(queries, dataset_name):
+    query_strings = []
+    dataset_queries = queries[dataset_name]
+    for query_list in dataset_queries:
+        query_str = join_query_list(query_list)
+        query_strings.append(query_str)
+
+    return query_strings
+
+
+def generate_napsu_original_products(datasets, queries, epsilons, MCMC_algorithms):
+    products = []
+
+    for dataset in datasets:
+        dataset_queries = queries[dataset]
+        for query_list in dataset_queries:
+            for epsilon in epsilons:
+                for algo in MCMC_algorithms:
+                    product_str = format_job_parameter_for_napsu_original(dataset, query_list, epsilon, algo)
+                    products.append(product_str)
+
+    return products
 
 
 def query_dataset_product(datasets, queries):
@@ -17,7 +42,7 @@ def query_dataset_product(datasets, queries):
 
 
 def query_independence_pruning_product():
-    adult_small_columns = ["education-num", "marital-status", "age", "sex", "hours-per-week", "compensation"]
+    adult_small_columns = ADULT_COLUMNS_SMALL
 
     missing_queries = []
     marginal_pairs = list(itertools.combinations(adult_small_columns, 2))

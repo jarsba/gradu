@@ -132,8 +132,11 @@ dmypy.json
 # Data folders
 data/datasets/*
 data/synt_datasets/*
+data/orig_results/*
+data/parameter_combinations/*
 !data/datasets/.gitkeep
 !data/synt_datasets/.gitkeep
+!data/parameter_combinations/.gitkeep
 
 # Profiles
 profiles/*
@@ -141,6 +144,7 @@ profiles/*
 
 # Models
 models/*
+models_bu/
 !models/.gitkeep
 
 # Results

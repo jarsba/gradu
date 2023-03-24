@@ -4,14 +4,12 @@ from typing import Literal
 
 sys.path.append(snakemake.config['workdir'])
 
-import jax
 from jax.config import config
 config.update("jax_enable_x64", True)
 
 import torch
 torch.set_default_dtype(torch.float64)
 
-import numpy as np
 import pandas as pd
 from arviz.data.inference_data import InferenceDataT
 
@@ -21,118 +19,100 @@ from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
 from src.utils.query_utils import join_query_list
-from src.utils.string_utils import epsilon_str_to_float
+from src.utils.string_utils import epsilon_str_to_float, epsilon_float_to_str
 from src.utils.data_utils import transform_for_modeling
+from src.utils.seed_utils import set_seed
 
-seed = snakemake.config['seed']
-torch.manual_seed(seed)
-rng = jax.random.PRNGKey(seed)
-np.random.seed(seed)
+if __name__ == '__main__':
 
-dataset_map = snakemake.config['original_datasets']
-inverted_dataset_map = {v: k for k, v in dataset_map.items()}
-dataset_names = [key for key in dataset_map.keys()]
-dataset_files = [value for value in dataset_map.values()]
-datasets = snakemake.input
+    seed = snakemake.config['seed']
+    rng = set_seed(seed)
 
-print(datasets)
+    print(snakemake.wildcards)
 
-target_files = snakemake.output
+    epsilon_str = str(snakemake.wildcards.epsilon)
+    print(epsilon_str)
+    query = str(snakemake.wildcards.query)
+    print(query)
+    dataset_name = str(snakemake.wildcards.dataset)
 
-epsilons = snakemake.config["epsilons"]
-queries = snakemake.config['queries']
+    target_file = str(snakemake.output)
+    epsilon = epsilon_str_to_float(epsilon_str)
 
-storage_file_path = "napsu_experiment_storage_output.csv"
-mode: Literal["replace"] = "replace"
-timer_file_path = "napsu_MCMC_time_vs_epsilon_comparison.csv"
+    dataset_map = snakemake.config['original_datasets']
+    inverted_dataset_map = {v: k for k, v in dataset_map.items()}
 
-storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
-timer = Timer(file_path=timer_file_path, mode=mode)
+    dataset_file = dataset_map[dataset_name]
 
-algo = "NUTS"
+    storage_file_path = "napsu_experiment_storage_output.csv"
+    mode: Literal["append"] = "append"
+    timer_file_path = "napsu_MCMC_time_vs_epsilon_comparison.csv"
 
-for dataset in datasets:
-    for epsilon_str in epsilons:
+    storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+    timer = Timer(file_path=timer_file_path, mode=mode)
 
-        epsilon = epsilon_str_to_float(epsilon_str)
+    algo = "NUTS"
+    dataframe = pd.read_csv(dataset_file)
 
-        dataset_name = inverted_dataset_map[dataset]
+    dataframe = transform_for_modeling(dataset_name, dataframe)
 
-        queries_for_dataset = queries[dataset_name]
+    n, d = dataframe.shape
+    query_str = join_query_list(query_list)
+    delta = (n ** (-2))
 
-        for query_list in queries_for_dataset:
-            dataframe = pd.read_csv(dataset)
+    experiment_id = get_key()
+    experiment_id_ctx.set(experiment_id)
 
-            dataframe = transform_for_modeling(dataset_name, dataframe)
+    timer_meta = {
+        "experiment_id": experiment_id,
+        "dataset_name": dataset_name,
+        "query": query_str,
+        "epsilon": epsilon,
+        "delta": delta,
+        "MCMC_algo": "NUTS",
+        "laplace_approximation": True,
+        "laplace_approximation_algorithm": "jaxopt_LBFGS"
+    }
 
-            n, d = dataframe.shape
-            query_str = join_query_list(query_list)
-            delta = (n ** (-2))
+    dataset_query_str = f"{dataset_name}_{query_str}"
 
-            experiment_id = get_key()
-            experiment_id_ctx.set(experiment_id)
+    pid = timer.start(f"Main run", **timer_meta)
 
-            timer_meta = {
-                "experiment_id": experiment_id,
-                "dataset_name": dataset_name,
-                "query": query_str,
-                "epsilon": epsilon,
-                "delta": delta,
-                "MCMC_algo": "NUTS",
-                "laplace_approximation": True,
-                "laplace_approximation_algorithm": "jaxopt_LBFGS"
-            }
+    print(
+        f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {query_str}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
 
-            dataset_query_str = f"{dataset_name}_{query_str}"
+    print("Initializing NapsuMQModel")
 
-            model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
-            if os.path.exists(model_file_path):
-                print(f"Model already exists for {dataset_query_str} query and epsilon {epsilon_str}, skipping")
-                continue
+    model = NapsuMQModel()
 
-            pid = timer.start(f"Main run", **timer_meta)
+    result: NapsuMQResult
+    inf_data: InferenceDataT
 
-            print(
-                f"PARAMS: \n\tdataset name {dataset_name}\n\tcliques {query_str}\n\tMCMC algo {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+    result, inf_data = model.fit(
+        data=dataframe,
+        dataset_name=dataset_name,
+        rng=rng,
+        epsilon=epsilon,
+        delta=delta,
+        column_feature_set=query_list,
+        MCMC_algo=algo,
+        use_laplace_approximation=True,
+        return_inference_data=True,
+        enable_profiling=True,
+        laplace_approximation_algorithm="jaxopt_LBFGS",
+        laplace_approximation_forward_mode=True
+    )
 
-            print("Initializing NapsuMQModel")
-            rng = jax.random.PRNGKey(6473286482)
+    timer.stop(pid)
 
-            model = NapsuMQModel()
+    model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
+    result.store(model_file_path)
 
-            result: NapsuMQResult
-            inf_data: InferenceDataT
+    inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
 
-            print(dataframe.dtypes)
-            print(dataframe.head())
-            print(dataframe.shape)
-            print(dataframe.columns)
+    # Save storage and timer results every iteration
+    storage.save(file_path=storage_file_path, mode=mode)
+    timer.save(file_path=timer_file_path, mode=mode)
 
-            result, inf_data = model.fit(
-                data=dataframe,
-                dataset_name=dataset_name,
-                rng=rng,
-                epsilon=epsilon,
-                delta=delta,
-                column_feature_set=query_list,
-                MCMC_algo=algo,
-                use_laplace_approximation=True,
-                return_inference_data=True,
-                enable_profiling=True,
-                laplace_approximation_algorithm="jaxopt_LBFGS",
-                laplace_approximation_forward_mode=True
-            )
-
-            timer.stop(pid)
-
-            model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")
-            result.store(model_file_path)
-
-            inf_data.to_netcdf(f"logs/inf_data_{dataset_query_str}_{epsilon_str}e_{algo}.nc")
-
-            # Save storage and timer results every iteration
-            storage.save(file_path=storage_file_path, mode=mode)
-            timer.save(file_path=timer_file_path, mode=mode)
-
-storage.save(file_path=storage_file_path, mode=mode)
-timer.save(file_path=timer_file_path, mode=mode)
+    storage.save(file_path=storage_file_path, mode=mode)
+    timer.save(file_path=timer_file_path, mode=mode)
