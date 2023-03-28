@@ -17,7 +17,7 @@ dependencies:
   - memray=1.7
   - pytorch=2.0.0
   - torchvision=0.15.0
-  - torchaudio=2.0.1
+  - torchaudio=2.0.0
   - pip
   - pip:
         - git+https://github.com/DPBayes/d3p.git@73695a6a51ec74522adafaa23dc8ab6e81a37686
