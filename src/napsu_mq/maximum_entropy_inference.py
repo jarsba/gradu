@@ -170,8 +170,12 @@ def run_numpyro_mcmc_normalised(
         progress_bar=not disable_progressbar, jit_model_args=False, chain_method="parallel"
     )
 
-    mean_guess = laplace_approx.mean
-    L_guess = jnp.linalg.cholesky(laplace_approx.covariance_matrix)
+    if type(laplace_approx) is torch.distributions.MultivariateNormal:
+        mean_guess = jnp.array(laplace_approx.mean.detach().numpy())
+        L_guess = jnp.linalg.cholesky(jnp.array(laplace_approx.covariance_matrix.detach().numpy()))
+    else:
+        mean_guess = laplace_approx.mean
+        L_guess = jnp.linalg.cholesky(laplace_approx.covariance_matrix)
 
     if enable_profiling is True:
         pr = cProfile.Profile()
@@ -391,6 +395,6 @@ def laplace_approximation_normal_prior(
     rng_state_restore(ors)
 
     if success is False:
-        raise ConvergenceException(f"Torch Laplace approximation L-BGFS failed to converge with {max_retries} retries")
+        raise ConvergenceException(f"Torch Laplace approximation L-BFGS failed to converge with {max_retries} retries")
 
     return laplace_approx, True
