@@ -92,9 +92,9 @@ rule generate_parameter_combinations:
         expand("logs/parameter_combinations_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log",  zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
-        mem_mb=2000,
+        runtime="30",
+        time="00:30:00",
+        mem_mb=8000,
         disk_mb=5000,
         partition="short"
     conda:
