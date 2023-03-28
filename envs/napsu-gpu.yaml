@@ -16,6 +16,10 @@ dependencies:
   - pandas=1.5
   - dill=0.3.6
   - python-graphviz=0.20.1
+  - pytorch=2.0.0
+  - torchvision=0.15.0
+  - torchaudio=2.0.0
+  - pyro-ppl=1.8.4
   - memray=1.7
   - pip
   - pip:
