@@ -1,21 +1,23 @@
-import os
 import itertools
+import sys
+import os
 
-import snakemake
+sys.path.append(snakemake.config['workdir'])
+
 import pickle
 import pandas as pd
 from src.utils.keygen import generate_experiment_id
 from src.utils.query_utils import join_query_list
 from src.utils.path_utils import DATA_FOLDER
 from src.utils.job_parameters import JobParameters
+from src.utils.string_utils import epsilon_float_to_str
 
 PARAMETER_COMBINATIONS_FOLDER = os.path.join(DATA_FOLDER, "parameter_combinations")
 
 if __name__ == "__main__":
 
-    epsilons = snakemake.config['epsilons']
+    epsilons = snakemake.config["epsilons"]
     queries = snakemake.config['queries']
-    MCMC_algorithms = snakemake.config['MCMC_algorithms']
     discretization_levels = ['low', 'high']
     algo = "NUTS"
 
@@ -32,7 +34,9 @@ if __name__ == "__main__":
                 experiment_id = generate_experiment_id()
                 query_str = join_query_list(query_list)
 
-                job_name = f"napsu_original_model_{dataset_name}_{epsilon}e_{query_str}"
+                epsilon_str = epsilon_float_to_str(epsilon)
+
+                job_name = f"napsu_original_model_parameters_{dataset_name}_{epsilon_str}e_{query_str}"
                 job_parameter = JobParameters(
                     job_name=job_name,
                     experiment_id=experiment_id,
@@ -44,7 +48,8 @@ if __name__ == "__main__":
                     algo=algo,
                     discretization_level=None,
                     laplace_approximation=True,
-                    laplace_approximation_algorithm="torch_LBGFS"
+                    laplace_approximation_algorithm="torch_LBFGS",
+                    missing_query=None
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
@@ -59,8 +64,9 @@ if __name__ == "__main__":
                 experiment_id = generate_experiment_id()
                 query_str = join_query_list(query_list)
                 discretization_level = "low" if "low" in dataset_name else "high"
+                epsilon_str = epsilon_float_to_str(epsilon)
 
-                job_name = f"napsu_discretization_model_{dataset_name}_{epsilon}e_{query_str}"
+                job_name = f"napsu_discretization_model_parameters_{dataset_name}_{epsilon_str}e_{query_str}"
                 job_parameter = JobParameters(
                     job_name=job_name,
                     experiment_id=experiment_id,
@@ -72,7 +78,8 @@ if __name__ == "__main__":
                     algo=algo,
                     discretization_level=discretization_level,
                     laplace_approximation=True,
-                    laplace_approximation_algorithm="torch_LBGFS"
+                    laplace_approximation_algorithm="torch_LBFGS",
+                    missing_query=None
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
@@ -82,6 +89,7 @@ if __name__ == "__main__":
     for dataset_name, dataset_path in independence_pruning_datasets.items():
         dataset = pd.read_csv(dataset_path)
         dataset_columns = list(dataset.columns)
+        dataset_columns = sorted(dataset_columns)
 
         # Make set of sets
         marginal_pairs = list(itertools.combinations(dataset_columns, 2))
@@ -100,8 +108,19 @@ if __name__ == "__main__":
             for query_list in test_queries:
                 experiment_id = generate_experiment_id()
                 query_str = join_query_list(query_list)
+                epsilon_str = epsilon_float_to_str(epsilon)
 
-                job_name = f"napsu_independence_pruning_model_{dataset_name}_{epsilon}e_{query_str}"
+                if len(query_list) == 0:
+                    query_removed = full_set_of_marginals
+                    missing_query = "all"
+                elif len(query_list) == len(full_set_of_marginals):
+                    query_removed = []
+                    missing_query = "none"
+                else:
+                    query_removed = list(set(full_set_of_marginals) - set(query_list))
+                    missing_query = [f"{pair[0]}+{pair[1]}" for pair in query_removed][0]
+
+                job_name = f"napsu_independence_pruning_model_parameters_{dataset_name}_{epsilon_str}e_{missing_query}"
                 job_parameter = JobParameters(
                     job_name=job_name,
                     experiment_id=experiment_id,
@@ -113,7 +132,8 @@ if __name__ == "__main__":
                     algo=algo,
                     discretization_level=None,
                     laplace_approximation=True,
-                    laplace_approximation_algorithm="torch_LBGFS"
+                    laplace_approximation_algorithm="torch_LBFGS",
+                    missing_query=missing_query
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)

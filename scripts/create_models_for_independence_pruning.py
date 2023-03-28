@@ -1,28 +1,27 @@
 import sys
-import os
 from typing import Literal
+import pickle
 
 sys.path.append(snakemake.config['workdir'])
 
-import jax
 from jax.config import config
+
 config.update("jax_enable_x64", True)
 
 import torch
+
 torch.set_default_dtype(torch.float64)
 
-import itertools
 from arviz.data.inference_data import InferenceDataT
 import pandas as pd
 
-from src.utils.path_utils import MODELS_FOLDER
 from src.utils.timer import Timer
-from src.utils.keygen import get_key
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
-from src.utils.query_utils import join_query_list
-from src.utils.string_utils import epsilon_str_to_float
 from src.utils.data_utils import transform_for_modeling
+from src.utils.seed_utils import set_seed
+from src.utils.job_parameters import JobParameters
+from src.utils.string_utils import epsilon_float_to_str
 
 """
 
@@ -35,122 +34,94 @@ with 5 variables using the set with of variables with least harm to downstream a
 
 """
 
-dataset_map = snakemake.config['independence_pruning_datasets']
-inverted_dataset_map = {v: k for k, v in dataset_map.items()}
-dataset = snakemake.input[0]
-dataset_name = inverted_dataset_map[dataset]
+if __name__ == "__main__":
+    seed = snakemake.config['seed']
+    rng = set_seed(seed)
 
-adult_dataset = pd.read_csv(dataset)
+    parameter_combination_pickle_path = snakemake.input[0]
+    parameter_combination_pickle_file = open(parameter_combination_pickle_path, "rb")
+    parameter_combinations: JobParameters = pickle.load(parameter_combination_pickle_file)
+    parameter_combination_pickle_file.close()
 
-epsilons = snakemake.config["epsilons"]
+    epsilon = parameter_combinations.epsilon
+    epsilon_str = epsilon_float_to_str(epsilon)
+    experiment_id = parameter_combinations.experiment_id
+    experiment_id_ctx.set(experiment_id)
+    dataset_name = parameter_combinations.dataset
+    dataset_path = parameter_combinations.dataset_path
+    query_list = parameter_combinations.query_list
+    query_str = parameter_combinations.query_string
+    laplace_approximation = parameter_combinations.laplace_approximation
+    laplace_approximation_algorithm = parameter_combinations.laplace_approximation_algorithm
+    algo = parameter_combinations.algo
+    missing_query = parameter_combinations.missing_query
 
-six_adult_columns = list(adult_dataset.columns)
+    print(epsilon)
+    print(dataset_name)
+    print(dataset_path)
+    print(query_list)
 
-# Make set of sets
-marginal_pairs = list(itertools.combinations(six_adult_columns, 2))
-full_set_of_marginals = marginal_pairs
+    target_file = str(snakemake.output[0])
 
-# Removes set from list of tuples that are interpreted as list of sets
-immutable_set_remove = lambda element, list_obj: list(filter(lambda x: set(x) != set(element), list_obj))
+    adult_dataset = pd.read_csv(dataset_path)
+    adult_train_df = transform_for_modeling("adult_small", adult_dataset)
 
-# List of lists with tuples of all 2-way marginals
-test_queries = [immutable_set_remove(pair, full_set_of_marginals) for pair in marginal_pairs]
-# Add also full and no queries
-test_queries.append(full_set_of_marginals)
-test_queries.append([])
+    storage_file_path = "napsu_independence_pruning_storage.csv"
+    mode: Literal["append"] = "append"
+    timer_file_path = "napsu_independence_pruning_timer.csv"
 
-adult_train_df = transform_for_modeling("adult_small", adult_dataset)
+    storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+    timer = Timer(file_path=timer_file_path, mode=mode)
 
-storage_file_path = "napsu_independence_pruning_storage.csv"
-mode: Literal["replace"] = "replace"
-timer_file_path = "napsu_independence_pruning_timer.csv"
+    n, d = adult_train_df.shape
+    delta = (n ** (-2))
 
-storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
-timer = Timer(file_path=timer_file_path, mode=mode)
+    timer_meta = {
+        "experiment_id": experiment_id,
+        "dataset_name": dataset_name,
+        "query": query_str,
+        "missing_query": missing_query,
+        "epsilon": epsilon,
+        "delta": delta,
+        "MCMC_algo": algo,
+        "laplace_approximation": laplace_approximation,
+        "laplace_approximation_algorithm": laplace_approximation_algorithm
+    }
 
-for epsilon_str in epsilons:
+    pid = timer.start(f"Main run", **timer_meta)
 
-    epsilon = epsilon_str_to_float(epsilon_str)
+    print(
+        f"PARAMS: \n\tdataset name {dataset_name}\n\tmissing query {missing_query}\n\tMCMC algo: NUTS\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {laplace_approximation}")
 
-    for query_list in test_queries:
+    print("Initializing NapsuMQModel")
 
-        n, d = adult_train_df.shape
-        query_str = join_query_list(query_list)
+    model = NapsuMQModel()
 
-        if len(query_list) == 0:
-            query_removed = full_set_of_marginals
-            missing_query = "all"
-        elif len(query_list) == len(full_set_of_marginals):
-            query_removed = []
-            missing_query = "none"
-        else:
-            query_removed = list(set(full_set_of_marginals) - set(query_list))
-            missing_query = [f"{pair[0]}+{pair[1]}" for pair in query_removed][0]
+    result: NapsuMQResult
+    inf_data: InferenceDataT
 
-            if len(query_removed) != 1:
-                print(f"Missing too many queries! Queries missing: {query_removed}")
-                sys.exit(1)
+    result, inf_data = model.fit(
+        data=adult_train_df,
+        dataset_name=dataset_name,
+        rng=rng,
+        epsilon=epsilon,
+        delta=delta,
+        column_feature_set=query_list,
+        MCMC_algo=algo,
+        use_laplace_approximation=laplace_approximation,
+        return_inference_data=True,
+        missing_query=missing_query,
+        enable_profiling=True,
+        laplace_approximation_algorithm=laplace_approximation_algorithm,
+        laplace_approximation_forward_mode=True
+    )
 
-        delta = (n ** (-2))
+    timer.stop(pid)
 
-        model_file_path = os.path.join(MODELS_FOLDER, f"napsu_independence_pruning_{missing_query}_missing_{epsilon_str}e.dill")
-        if os.path.exists(model_file_path):
-            print(f"Model already exists for {missing_query} missing, skipping")
-            continue
+    print("Writing model to file")
+    result.store(target_file)
 
-        experiment_id = get_key()
-        experiment_id_ctx.set(experiment_id)
+    inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{dataset_name}_{epsilon}e_{missing_query}.nc")
 
-        timer_meta = {
-            "experiment_id": experiment_id,
-            "dataset_name": dataset_name,
-            "query": query_str,
-            "missing_query": missing_query,
-            "epsilon": epsilon,
-            "delta": delta,
-            "MCMC_algo": "NUTS",
-            "laplace_approximation": True,
-            "laplace_approximation_algorithm": "jaxopt_LBFGS"
-        }
-
-        pid = timer.start(f"Main run", **timer_meta)
-
-        print(
-            f"PARAMS: \n\tdataset name {dataset_name}\n\tmissing query {missing_query}\n\tMCMC algo: NUTS\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
-
-        print("Initializing NapsuMQModel")
-        rng = jax.random.PRNGKey(6473286482)
-
-        model = NapsuMQModel()
-
-        result: NapsuMQResult
-        inf_data: InferenceDataT
-
-        result, inf_data = model.fit(
-            data=adult_train_df,
-            dataset_name=dataset_name,
-            rng=rng,
-            epsilon=epsilon,
-            delta=delta,
-            column_feature_set=query_list,
-            MCMC_algo="NUTS",
-            use_laplace_approximation=True,
-            return_inference_data=True,
-            missing_query=missing_query,
-            enable_profiling=True,
-            laplace_approximation_algorithm="jaxopt_LBFGS",
-            laplace_approximation_forward_mode=True
-        )
-
-        timer.stop(pid)
-
-        print("Writing model to file")
-        result.store(model_file_path)
-
-        inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{missing_query}_missing_{epsilon_str}e.nc")
-
-        storage.save(file_path=storage_file_path, mode=mode)
-        timer.save(file_path=timer_file_path, mode=mode)
-
-storage.save(file_path=storage_file_path, mode=mode)
-timer.save(file_path=timer_file_path, mode=mode)
+    storage.save(file_path=storage_file_path, mode=mode)
+    timer.save(file_path=timer_file_path, mode=mode)

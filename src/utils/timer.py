@@ -1,7 +1,7 @@
 from timeit import default_timer as timer
 from typing import Optional, Literal
 import pandas as pd
-from src.utils.keygen import get_key
+from src.utils.keygen import generate_experiment_id
 from src.utils.singleton import Singleton
 
 
@@ -26,7 +26,7 @@ class Timer(metaclass=Singleton):
             experiment_id = None
         start = timer()
 
-        process_id = get_key()
+        process_id = generate_experiment_id()
 
         self.times[process_id] = {
             'experiment_id': experiment_id,

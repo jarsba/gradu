@@ -1,4 +1,4 @@
-from typing import Mapping, List, Optional, Literal, Union
+from typing import Mapping, Optional, Literal, Union
 import pandas as pd
 from src.utils.singleton import Singleton
 import contextvars

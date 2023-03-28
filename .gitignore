@@ -149,6 +149,7 @@ models_bu/
 
 # Results
 results/*
+results_bu/
 !results/.gitkeep
 
 # Logs

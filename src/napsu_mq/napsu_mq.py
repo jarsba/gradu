@@ -44,7 +44,7 @@ from .mst import MST_selection
 from src.utils.timer import Timer
 from src.utils.query_utils import calculate_query_number, join_query_list
 from src.utils.experiment_storage import experiment_id_ctx
-from src.utils.keygen import get_key
+from src.utils.keygen import generate_experiment_id
 
 timer = Timer()
 
@@ -93,7 +93,7 @@ class NapsuMQModel(InferenceModel):
             experiment_id = experiment_id_ctx.get()
         except Exception as exc:
             print(f"No experiment_id found: {exc}")
-            experiment_id = get_key()
+            experiment_id = generate_experiment_id()
             print(f"Setting experiment_id to {experiment_id}")
             experiment_id_ctx.set(experiment_id)
 

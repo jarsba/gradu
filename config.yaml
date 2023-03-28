@@ -29,11 +29,11 @@ independence_pruning_datasets:
   "adult_small": "data/datasets/adult_small.csv"
 
 epsilons:
-  - "01"
-  - "03"
-  - "10"
-  - "30"
-  - "80"
+  - 0.1
+  - 0.3
+  - 1.0
+  - 3.0
+  - 8.0
 MCMC_algorithms:
   - "NUTS"
 n_synt_datasets: 100
@@ -63,6 +63,8 @@ queries:
     - [['age', 'hours-per-week']]
     - [['education-num', 'compensation']]
     - [['hours-per-week', 'compensation']]
+    - [[ 'sex', 'hours-per-week' ]]
+    - [[ 'age', 'sex' ]]
 
   "adult_large":
     - []
@@ -73,6 +75,9 @@ queries:
     - [['hours-per-week', 'compensation']]
     - [['education-num', 'workclass']]
     - [['hours-per-week', 'workclass']]
+    - [[ 'sex', 'hours-per-week' ]]
+    - [[ 'age', 'sex' ]]
+
 
   "adult_no_discretization":
     - []

@@ -2,7 +2,7 @@ import sys
 sys.path.append(snakemake.config['workdir'])
 
 from constants import TARGET_COLUMNS_FOR_DATASET, TRAIN_DATASET_FOR_DATASET
-from napsu_mq import NapsuMQResult
+from src.napsu_mq.napsu_mq import NapsuMQResult
 import pandas as pd
 from src.utils.data_utils import transform_for_ci_coverage
 from scripts.base_ci_coverage import calculate_ci_coverage_objects

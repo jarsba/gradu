@@ -30,6 +30,7 @@ for dataset, target_file in zip(dataset_names, dataset_files):
 
     # Skip if the dataset is not in the preprocessing functions like for "adult", "binary3d" and "binary4d"
     if dataset not in PREPROCESSING_FUNCTIONS:
+        print(f"Warning: Dataset not found in PREPROCESSING_FUNCTIONS. Skipping dataset: {dataset}")
         continue
 
     df = PREPROCESSING_FUNCTIONS[dataset](dataset_folder=DATASETS_FOLDER)

@@ -1,26 +1,28 @@
 import sys
 import os
 from typing import Literal
+import pickle
 
 sys.path.append(snakemake.config['workdir'])
 
-import jax
 from jax.config import config
+
 config.update("jax_enable_x64", True)
 
 import torch
+
 torch.set_default_dtype(torch.float64)
 
 from arviz.data.inference_data import InferenceDataT
 import pandas as pd
 
-from src.utils.path_utils import MODELS_FOLDER
 from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
-from src.utils.keygen import get_key
 from src.napsu_mq.napsu_mq import NapsuMQModel, NapsuMQResult
-from src.utils.string_utils import epsilon_str_to_float
+from src.utils.string_utils import epsilon_float_to_str
 from src.utils.timer import Timer
 from src.utils.data_utils import transform_for_modeling
+from src.utils.job_parameters import JobParameters
+from src.utils.seed_utils import set_seed
 
 """
 
@@ -44,98 +46,95 @@ capital-gains -> binary 0/1
 capital-losses -> binary 0/1
 """
 
-dataset_map = snakemake.config['discretization_datasets']
-inverted_dataset_map = {v: k for k, v in dataset_map.items()}
+if __name__ == '__main__':
+    seed = snakemake.config['seed']
+    rng = set_seed(seed)
 
-datasets = snakemake.input
-epsilons = snakemake.config["epsilons"]
+    parameter_combination_pickle_path = snakemake.input[0]
+    parameter_combination_pickle_file = open(parameter_combination_pickle_path, "rb")
+    parameter_combinations: JobParameters = pickle.load(parameter_combination_pickle_file)
+    parameter_combination_pickle_file.close()
 
-storage_file_path = "napsu_discretization_test_storage.csv"
-mode: Literal["replace"] = "replace"
-timer_file_path = "napsu_discretization_test_timer.csv"
+    epsilon = parameter_combinations.epsilon
+    epsilon_str = epsilon_float_to_str(epsilon)
+    experiment_id = parameter_combinations.experiment_id
+    experiment_id_ctx.set(experiment_id)
+    dataset_name = parameter_combinations.dataset
+    dataset_path = parameter_combinations.dataset_path
+    query_list = parameter_combinations.query_list
+    query_str = parameter_combinations.query_string
+    laplace_approximation = parameter_combinations.laplace_approximation
+    laplace_approximation_algorithm = parameter_combinations.laplace_approximation_algorithm
+    algo = parameter_combinations.algo
+    discretization_level = parameter_combinations.discretization_level
 
-storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
-timer = Timer(file_path=timer_file_path, mode=mode)
+    print(epsilon)
+    print(dataset_name)
+    print(dataset_path)
+    print(query_list)
 
-for dataset in datasets:
+    target_file = str(snakemake.output[0])
 
-    dataset_name = inverted_dataset_map[dataset]
+    storage_file_path = "napsu_discretization_test_storage.csv"
+    mode: Literal["append"] = "append"
+    timer_file_path = "napsu_discretization_test_timer.csv"
 
-    dataframe = pd.read_csv(dataset)
+    storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
+    timer = Timer(file_path=timer_file_path, mode=mode)
 
+    dataframe = pd.read_csv(dataset_path)
     dataframe = transform_for_modeling(dataset_name, dataframe)
 
-    discretization_level = "low" if "low" in dataset_name else "high"
+    n, d = dataframe.shape
+    query = []
+    delta = (n ** (-2))
 
-    for epsilon_str in epsilons:
+    timer_meta = {
+        "experiment_id": experiment_id,
+        "dataset_name": dataset_name,
+        "query": query,
+        "epsilon": epsilon,
+        "delta": delta,
+        "MCMC_algo": algo,
+        "discretization": discretization_level,
+        "laplace_approximation": laplace_approximation,
+        "laplace_approximation_algorithm": laplace_approximation_algorithm
+    }
 
-        epsilon = epsilon_str_to_float(epsilon_str)
-        n, d = dataframe.shape
-        query = []
-        delta = (n ** (-2))
+    pid = timer.start(f"Main run", **timer_meta)
 
-        experiment_id = get_key()
-        experiment_id_ctx.set(experiment_id)
+    print(
+        f"PARAMS: \n\tdataset name {dataset_name}\n\tdiscretization {discretization_level}\n\tMCMC algo: {algo}\n\tepsilon {epsilon_str}\n\tdelta: {delta}\n\tLaplace approximation {laplace_approximation}")
 
-        timer_meta = {
-            "experiment_id": experiment_id,
-            "dataset_name": "adult",
-            "query": query,
-            "epsilon": epsilon,
-            "delta": delta,
-            "MCMC_algo": "NUTS",
-            "laplace_approximation": True,
-            "discretization": discretization_level,
-            "laplace_approximation_algorithm": "jaxopt_LBFGS"
-        }
+    print("Initializing NapsuMQModel")
+    model = NapsuMQModel()
 
-        model_file_path = os.path.join(MODELS_FOLDER,
-                                       f"napsu_discretization_{discretization_level}_{epsilon_str}e.dill")
-        if os.path.exists(model_file_path):
-            print(f"Model already exists for {discretization_level} discretization and epsilon {epsilon_str}, skipping")
-            continue
+    result: NapsuMQResult
+    inf_data: InferenceDataT
 
-        pid = timer.start(f"Main run", **timer_meta)
+    result, inf_data = model.fit(
+        data=dataframe,
+        dataset_name=f"adult_{discretization_level}_discretization",
+        rng=rng,
+        epsilon=epsilon,
+        delta=delta,
+        column_feature_set=query,
+        MCMC_algo=algo,
+        use_laplace_approximation=laplace_approximation,
+        return_inference_data=True,
+        discretization=discretization_level,
+        enable_profiling=True,
+        laplace_approximation_algorithm=laplace_approximation_algorithm,
+        laplace_approximation_forward_mode=True
+    )
 
-        print(
-            f"PARAMS: \n\tdataset name ADULT\n\tdiscretization {discretization_level}\n\tMCMC algo: NUTS\n\tepsilon {epsilon}\n\tdelta: {delta}\n\tLaplace approximation {True}")
+    timer.stop(pid)
 
-        print("Initializing NapsuMQModel")
-        rng = jax.random.PRNGKey(6473286482)
+    print("Writing model to file")
+    result.store(target_file)
 
-        model = NapsuMQModel()
+    inf_data.to_netcdf(f"logs/inf_data_discretization_{dataset_name}_{epsilon}e_{query_str}.nc")
 
-        result: NapsuMQResult
-        inf_data: InferenceDataT
-
-        result, inf_data = model.fit(
-            data=dataframe,
-            dataset_name=f"adult_{discretization_level}_discretization",
-            rng=rng,
-            epsilon=epsilon,
-            delta=delta,
-            column_feature_set=query,
-            MCMC_algo="NUTS",
-            use_laplace_approximation=True,
-            return_inference_data=True,
-            discretization=discretization_level,
-            enable_profiling=True,
-            laplace_approximation_algorithm="jaxopt_LBFGS",
-            laplace_approximation_forward_mode=True
-        )
-
-        timer.stop(pid)
-
-        print("Writing model to file")
-        model_file_path = os.path.join(MODELS_FOLDER,
-                                       f"napsu_discretization_{discretization_level}_{epsilon_str}e.dill")
-        result.store(model_file_path)
-
-        inf_data.to_netcdf(f"logs/inf_data_discretization_{discretization_level}_{epsilon_str}e.nc")
-
-        # Save storage and timer results every iteration
-        storage.save(file_path=storage_file_path, mode=mode)
-        timer.save(file_path=timer_file_path, mode=mode)
-
-storage.save(file_path=storage_file_path, mode=mode)
-timer.save(file_path=timer_file_path, mode=mode)
+    # Save storage and timer results every iteration
+    storage.save(file_path=storage_file_path, mode=mode)
+    timer.save(file_path=timer_file_path, mode=mode)

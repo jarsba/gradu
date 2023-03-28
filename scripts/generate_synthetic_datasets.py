@@ -16,14 +16,17 @@ from constants import TRAIN_DATASET_SIZE_MAP
 from src.utils.path_utils import SYNT_DATASETS_FOLDER
 
 models = snakemake.input
+output_files = snakemake.output
 n_synt_datasets = snakemake.config['n_synt_datasets']
 
 print(models)
 
 sampling_rng = jax.random.PRNGKey(86933526)
 
-for model_path in models:
+for model_path, output_path in zip(models, output_files):
     print(f"Generating data for model {model_path}")
+    print(f"Output path: {output_path}")
+
     napsu_result_read_file = open(f"{model_path}", "rb")
     model: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
     meta_info = model.meta
@@ -61,9 +64,6 @@ for model_path in models:
 
     epsilon_str = epsilon_float_to_str(epsilon)
 
-    path = os.path.join(SYNT_DATASETS_FOLDER,
-                        f"synthetic_dataset_{dataset_name}_{query_str}_{epsilon_str}e_{MCMC_algorithm}.pickle")
-
-    with open(path, "wb") as file:
+    with open(output_path, "wb") as file:
         pickle.dump(synth_data_object, file)
         file.close()

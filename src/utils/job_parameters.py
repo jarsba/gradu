@@ -15,3 +15,4 @@ class JobParameters:
     discretization_level: Union[str, None]
     laplace_approximation: bool
     laplace_approximation_algorithm: str
+    missing_query: Union[None, str, List[str]]
