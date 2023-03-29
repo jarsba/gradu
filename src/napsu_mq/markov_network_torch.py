@@ -27,9 +27,9 @@ class MarkovNetworkTorch(MarkovNetwork):
     """
     def __init__(self, domain: Dict, queries: FullMarginalQuerySet, elimination_order: Optional[List] = None, debug_checks: Optional[bool] = True):
         super().__init__(domain, queries, elimination_order, debug_checks)
-        self.suff_stat_mean = functorch.grad(self.lambda0)
-        self.suff_stat_cov = functorch.jacrev(functorch.jacrev(self.lambda0))
-        self.suff_stat_cov_bp = functorch.jacrev(self.suff_stat_mean_bp)
+        self.suff_stat_mean = torch.func.grad(self.lambda0)
+        self.suff_stat_cov = torch.func.jacrev(torch.func.jacrev(self.lambda0))
+        self.suff_stat_cov_bp = torch.func.jacrev(self.suff_stat_mean_bp)
         self.log_factor_class = LogFactorTorch
 
     def lambda0(self, lambdas: torch.Tensor) -> torch.Tensor:

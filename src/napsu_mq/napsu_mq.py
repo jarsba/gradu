@@ -48,7 +48,7 @@ from src.utils.keygen import generate_experiment_id
 
 timer = Timer()
 
-laplace_approximation_algorithms = Literal['jax_minimize', 'jaxopt_LBFGS', 'jaxopt_BFGS', 'tfp_LBFGS', 'tfp_BFGS']
+laplace_approximation_algorithms = Literal['jax_minimize', 'jaxopt_LBFGS', 'torch_LBFGS']
 
 
 def check_kwargs(kwargs, name, default_value):
@@ -60,8 +60,8 @@ def check_kwargs(kwargs, name, default_value):
 
 laplace_approximation_mapping = {
     'jax_minimize': mei.run_numpyro_laplace_approximation,
-    'jaxopt_LBGFS': mei.laplace_approximation_with_jaxopt,
-    'torch_LBGFS': mei.laplace_approximation_normal_prior,
+    'jaxopt_LBFGS': mei.laplace_approximation_with_jaxopt,
+    'torch_LBFGS': mei.laplace_approximation_normal_prior,
 }
 
 
@@ -150,6 +150,8 @@ class NapsuMQModel(InferenceModel):
 
         pid = timer.start(f"Calculating full marginal query", **timer_meta)
 
+        print(f"MST query set: {query_sets}")
+
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
 
@@ -220,7 +222,7 @@ class NapsuMQModel(InferenceModel):
             print(sigma_DP)
             dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
             dp_suff_stat = suff_stat + dp_noise
-            dp_suff_stat_torch = torch.from_numpy(np.asarray(dp_suff_stat))
+            dp_suff_stat_torch = torch.from_numpy(np.array(dp_suff_stat))
 
         if dry_run is True:
             meta = {
@@ -258,6 +260,8 @@ class NapsuMQModel(InferenceModel):
                 raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 
             timer.stop(pid)
+
+            print(f"Laplace approximation time: {timer.get_time(pid)}")
 
             if only_laplace_approximation is True:
                 return laplace_approx

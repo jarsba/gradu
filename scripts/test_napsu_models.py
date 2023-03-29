@@ -23,7 +23,7 @@ query_list = []
 algo = 'NUTS'
 epsilon_str = "0.1"
 
-dataframe = pd.read_csv(os.path.join(DATA_FOLDER, "adult_high_discretization.csv"))
+dataframe = pd.read_csv(os.path.join(DATA_FOLDER, "adult_small.csv"))
 dataset_name = "adult_small"
 
 dataframe = transform_for_modeling(dataset_name, dataframe)
@@ -63,7 +63,7 @@ result, inf_data = model.fit(
     use_laplace_approximation=True,
     return_inference_data=True,
     enable_profiling=True,
-    laplace_approximation_algorithm="jaxopt_LBFGS",
+    laplace_approximation_algorithm="torch_LBFGS",
 )
 
 model_file_path = os.path.join(MODELS_FOLDER, f"napsu_{dataset_query_str}_{epsilon_str}e_{algo}.dill")

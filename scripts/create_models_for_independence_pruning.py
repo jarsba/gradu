@@ -23,6 +23,11 @@ from src.utils.seed_utils import set_seed
 from src.utils.job_parameters import JobParameters
 from src.utils.string_utils import epsilon_float_to_str
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 """
 
 Steps:
