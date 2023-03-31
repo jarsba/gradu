@@ -7,7 +7,7 @@ class JobParameters:
     job_name: str
     experiment_id: str
     dataset: str
-    dataset_path: str
+    dataset_path: Union[str, None]
     query_list: List[Tuple[str, str]]
     query_string: str
     epsilon: float

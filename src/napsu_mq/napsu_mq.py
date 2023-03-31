@@ -116,23 +116,13 @@ class NapsuMQModel(InferenceModel):
         print(f"Domain size: {dataframe.get_domain_size()}")
         category_mapping = DataFrameData.get_category_mapping(data)
         n, d = dataframe.int_array.shape
-        print(n)
-        print(d)
 
         domain_key_list = list(dataframe.values_by_col.keys())
         domain_value_count_list = [len(dataframe.values_by_col[key]) for key in domain_key_list]
 
-        print("Domain value count list")
-        print(domain_value_count_list)
-        print("Dataframe values by col")
-        print(dataframe.values_by_col)
         pid = timer.start(f"Query selection", **timer_meta)
 
         domain = Domain(domain_key_list, domain_value_count_list)
-
-        print("Dataframe int df")
-        print(dataframe.int_df)
-        print(dataframe.int_df.shape)
 
         print("start MST selection")
         if return_MST_weights is True:
@@ -156,7 +146,6 @@ class NapsuMQModel(InferenceModel):
         timer.stop(pid)
 
         query_list = queries.flatten()
-        print(len(query_list.queries))
 
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 

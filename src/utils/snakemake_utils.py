@@ -5,6 +5,7 @@ import itertools
 from src.utils.preprocess_dataset import ADULT_COLUMNS_SMALL
 from src.utils.string_utils import epsilon_float_to_str
 
+
 def get_query_list(queries, dataset_name) -> List[str]:
     query_strings = []
     dataset_queries = queries[dataset_name]
@@ -65,3 +66,18 @@ def generate_independence_pruning_missing_queries():
     independence_pruning_missing_query_strings.append('none')
 
     return independence_pruning_missing_query_strings
+
+
+def generate_linear_regression_products(epsilons) -> Tuple[List, List]:
+    dataset_list = []
+    epsilon_list = []
+
+    for n_categories in range(2, 8):
+        for epsilon in epsilons:
+            epsilon_str = epsilon_float_to_str(epsilon)
+            dataset_name = f"dummy_5x{n_categories}"
+
+            dataset_list.append(dataset_name)
+            epsilon_list.append(epsilon_str)
+
+    return dataset_list, epsilon_list

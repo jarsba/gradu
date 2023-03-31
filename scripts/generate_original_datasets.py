@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(snakemake.config['workdir'])
 
 from src.utils.preprocess_dataset import \
@@ -6,7 +7,8 @@ from src.utils.preprocess_dataset import \
     get_adult_train_low_discretization, get_adult_test_low_discretization, \
     get_adult_train_high_discretization, get_adult_test_high_discretization, \
     get_adult_train_small, get_adult_test_small, \
-    get_adult_train_large, get_adult_test_large
+    get_adult_train_large, get_adult_test_large, get_adult_train_independence_pruning, \
+    get_adult_test_independence_pruning
 from src.utils.path_utils import DATASETS_FOLDER
 
 datasets = snakemake.config['datasets']
@@ -24,6 +26,8 @@ PREPROCESSING_FUNCTIONS = {
     "adult_no_discretization_test": get_adult_test_no_discretization,
     "adult_low_discretization_test": get_adult_test_low_discretization,
     "adult_high_discretization_test": get_adult_test_high_discretization,
+    "adult_independence_pruning": get_adult_train_independence_pruning,
+    "adult_independence_pruning_test": get_adult_test_independence_pruning
 }
 
 for dataset, target_file in zip(dataset_names, dataset_files):

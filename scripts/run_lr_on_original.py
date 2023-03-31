@@ -14,10 +14,8 @@ results = pd.DataFrame(
     columns=["dataset_name", "accuracy", "balanced_accuracy", "F1", "coefficients", "point_estimates",
              "variance_estimates", "confidence_intervals"])
 
-print(dataset_paths)
 
 for path in dataset_paths:
-    print(path)
     df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]

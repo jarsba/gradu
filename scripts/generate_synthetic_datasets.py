@@ -19,13 +19,10 @@ models = snakemake.input
 output_files = snakemake.output
 n_synt_datasets = snakemake.config['n_synt_datasets']
 
-print(models)
 
 sampling_rng = jax.random.PRNGKey(86933526)
 
 for model_path, output_path in zip(models, output_files):
-    print(f"Generating data for model {model_path}")
-    print(f"Output path: {output_path}")
 
     napsu_result_read_file = open(f"{model_path}", "rb")
     model: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)

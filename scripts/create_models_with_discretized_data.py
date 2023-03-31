@@ -67,11 +67,6 @@ if __name__ == '__main__':
     algo = parameter_combinations.algo
     discretization_level = parameter_combinations.discretization_level
 
-    print(epsilon)
-    print(dataset_name)
-    print(dataset_path)
-    print(query_list)
-
     target_file = str(snakemake.output[0])
 
     storage_file_path = "napsu_discretization_test_storage.csv"
@@ -113,7 +108,7 @@ if __name__ == '__main__':
 
     result, inf_data = model.fit(
         data=dataframe,
-        dataset_name=f"adult_{discretization_level}_discretization",
+        dataset_name=dataset_name,
         rng=rng,
         epsilon=epsilon,
         delta=delta,
@@ -122,7 +117,7 @@ if __name__ == '__main__':
         use_laplace_approximation=laplace_approximation,
         return_inference_data=True,
         discretization=discretization_level,
-        enable_profiling=True,
+        enable_profiling=False,
         laplace_approximation_algorithm=laplace_approximation_algorithm,
         laplace_approximation_forward_mode=True
     )

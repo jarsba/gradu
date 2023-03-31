@@ -116,6 +116,8 @@ def transform_for_classification(dataset_name: str, df: pd.DataFrame) -> pd.Data
 
     elif 'binary' in dataset_name:
         df_copy = df_copy.astype('int')
+    elif 'dummy' in dataset_name:
+        df_copy = df_copy.astype('int')
     else:
         raise ValueError(f"Dataset {dataset_name} not supported")
 
@@ -128,7 +130,6 @@ def transform_for_modeling(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy()
 
     if 'adult' in dataset_name:
-
         COLUMNS_KEY = DATA_TO_COLUMNS_MAPPING[dataset_name]
         ADULT_TYPES = DATASET_COLUMN_TYPES[COLUMNS_KEY]
 
@@ -140,8 +141,9 @@ def transform_for_modeling(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
                 df_copy[column] = df_copy[column].astype('int')
 
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
-
     elif 'binary' in dataset_name:
+        df_copy = df_copy.astype('int')
+    elif 'dummy' in dataset_name:
         df_copy = df_copy.astype('int')
     else:
         raise ValueError(f"Dataset {dataset_name} not supported")
@@ -166,7 +168,8 @@ def transform_for_ci_coverage(dataset_name: str, df: pd.DataFrame) -> pd.DataFra
                 df_copy[column] = df_copy[column].astype('int')
 
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
-
+    elif 'dummy' in dataset_name:
+        df_copy = df_copy.astype('int')
     else:
         raise ValueError(f"Dataset {dataset_name} not supported")
 

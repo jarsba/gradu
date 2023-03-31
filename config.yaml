@@ -14,6 +14,8 @@ datasets:
   "adult_no_discretization_test": "data/datasets/adult_no_discretization_test.csv"
   "adult_low_discretization_test": "data/datasets/adult_low_discretization_test.csv"
   "adult_high_discretization_test": "data/datasets/adult_high_discretization_test.csv"
+  "adult_independence_pruning": "data/datasets/adult_independence_pruning.csv"
+  "adult_independence_pruning_test": "data/datasets/adult_independence_pruning_test.csv"
 
 original_datasets:
   "adult_small": "data/datasets/adult_small.csv"
@@ -26,7 +28,7 @@ discretization_datasets:
   "adult_low_discretization": "data/datasets/adult_low_discretization.csv"
 
 independence_pruning_datasets:
-  "adult_small": "data/datasets/adult_small.csv"
+  "adult_independence_pruning": "data/datasets/adult_independence_pruning.csv"
 
 epsilons:
   - 0.1

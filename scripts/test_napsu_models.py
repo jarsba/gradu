@@ -16,8 +16,6 @@ from src.utils.data_utils import transform_for_modeling
 ROOT_FOLDER = os.path.dirname(os.path.dirname(os.path.abspath(__name__)))
 DATA_FOLDER = os.path.join(ROOT_FOLDER, "data", "datasets")
 
-print(DATA_FOLDER)
-
 epsilon = 0.1
 query_list = []
 algo = 'NUTS'
@@ -46,11 +44,6 @@ model = NapsuMQModel()
 
 result: NapsuMQResult
 inf_data: InferenceDataT
-
-print(dataframe.dtypes)
-print(dataframe.head())
-print(dataframe.shape)
-print(dataframe.columns)
 
 result, inf_data = model.fit(
     data=dataframe,

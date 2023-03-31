@@ -61,11 +61,6 @@ if __name__ == "__main__":
     algo = parameter_combinations.algo
     missing_query = parameter_combinations.missing_query
 
-    print(epsilon)
-    print(dataset_name)
-    print(dataset_path)
-    print(query_list)
-
     target_file = str(snakemake.output[0])
 
     adult_dataset = pd.read_csv(dataset_path)
@@ -116,7 +111,7 @@ if __name__ == "__main__":
         use_laplace_approximation=laplace_approximation,
         return_inference_data=True,
         missing_query=missing_query,
-        enable_profiling=True,
+        enable_profiling=False,
         laplace_approximation_algorithm=laplace_approximation_algorithm,
         laplace_approximation_forward_mode=True
     )

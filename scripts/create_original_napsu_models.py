@@ -43,13 +43,7 @@ if __name__ == '__main__':
     laplace_approximation_algorithm = parameter_combinations.laplace_approximation_algorithm
     algo = parameter_combinations.algo
 
-    print(epsilon)
-    print(dataset_name)
-    print(dataset_path)
-    print(query_list)
-
     target_file = str(snakemake.output[0])
-
 
     storage_file_path = "napsu_experiment_storage_output.csv"
     mode: Literal["append"] = "append"
@@ -98,7 +92,7 @@ if __name__ == '__main__':
         MCMC_algo=algo,
         use_laplace_approximation=laplace_approximation,
         return_inference_data=True,
-        enable_profiling=True,
+        enable_profiling=False,
         laplace_approximation_algorithm=laplace_approximation_algorithm,
         laplace_approximation_forward_mode=True
     )

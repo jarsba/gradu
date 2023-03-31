@@ -1,5 +1,5 @@
 import sys
-from src.utils.snakemake_utils import generate_dataset_query_epsilon_products, generate_independence_pruning_missing_queries, generate_dataset_query_epsilon_products_independence_queries
+from src.utils.snakemake_utils import generate_dataset_query_epsilon_products, generate_independence_pruning_missing_queries, generate_dataset_query_epsilon_products_independence_queries, generate_linear_regression_products
 
 configfile: "config.yaml"
 workdir: config['workdir']
@@ -30,6 +30,7 @@ independence_pruning_datasets = config['independence_pruning_datasets']
 independence_pruning_queries = generate_independence_pruning_missing_queries()
 independence_dataset_list, independence_query_list, independence_epsilon_list = generate_dataset_query_epsilon_products_independence_queries(independence_pruning_datasets, independence_pruning_queries, epsilons)
 
+linear_regression_dataset_list, linear_regression_epsilon_list = generate_linear_regression_products(epsilons)
 
 singularity: "docker://continuumio/miniconda3:4.12.0"
 
@@ -49,6 +50,7 @@ rule all:
         "results/ci_coverage_original_data_results.csv",
         "results/ci_coverage_discretized_data_results.csv",
         "results/ci_coverage_independence_pruning_results.csv",
+        "plots/linear_regression_comparison.svg"
 
 rule csv_results:
     input:
@@ -85,11 +87,13 @@ rule generate_parameter_combinations:
     output:
         expand("data/parameter_combinations/napsu_original_model_parameters_{original_dataset_name}_{original_epsilon}e_{original_query_str}.pickle", zip, original_dataset_name=original_dataset_list, original_epsilon=original_epsilon_list, original_query_str=original_query_list),
         expand("data/parameter_combinations/napsu_discretization_model_parameters_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.pickle", zip, discretization_dataset_name=discretization_dataset_list, discretization_epsilon=discretization_epsilon_list, discretization_query_str=discretization_query_list),
-        expand("data/parameter_combinations/napsu_independence_pruning_model_parameters_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.pickle", zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
+        expand("data/parameter_combinations/napsu_independence_pruning_model_parameters_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.pickle", zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list),
+        expand("data/parameter_combinations/napsu_linear_regression_model_parameters_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.pickle", zip, linear_regression_dataset_name=linear_regression_dataset_list, linear_regression_epsilon_str=linear_regression_epsilon_list)
     log:
         expand("logs/parameter_combinations_original_{original_dataset_name}_{original_epsilon}e_{original_query_str}.log", zip, original_dataset_name=original_dataset_list, original_epsilon=original_epsilon_list, original_query_str=original_query_list),
         expand("logs/parameter_combinations_discretization_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.log", zip, discretization_dataset_name=discretization_dataset_list, discretization_epsilon=discretization_epsilon_list, discretization_query_str=discretization_query_list),
-        expand("logs/parameter_combinations_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log",  zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
+        expand("logs/parameter_combinations_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log",  zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list),
+        expand("logs/parameter_combinations_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.log", zip, linear_regression_dataset_name=linear_regression_dataset_list, linear_regression_epsilon_str=linear_regression_epsilon_list)
     threads: 1
     resources:
         runtime="30",
@@ -154,7 +158,7 @@ rule create_models_for_independence_pruning:
         #experiment_storage="napsu_independence_pruning_storage.csv",
         #timer="napsu_independence_pruning_timer.csv"
     log:
-        "logs/napsu_independence_pruning__{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log",
+        "logs/napsu_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log",
         "logs/inf_data_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.nc"
     threads: 8
     resources:
@@ -230,6 +234,28 @@ rule generate_datasets_for_discretized_data:
     script:
         "scripts/generate_datasets_for_discretized_data.py"
 
+
+rule create_models_for_linear_regression:
+    input:
+        "data/parameter_combinations/napsu_linear_regression_model_parameters_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.pickle",
+    output:
+        "models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.dill",
+        #experiment_storage="napsu_independence_pruning_storage.csv",
+        #timer="napsu_independence_pruning_timer.csv"
+    log:
+        "logs/napsu_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.log",
+        "logs/inf_data_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.nc"
+    threads: 8
+    resources:
+        runtime="2880",
+        time="48:00:00",
+        mem_mb=48000,
+        partition="medium"
+    # gpu=4
+    conda:
+        "envs/napsu.yaml"
+    script:
+        "scripts/create_models_for_independence_pruning.py"
 
 rule run_logistic_regression_on_synt:
     input:
@@ -450,6 +476,24 @@ rule compare_original_clf_results:
     script:
         "scripts/plot_clf_results.py"
 
+rule create_linear_regression_plots:
+    input:
+        expand("models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.dill", zip, linear_regression_dataset_name=linear_regression_dataset_list, linear_regression_epsilon_str=linear_regression_epsilon_list)
+    output:
+        report("plots/linear_regression_comparison.svg")
+    log:
+        "logs/linear_regression_plot.log"
+    threads: 1
+    resources:
+        runtime="120",
+        time="02:00:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/plot_linear_regression_results.py"
 
 rule clean_slurm_logs:
     shell:

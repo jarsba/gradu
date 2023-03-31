@@ -11,6 +11,7 @@ from src.utils.query_utils import join_query_list
 from src.utils.path_utils import DATA_FOLDER
 from src.utils.job_parameters import JobParameters
 from src.utils.string_utils import epsilon_float_to_str
+from src.utils.data_generator import create_dummy_dataset
 
 PARAMETER_COMBINATIONS_FOLDER = os.path.join(DATA_FOLDER, "parameter_combinations")
 
@@ -137,3 +138,31 @@ if __name__ == "__main__":
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
+
+    for n_categories in range(2, 8):
+        dataset = create_dummy_dataset(n_columns=5, n_rows=10000, n_categories=n_categories)
+        dataset_name = f"dummy_5x{n_categories}"
+        dataset_columns = list(dataset.columns)
+
+        for epsilon in epsilons:
+            experiment_id = generate_experiment_id()
+            epsilon_str = epsilon_float_to_str(epsilon)
+            query_list = []
+            query_str = join_query_list(query_list)
+            job_name = f"napsu_linear_regression_model_parameters_{dataset_name}_{epsilon_str}e"
+            job_parameter = JobParameters(
+                job_name=job_name,
+                experiment_id=experiment_id,
+                dataset=dataset_name,
+                dataset_path=None,
+                query_list=query_list,
+                query_string=query_str,
+                epsilon=epsilon,
+                algo=algo,
+                discretization_level=None,
+                laplace_approximation=True,
+                laplace_approximation_algorithm="torch_LBFGS",
+                missing_query=None
+            )
+            with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
+                pickle.dump(job_parameter, f)

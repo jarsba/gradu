@@ -45,11 +45,7 @@ class DataFrameData:
 
         self.int_array = self.int_df.to_numpy()
 
-        print(self.int_array.shape)
-
         self.n, self.d = base_df.shape
-        print(f"Dataframe data n: {self.n}")
-        print(f"Dataframe data d: {self.d}")
 
         self.values_by_col = {
             col: list(range(len(self.base_df[col].cat.categories))) if is_categorical_dtype(self.base_df[col])
