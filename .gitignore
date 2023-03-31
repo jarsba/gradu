@@ -156,5 +156,9 @@ results_bu/
 logs/*
 !logs/.gitkeep
 
+# Plots
+plots/*
+!plots/.gitkeep
+
 # Local files
 local_run.sh
