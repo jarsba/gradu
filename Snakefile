@@ -119,8 +119,8 @@ rule create_original_napsu_models:
         "logs/inf_data_napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.nc"
     threads: 8
     resources:
-        runtime="2880",
-        time="48:00:00",
+        runtime="4320",
+        time="72:00:00",
         mem_mb=48000,
         partition="medium"
     # gpu=4
@@ -162,8 +162,8 @@ rule create_models_for_independence_pruning:
         "logs/inf_data_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.nc"
     threads: 8
     resources:
-        runtime="2880",
-        time="48:00:00",
+        runtime="4320",
+        time="72:00:00",
         mem_mb=48000,
         partition="medium"
     # gpu=4
@@ -204,8 +204,8 @@ rule create_models_for_discretization:
         "logs/napsu_discretization_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.log"
     threads: 8
     resources:
-        runtime="2880",
-        time="48:00:00",
+        runtime="4320",
+        time="72:00:00",
         mem_mb=48000,
         partition="medium"
     # gpu=4
@@ -247,8 +247,8 @@ rule create_models_for_linear_regression:
         "logs/inf_data_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.nc"
     threads: 8
     resources:
-        runtime="2880",
-        time="48:00:00",
+        runtime="4320",
+        time="72:00:00",
         mem_mb=48000,
         partition="medium"
     # gpu=4
