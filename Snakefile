@@ -255,7 +255,7 @@ rule create_models_for_linear_regression:
     conda:
         "envs/napsu.yaml"
     script:
-        "scripts/create_models_for_independence_pruning.py"
+        "scripts/create_models_for_linear_regression.py"
 
 rule run_logistic_regression_on_synt:
     input:

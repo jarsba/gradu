@@ -2,6 +2,7 @@ from typing import List, Iterable, Optional
 
 import numpy as np
 import pandas as pd
+import re
 
 DATASET_COLUMN_TYPES = {
     'adult': {
@@ -111,7 +112,7 @@ def transform_for_classification(dataset_name: str, df: pd.DataFrame) -> pd.Data
                 df_copy[column] = df_copy[column].astype('int')
 
         df_copy = pd.get_dummies(df_copy)
-
+        df_copy = df_copy.rename(columns=lambda x: re.sub('[-_()]+', '', x))
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
 
     elif 'binary' in dataset_name:
