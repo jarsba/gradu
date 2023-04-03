@@ -9,7 +9,7 @@ DATASET_COLUMN_TYPES = {
         'age': 'int',
         'workclass': 'category',
         'gender': 'category',
-        'education-num': 'int',
+        'education-num': 'category',
         'marital-status': 'category',
         'occupation': 'category',
         'relationship': 'category',
@@ -19,9 +19,9 @@ DATASET_COLUMN_TYPES = {
         'capital-loss': 'int',
         'hours-per-week': 'int',
         'native-country': 'category',
-        'had-capital-gains': 'int',
-        'had-capital-losses': 'int',
-        'compensation': 'int'
+        'had-capital-gains': 'category',
+        'had-capital-losses': 'category',
+        'compensation': 'category'
     },
     'adult_discrete': {
         'age': 'category',
@@ -37,9 +37,9 @@ DATASET_COLUMN_TYPES = {
         'capital-loss': 'int',
         'hours-per-week': 'category',
         'native-country': 'category',
-        'had-capital-gains': 'int',
-        'had-capital-losses': 'int',
-        'compensation': 'int'
+        'had-capital-gains': 'category',
+        'had-capital-losses': 'category',
+        'compensation': 'category'
     }
 }
 
@@ -138,14 +138,15 @@ def transform_for_modeling(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
             dtype = ADULT_TYPES[column]
             if dtype == 'category':
                 df_copy[column] = df_copy[column].astype('category')
-            elif dtype == 'int':
-                df_copy[column] = df_copy[column].astype('int')
+            else:
+                raise Exception(
+                    f"Column {column} has unsupported type {dtype}. For modeling all types should be categorical.")
 
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
     elif 'binary' in dataset_name:
-        df_copy = df_copy.astype('int')
+        df_copy = df_copy.astype('category')
     elif 'dummy' in dataset_name:
-        df_copy = df_copy.astype('int')
+        df_copy = df_copy.astype('category')
     else:
         raise ValueError(f"Dataset {dataset_name} not supported")
 

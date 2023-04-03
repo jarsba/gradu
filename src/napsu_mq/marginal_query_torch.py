@@ -5,7 +5,7 @@ import itertools
 
 from tqdm import tqdm
 
-from utils import powerset
+from .utils import powerset
 
 
 class MarginalQuery:
@@ -137,7 +137,6 @@ class FullMarginalQuerySet:
             clique_product = itertools.product(*(self.values_by_int_feature[variable] for variable in clique_ordered))
             for val in tqdm(clique_product):
                 value = torch.zeros(len(clique), dtype=int)
-                slice = value[conv_clique_indices]
                 value[conv_clique_indices] = torch.tensor(val, dtype=int)
                 counter = torch.zeros(tuple([len(self.values_by_int_feature[variable]) for variable in clique_ordered]),
                                       dtype=int)

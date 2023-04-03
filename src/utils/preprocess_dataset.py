@@ -73,8 +73,8 @@ def clean_adult(data: pd.DataFrame) -> pd.DataFrame:
     data['relationship'] = pd.Categorical(data['relationship'])
     data['race'] = pd.Categorical(data['race'])
     data['sex'] = pd.Categorical(data['sex'])
-    data['had-capital-gains'] = data['had-capital-gains'].astype(int)
-    data['had-capital-losses'] = data['had-capital-losses'].astype(int)
+    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
+    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
     data['capital-gain'] = data['capital-gain'].astype(int)
     data['capital-loss'] = data['capital-loss'].astype(int)
     data['hours-per-week'] = data['hours-per-week'].astype(int)
@@ -116,8 +116,8 @@ def clean_adult_with_discretization(data: pd.DataFrame, bucket_size: int = None,
     data['sex'] = pd.Categorical(data['sex'])
     data['capital-gain'] = data['capital-gain'].astype(int)
     data['capital-loss'] = data['capital-loss'].astype(int)
-    data['had-capital-gains'] = data['had-capital-gains'].astype(int)
-    data['had-capital-losses'] = data['had-capital-losses'].astype(int)
+    data['had-capital-gains'] = pd.Categorical(data['had-capital-gains'])
+    data['had-capital-losses'] = pd.Categorical(data['had-capital-losses'])
     if bucket_size is not None:
         hours_labels = ["{0} - {1}".format(i, i + bucket_size) for i in range(0, 100, bucket_size)]
         data['hours-per-week'] = pd.Categorical(
@@ -389,7 +389,7 @@ def get_adult_train_independence_pruning(dataset_folder: str = None) -> pd.DataF
 
 def get_adult_test_independence_pruning(dataset_folder: str = None) -> pd.DataFrame:
     """
-    Returns: Subtset of Adult test dataset that has columns discretized to buckets of 10 and that has following columns:
+    Returns: Subtset of Adult test dataset that has columns discretized to buckets of 2 and that has following columns:
         - 'age'
         - 'sex'
         - 'education-num'

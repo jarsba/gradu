@@ -38,12 +38,16 @@ class DataFrameData:
         for col in base_df.columns:
             if is_categorical_dtype(self.base_df[col]):
                 self.int_df[col] = self.base_df[col].cat.codes
-            elif is_integer_dtype(self.base_df[col]):
-                self.int_df[col] = self.base_df[col]
+            #elif is_integer_dtype(self.base_df[col]):
+            #    self.int_df[col] = self.base_df[col]
             else:
                 raise ValueError(f"DataFrame contains unsupported column type: {self.base_df[col].dtype}")
 
+        print(self.int_df.dtypes)
+
         self.int_array = self.int_df.to_numpy()
+
+        print(self.int_array.shape)
 
         self.n, self.d = base_df.shape
 
