@@ -2,7 +2,7 @@ from typing import Tuple, List
 
 from src.utils.query_utils import join_query_list
 import itertools
-from src.utils.preprocess_dataset import ADULT_COLUMNS_SMALL
+from src.utils.preprocess_dataset import ADULT_COLUMNS_SMALL, ADULT_COLUMNS_INDEPENDENCE_PRUNING
 from src.utils.string_utils import epsilon_float_to_str
 
 
@@ -52,12 +52,12 @@ def generate_dataset_query_epsilon_products_independence_queries(datasets, queri
 
 def generate_independence_pruning_missing_queries():
     """Generate missing query strings for independence pruning datasets"""
-    adult_small_columns = ADULT_COLUMNS_SMALL
-    adult_small_columns = sorted(adult_small_columns)
+    adult_independence_pruning_columns = ADULT_COLUMNS_INDEPENDENCE_PRUNING
+    adult_independence_pruning_columns = sorted(adult_independence_pruning_columns)
 
     independence_pruning_missing_query_strings = []
 
-    marginal_pairs = list(itertools.combinations(adult_small_columns, 2))
+    marginal_pairs = list(itertools.combinations(adult_independence_pruning_columns, 2))
 
     marginal_pair_strings = [f"{pair[0]}+{pair[1]}" for pair in marginal_pairs]
 
