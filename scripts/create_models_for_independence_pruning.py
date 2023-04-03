@@ -123,5 +123,5 @@ if __name__ == "__main__":
 
     inf_data.to_netcdf(f"logs/inf_data_independence_pruning_{dataset_name}_{epsilon}e_{missing_query}.nc")
 
-    storage.save(file_path=storage_file_path, mode=mode)
-    timer.save(file_path=timer_file_path, mode=mode)
+    storage.save(file_path=storage_file_path, mode=mode, index=False)
+    timer.save(file_path=timer_file_path, mode=mode, index=False)

@@ -29,11 +29,12 @@ class ExperimentStorage(metaclass=Singleton):
         else:
             self.storage[experiment_id] = dict_to_store
 
-    def to_df(self) -> Optional[pd.DataFrame]:
+    def to_df(self, **kwargs) -> Optional[pd.DataFrame]:
         if len(self.storage) == 0:
             return None
         else:
-            df = pd.DataFrame().from_records(self.storage)
+            df_records = [{'experiment_id': key, **item} for key, item in self.storage.items()]
+            df = pd.DataFrame().from_records(df_records, **kwargs)
             return df
 
     def to_csv(self, file_path: Optional[str], **kwargs) -> None:
@@ -47,7 +48,7 @@ class ExperimentStorage(metaclass=Singleton):
         else:
             df.to_csv(file_path, **kwargs)
 
-    def save(self, file_path: str = None, mode: Literal["replace", "append"] = None) -> None:
+    def save(self, file_path: str = None, mode: Literal["replace", "append"] = None, **kwargs) -> None:
         """Save to contents of the experiment storage to a csv file. Convenience wrapper for to_csv-function
 
         Args:
@@ -70,8 +71,8 @@ class ExperimentStorage(metaclass=Singleton):
         mode = mode if mode is not None else self.mode
 
         if mode == 'replace':
-            self.to_csv(file_path, mode="w")
+            self.to_csv(file_path, mode="w", **kwargs)
         elif mode == 'append':
-            self.to_csv(file_path, mode="a")
+            self.to_csv(file_path, mode="a", **kwargs)
         else:
             raise Exception("Invalid mode")

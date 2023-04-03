@@ -45,14 +45,15 @@ class Timer(metaclass=Singleton):
         times_obj['stop'] = stop
         times_obj['timedelta'] = stop - times_obj['start']
 
-    def to_df(self) -> Optional[pd.DataFrame]:
+    def to_df(self, **kwargs) -> Optional[pd.DataFrame]:
         if len(self.times) == 0:
             return None
         else:
-            df = pd.DataFrame.from_records(self.times)
+            df_records = [item for item in self.times.values()]
+            df = pd.DataFrame.from_records(df_records, **kwargs)
             return df
 
-    def to_csv(self, file_path: Optional[str], **kwargs) -> None:
+    def to_csv(self, file_path: Optional[str] = None, **kwargs) -> None:
         if file_path is None and self.file_path is None:
             raise Exception("File path is not defined.")
 
@@ -65,7 +66,7 @@ class Timer(metaclass=Singleton):
         else:
             df.to_csv(file_path, **kwargs)
 
-    def save(self, file_path: str = None, mode: Literal["replace", "append"] = None) -> None:
+    def save(self, file_path: str = None, mode: Literal["replace", "append"] = None, **kwargs) -> None:
         """Save to contents of the timer to a csv file. Convenience wrapper for to_csv-function.
 
         Args:
@@ -88,8 +89,8 @@ class Timer(metaclass=Singleton):
         mode = mode if mode is not None else self.mode
 
         if mode == 'replace':
-            self.to_csv(file_path, mode="w")
+            self.to_csv(file_path, mode="w", **kwargs)
         elif mode == 'append':
-            self.to_csv(file_path, mode="a")
+            self.to_csv(file_path, mode="a", **kwargs)
         else:
             raise Exception("Invalid mode")
