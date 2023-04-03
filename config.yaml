@@ -1,4 +1,5 @@
 workdir: "/home/local/jarlehti/projects/gradu"
+cluster: "ukko"
 
 seed: 42
 n_of_repeats: 20
