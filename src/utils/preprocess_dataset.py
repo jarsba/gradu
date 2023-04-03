@@ -23,6 +23,8 @@ ADULT_COLUMNS_LARGE = [
 ADULT_COLUMNS_DISCRETIZATION = ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
                                 'had-capital-gains', 'had-capital-losses', 'compensation']
 
+ADULT_COLUMNS_INDEPENDENCE_PRUNING = ["education-num", "sex", "age", "hours-per-week", "compensation"]
+
 
 def convert_to_int_array(df: pd.DataFrame) -> np.ndarray:
     int_df = df.copy()
@@ -382,7 +384,7 @@ def get_adult_train_independence_pruning(dataset_folder: str = None) -> pd.DataF
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_train_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, n_buckets=2,
-                                                    columns=ADULT_COLUMNS_SMALL)
+                                                    columns=ADULT_COLUMNS_INDEPENDENCE_PRUNING)
 
     return cleaned_adult
 
@@ -406,7 +408,7 @@ def get_adult_test_independence_pruning(dataset_folder: str = None) -> pd.DataFr
 
     data = pd.read_csv(os.path.join(dataset_folder, "cleaned_adult_test_data.csv"))
     cleaned_adult = clean_adult_with_discretization(data, n_buckets=2,
-                                                    columns=ADULT_COLUMNS_SMALL)
+                                                    columns=ADULT_COLUMNS_INDEPENDENCE_PRUNING)
 
     return cleaned_adult
 

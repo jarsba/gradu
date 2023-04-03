@@ -20,7 +20,7 @@ from typing import Tuple, List, Union, Mapping, Iterable
 
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_integer_dtype, is_categorical_dtype
+from pandas.api.types import is_categorical_dtype
 
 logger = logging.getLogger(__name__)
 
