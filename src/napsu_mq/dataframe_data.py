@@ -38,23 +38,15 @@ class DataFrameData:
         for col in base_df.columns:
             if is_categorical_dtype(self.base_df[col]):
                 self.int_df[col] = self.base_df[col].cat.codes
-            #elif is_integer_dtype(self.base_df[col]):
-            #    self.int_df[col] = self.base_df[col]
             else:
                 raise ValueError(f"DataFrame contains unsupported column type: {self.base_df[col].dtype}")
 
-        print(self.int_df.dtypes)
-
         self.int_array = self.int_df.to_numpy()
-
-        print(self.int_array.shape)
 
         self.n, self.d = base_df.shape
 
         self.values_by_col = {
-            col: list(range(len(self.base_df[col].cat.categories))) if is_categorical_dtype(self.base_df[col])
-            else sorted(list(self.base_df[col].unique()))
-            for col in self.int_df.columns
+            col: list(range(len(self.base_df[col].cat.categories))) for col in self.int_df.columns
         }
 
         self.values_by_int_feature = {i: list(self.values_by_col[col]) for i, col in enumerate(self.int_df.columns)}
