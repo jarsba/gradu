@@ -123,8 +123,7 @@ rule create_original_napsu_models:
         runtime="4320" if cluster == "vorna" else "2880",
         time="72:00:00" if cluster == "vorna" else "48:00:00",
         mem_mb=48000,
-        partition="medium",
-        slurm_extra="--XLA_FLAGS='--xla_force_host_platform_device_count=4'"
+        partition="medium"
     # gpu=4
     conda:
         "envs/napsu.yaml"
@@ -167,8 +166,7 @@ rule create_models_for_independence_pruning:
         runtime="4320" if cluster == "vorna" else "2880",
         time="72:00:00" if cluster == "vorna" else "48:00:00",
         mem_mb=48000,
-        partition="medium",
-        slurm_extra="--XLA_FLAGS='--xla_force_host_platform_device_count=4'"
+        partition="medium"
     # gpu=4
     conda:
         "envs/napsu.yaml"
@@ -210,8 +208,7 @@ rule create_models_for_discretization:
         runtime="4320" if cluster == "vorna" else "2880",
         time="72:00:00" if cluster == "vorna" else "48:00:00",
         mem_mb=48000,
-        partition="medium",
-        slurm_extra="--XLA_FLAGS='--xla_force_host_platform_device_count=4'"
+        partition="medium"
     # gpu=4
     conda:
         "envs/napsu.yaml"
@@ -254,8 +251,7 @@ rule create_models_for_linear_regression:
         runtime="4320" if cluster == "vorna" else "2880",
         time="72:00:00" if cluster == "vorna" else "48:00:00",
         mem_mb=48000,
-        partition="medium",
-        slurm_extra="--XLA_FLAGS='--xla_force_host_platform_device_count=4'"
+        partition="medium"
     # gpu=4
     conda:
         "envs/napsu.yaml"

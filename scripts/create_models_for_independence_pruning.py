@@ -1,3 +1,7 @@
+import os
+print(os.environ["XLA_FLAGS"])
+os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=4"
+
 import sys
 from typing import Literal
 import pickle
