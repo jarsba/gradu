@@ -3,8 +3,11 @@ from typing import Literal
 import pickle
 sys.path.append(snakemake.config['workdir'])
 
+import jax
 from jax.config import config
+
 config.update("jax_enable_x64", True)
+print(f"Jax device count: {jax.local_device_count()}")
 
 import torch
 torch.set_default_dtype(torch.float64)
