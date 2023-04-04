@@ -11,7 +11,6 @@ from time import time as unix_time
 from typing import Union
 from uuid import uuid4
 import shlex
-from io import StringIO
 
 from CookieCutter import CookieCutter
 from snakemake import io
@@ -236,10 +235,10 @@ def time_to_minutes(time):
     m = regex[0].match(time)
     d.update(m.groupdict())
     minutes = (
-        int(d["days"]) * 24 * 60
-        + int(d["hours"]) * 60
-        + int(d["minutes"])
-        + math.ceil(int(d["seconds"]) / 60)
+            int(d["days"]) * 24 * 60
+            + int(d["hours"]) * 60
+            + int(d["minutes"])
+            + math.ceil(int(d["seconds"]) / 60)
     )
     assert minutes > 0, "minutes has to be greater than 0"
     return minutes
@@ -327,8 +326,8 @@ class JobLog:
     @property
     def wildcards_str(self) -> str:
         return (
-            ".".join("{}={}".format(k, v) for k, v in self.wildcards.items())
-            or "unique"
+                ".".join("{}={}".format(k, v) for k, v in self.wildcards.items())
+                or "unique"
         )
 
     @property

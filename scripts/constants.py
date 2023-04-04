@@ -7,7 +7,7 @@ TARGET_COLUMNS_FOR_DATASET = {
     "adult_no_discretization": "compensation",
     "adult_low_discretization": "compensation",
     "adult_high_discretization": "compensation",
-
+    "adult_independence_pruning": "compensation",
 }
 
 TRAIN_DATASET_FOR_DATASET = {
@@ -18,7 +18,8 @@ TRAIN_DATASET_FOR_DATASET = {
     "adult_large": "data/datasets/adult_large.csv",
     "adult_no_discretization": "data/datasets/adult_no_discretization.csv",
     "adult_low_discretization": "data/datasets/adult_low_discretization.csv",
-    "adult_high_discretization": "data/datasets/adult_high_discretization.csv"
+    "adult_high_discretization": "data/datasets/adult_high_discretization.csv",
+    "adult_independence_pruning": "data/datasets/adult_independence_pruning.csv"
 }
 
 TEST_DATASETS_FOR_DATASET = {
@@ -29,8 +30,8 @@ TEST_DATASETS_FOR_DATASET = {
     "adult_large": "data/datasets/adult_large_test.csv",
     "adult_no_discretization": "data/datasets/adult_no_discretization_test.csv",
     "adult_low_discretization": "data/datasets/adult_low_discretization_test.csv",
-    "adult_high_discretization": "data/datasets/adult_high_discretization_test.csv"
-
+    "adult_high_discretization": "data/datasets/adult_high_discretization_test.csv",
+    "adult_independence_pruning": "data/datasets/adult_independence_pruning_test.csv"
 }
 
 TRAIN_DATASET_SIZE_MAP = {
@@ -41,7 +42,8 @@ TRAIN_DATASET_SIZE_MAP = {
     "adult_large": 30162,
     "adult_no_discretization": 30162,
     "adult_low_discretization": 30162,
-    "adult_high_discretization": 30162
+    "adult_high_discretization": 30162,
+    "adult_independence_pruning": 30162,
 }
 
 TEST_DATASET_SIZE_MAP = {
@@ -52,7 +54,8 @@ TEST_DATASET_SIZE_MAP = {
     "adult_large": 15060,
     "adult_no_discretization": 15060,
     "adult_low_discretization": 15060,
-    "adult_high_discretization": 15060
+    "adult_high_discretization": 15060,
+    "adult_independence_pruning": 30162,
 
 }
 
@@ -61,16 +64,18 @@ COLUMNS_FOR_DATASET = {
               'hours-per-week', 'native-country', 'compensation'],
     "binary4d": ['A', 'B', 'C', 'D'],
     "binary3d": ['A', 'B', 'C'],
-    "adult_small": ["education-num", "marital-status", "age", "sex", "hours-per-week", "compensation"],
+    "adult_small": ["education-num", "marital-status", "sex", "age", "hours-per-week", "compensation"],
     "adult_large": ["age", "sex", "education-num", "hours-per-week", "workclass", "marital-status",
                     "had-capital-gains", "had-capital-losses", "compensation"],
-    "adult_no_discretization": ['age', 'sex', 'education-num', 'hours-per-week', 'workclass', 'marital-status',
+    "adult_no_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
                                 'had-capital-gains', 'had-capital-losses', 'compensation'],
-    "adult_low_discretization": ['age', 'sex', 'education-num', 'hours-per-week', 'workclass', 'marital-status',
-                                 'had-capital-gains', 'had-capital-losses', 'compensation'],
-    "adult_high_discretization": ['age', 'sex', 'education-num', 'hours-per-week', 'workclass', 'marital-status',
-                                  'had-capital-gains', 'had-capital-losses', 'compensation']
+    "adult_low_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
+                                'had-capital-gains', 'had-capital-losses', 'compensation'],
+    "adult_high_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
+                                'had-capital-gains', 'had-capital-losses', 'compensation'],
+    "adult_independence_pruning": ["education-num", "sex", "age", "hours-per-week", "compensation"]
 }
+
 
 TRUE_COEFFICIENTS_FOR_DATASETS = {
     "binary3d": [1.0, 0.0],

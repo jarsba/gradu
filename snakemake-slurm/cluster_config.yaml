@@ -1,8 +1,0 @@
-__default__:
-    account: jarlehti
-    partition: medium
-    mail-user: jarlehti@helsinki.fi
-    time: 120
-    nodes: 1
-    ntasks: 1
-    mem: 10GB
