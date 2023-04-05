@@ -105,6 +105,7 @@ if __name__ == '__main__':
 
     timer.stop(pid)
 
+    print("Writing model to file")
     result.store(target_file)
 
     inf_data.to_netcdf(f"logs/inf_data_napsu_original_model_{dataset_name}_{epsilon}e_{query_str}.nc")

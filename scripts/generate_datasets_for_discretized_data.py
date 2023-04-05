@@ -1,10 +1,10 @@
 import sys
 sys.path.append(snakemake.config['workdir'])
 
+from jax.config import config
+config.update("jax_enable_x64", True)
 from typing import List
 
-import os
-import jax
 import numpy as np
 import pandas as pd
 import pickle
@@ -13,14 +13,16 @@ from src.utils.string_utils import epsilon_float_to_str
 from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.utils.synthetic_data_object import SynthDataObject
 from constants import TRAIN_DATASET_SIZE_MAP
-from src.utils.path_utils import SYNT_DATASETS_FOLDER
+from src.utils.seed_utils import set_seed
 
-models = snakemake.input
-n_synt_datasets = snakemake.config['n_synt_datasets']
+if __name__ == "__main__":
+    seed = snakemake.config['seed']
+    rng = set_seed(seed)
 
-sampling_rng = jax.random.PRNGKey(34652346234)
+    model_path = str(snakemake.input[0])
+    target_file = str(snakemake.output[0])
+    n_synt_datasets = snakemake.config['n_synt_datasets']
 
-for model_path in models:
     print(f"Generating discretized data for model {model_path}")
     napsu_result_read_file = open(f"{model_path}", "rb")
     model: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
@@ -37,7 +39,7 @@ for model_path in models:
 
     n_synt_samples = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
-    synt_datasets: List[pd.DataFrame] = model.generate_extended(sampling_rng, n_synt_samples, n_synt_datasets,
+    synt_datasets: List[pd.DataFrame] = model.generate_extended(rng, n_synt_samples, n_synt_datasets,
                                                                 single_dataframe=False)
     np_tensor: np.ndarray = dataframe_list_to_tensor(synt_datasets)
 
@@ -59,8 +61,6 @@ for model_path in models:
 
     epsilon_str = epsilon_float_to_str(epsilon)
 
-    path = os.path.join(SYNT_DATASETS_FOLDER, f"synthetic_dataset_discretization_{dataset_name}_{epsilon_str}e_{MCMC_algorithm}.pickle")
-
-    with open(path, "wb") as file:
+    with open(target_file, "wb") as file:
         pickle.dump(synth_data_object, file)
         file.close()
