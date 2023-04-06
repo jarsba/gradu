@@ -1,14 +1,12 @@
-from typing import Mapping
 
 import numpy as np
 import pandas as pd
 
-from constants import TRAIN_DATASET_SIZE_MAP, TARGET_COLUMNS_FOR_DATASET
-from data_utils import dataframe_list_to_tensor
+from constants import TRAIN_DATASET_SIZE_MAP
 from napsu_mq import NapsuMQResult
 from rubins_rules import conf_int
 from src.utils.confidence_interval_object import ConfidenceIntervalObject
-from src.utils.data_utils import transform_for_ci_coverage
+from src.utils.data_utils import transform_for_ci_coverage, dataframe_list_to_tensor
 from src.napsu_mq.logistic_regression import logistic_regression, logistic_regression_on_2d
 import jax
 
