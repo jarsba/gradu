@@ -269,7 +269,7 @@ rule run_logistic_regression_on_synt:
         time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     output:
         "results/synthetic_logistic_regression_results.csv"
     conda:
@@ -311,7 +311,7 @@ rule run_classification_on_synt:
         time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
@@ -351,7 +351,7 @@ rule run_logistic_regression_on_discretized_data:
         time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
@@ -370,7 +370,7 @@ rule run_logistic_regression_on_independence_pruning_datasets:
         time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
@@ -390,7 +390,7 @@ rule run_ci_coverage_on_original_models:
         time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
@@ -410,7 +410,7 @@ rule run_ci_coverage_on_discretized_models:
         time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
@@ -429,7 +429,7 @@ rule run_ci_coverage_on_independence_pruning_models:
         time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
-        partition="short"
+        partition="medium"
     conda:
         "envs/analysis.yaml"
     script:
