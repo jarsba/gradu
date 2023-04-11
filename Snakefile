@@ -265,8 +265,8 @@ rule run_logistic_regression_on_synt:
         "logs/logistic_regression_synthetic_dataset_original_model.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
         partition="short"
@@ -307,8 +307,8 @@ rule run_classification_on_synt:
         "logs/classification_synthetic_dataset_original_models.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
         partition="short"
@@ -347,8 +347,8 @@ rule run_logistic_regression_on_discretized_data:
         "logs/logistic_regression_discretized_datasets.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
         partition="short"
@@ -366,8 +366,8 @@ rule run_logistic_regression_on_independence_pruning_datasets:
         "logs/logistic_regression_independence_pruning_datasets.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=32000,
         disk_mb=50000,
         partition="short"
@@ -386,8 +386,8 @@ rule run_ci_coverage_on_original_models:
         "logs/ci_coverage_napsu_original_modelss.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
         partition="short"
@@ -406,8 +406,8 @@ rule run_ci_coverage_on_discretized_models:
         "logs/ci_coverage_discretization_models.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
         partition="short"
@@ -425,8 +425,8 @@ rule run_ci_coverage_on_independence_pruning_models:
         "logs/ci_coverage_independence_pruning_models.log"
     threads: 1
     resources:
-        runtime="120",
-        time="02:00:00",
+        runtime="3600",
+        time="24:00:00",
         mem_mb=16000,
         disk_mb=50000,
         partition="short"
