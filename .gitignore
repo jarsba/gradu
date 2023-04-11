@@ -164,4 +164,12 @@ dag.*
 # Local files
 local_run.sh
 
-
+# Timer and storage files
+napsu_discretization_test_storage.csv
+napsu_discretization_test_timer.csv
+napsu_experiment_storage_output.csv
+napsu_independence_pruning_storage.csv
+napsu_independence_pruning_timer.csv
+napsu_linear_regression_test_storage.csv
+napsu_linear_regression_test_timer.csv
+napsu_MCMC_time_vs_epsilon_comparison.csv 

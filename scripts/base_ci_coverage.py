@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 
@@ -19,10 +18,11 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
     if rng is None:
         rng = jax.random.PRNGKey(2534753284572)
 
-    point_estimates, variance_estimates = logistic_regression_on_2d(test_dataset, return_intervals=False,
-                                                                    return_results=False,
-                                                                    col_to_predict=target_column_index)
-    true_parameter_values = point_estimates
+    point_estimates, variance_estimates = logistic_regression_on_2d(test_dataset, col_to_predict=target_column_index,
+                                                                    return_intervals=False, return_results=False,
+                                                                    add_constant=False)
+    true_parameter_values = point_estimates.flatten()
+
     sampling_rngs = jax.random.split(rng, n_repeats)
     dataset_name = model.meta['dataset_name']
     n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
@@ -31,13 +31,15 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
 
     for i in range(n_repeats):
         for interval in confidence_intervals:
+            print(f"Running CI coverage for dataset {dataset_name}, index {i} and interval {interval}")
             datasets = model.generate(sampling_rngs[i], n_original_datapoints, n_datasets)
 
             datasets_transformed = [transform_for_ci_coverage(dataset_name, dataset) for dataset in datasets]
 
             datasets_np = dataframe_list_to_tensor(datasets_transformed)
 
-            q, u = logistic_regression(datasets_np, add_constant=False, col_to_predict=target_column_index)
+            q, u = logistic_regression(datasets_np, col_to_predict=target_column_index, return_intervals=False,
+                                       return_results=False, add_constant=False)
 
             for d in range(len(true_parameter_values)):
                 q_i = q[:, d]
@@ -53,6 +55,9 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                 print(
                     f"True param value: {true_param_value}, confidence interval: {ci_result[0]} - {ci_result[1]}")
 
+                contains_true_value = ci_result[0] <= true_param_value <= ci_result[1]
+                print(contains_true_value)
+
                 conf_int_object = ConfidenceIntervalObject(
                     original_dataset_name=dataset_name,
                     index=i,
@@ -62,7 +67,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     conf_int_end=ci_result[1],
                     conf_int_width=ci_result[1] - ci_result[0],
                     true_parameter_value=true_param_value,
-                    contains_true_parameter=ci_result[0] <= true_param_value <= ci_result[1],
+                    contains_true_parameter=contains_true_value,
                     meta=meta
                 )
 

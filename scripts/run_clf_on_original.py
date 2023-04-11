@@ -8,7 +8,10 @@ import numpy as np
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET
 from base_clf import run_classification
 from src.utils.data_utils import transform_for_classification
+from src.utils.seed_utils import set_seed
 
+seed = snakemake.config['seed']
+rng = set_seed(seed)
 
 dataset_paths = snakemake.input
 dataset_map = snakemake.config['original_datasets']

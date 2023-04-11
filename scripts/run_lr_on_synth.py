@@ -12,6 +12,10 @@ from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COL
 from src.utils.data_utils import transform_for_classification
 from base_lr import run_logistic_regression_on_3d, run_logistic_regression_on_2d
 from src.utils.classification_utils import compare_and_fill_missing_columns
+from src.utils.seed_utils import set_seed
+
+seed = snakemake.config['seed']
+rng = set_seed(seed)
 
 dataset_paths = snakemake.input
 

@@ -10,6 +10,10 @@ from base_clf import run_classification
 from src.utils.data_utils import transform_for_classification
 import pickle
 from src.utils.classification_utils import compare_and_fill_missing_columns
+from src.utils.seed_utils import set_seed
+
+seed = snakemake.config['seed']
+rng = set_seed(seed)
 
 dataset_paths = snakemake.input
 

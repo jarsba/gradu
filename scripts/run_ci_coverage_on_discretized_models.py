@@ -4,11 +4,13 @@ sys.path.append(snakemake.config['workdir'])
 from constants import TARGET_COLUMNS_FOR_DATASET, TRAIN_DATASET_FOR_DATASET
 from src.napsu_mq.napsu_mq import NapsuMQResult
 import pandas as pd
-
+from src.utils.seed_utils import set_seed
 from src.utils.data_utils import transform_for_ci_coverage
 from scripts.base_ci_coverage import calculate_ci_coverage_objects
 
 models = snakemake.input
+seed = snakemake.config['seed']
+rng = set_seed(seed)
 
 for model_path in models:
     print(f"Generating data for model {model_path}")
@@ -36,4 +38,4 @@ for model_path in models:
         'epsilon': epsilon,
     }
 
-    ci_coverage_results = calculate_ci_coverage_objects(model, test_dataset=test_df_np, meta=meta, target_column_index=target_column)
+    ci_coverage_results = calculate_ci_coverage_objects(model, rng=rng, test_dataset=test_df_np, meta=meta, target_column_index=target_column)
