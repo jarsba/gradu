@@ -56,7 +56,7 @@ def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test, col_t
     f1 = f1_score(y_test, predictions)
 
     point_estimates, variance_estimates = logistic_regression(
-        df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False)
+        df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False, return_results=False)
 
     coefficients = model.get_clf().params.to_numpy()
 
@@ -79,10 +79,10 @@ def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_t
 
     if return_confidence_intervals is True:
         point_estimates, variance_estimates, confidence_interval = logistic_regression_on_2d(
-            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=True, conf_levels=[0.95])
+            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=True, return_results=False, conf_levels=[0.95])
         return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates, confidence_interval
 
     else:
         point_estimates, variance_estimates = logistic_regression_on_2d(
-            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False)
+            df_np, col_to_predict=col_to_predict, add_constant=False, return_intervals=False, return_results=False)
         return accuracy, balanced_accuracy, f1, coefficients, point_estimates, variance_estimates

@@ -92,7 +92,7 @@ for path in dataset_paths:
 
     X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
     accuracy_score, balanced_accuracy_score, f1_score, \
-    coefficients, point_estimates, variance_estimates = run_logistic_regression_on_3d(
+    coefficients, point_estimates, variance_estimates = run_logistic_regression_on_2d(
         df_np, X_train, y_train, X_test, y_test, col_to_predict=target_column_index)
 
     results.loc[len(results)] = [experiment_id, dataset_name, np.nan, query, epsilon, MCMC_algorithm,
