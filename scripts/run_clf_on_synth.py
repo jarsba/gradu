@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(snakemake.config['workdir'])
 
 import pandas as pd
@@ -8,6 +9,7 @@ from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COL
 from base_clf import run_classification
 from src.utils.data_utils import transform_for_classification
 import pickle
+from src.utils.classification_utils import compare_and_fill_missing_columns
 
 dataset_paths = snakemake.input
 
@@ -43,7 +45,7 @@ for path in dataset_paths:
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
 
         train_df_transformed = transform_for_classification(dataset_name, train_df)
-
+        train_df_transformed = compare_and_fill_missing_columns(test_df_transformed, train_df_transformed)
 
         # Check that both have equal columns
         assert set(list(train_df_transformed.columns.values)).symmetric_difference(
@@ -60,7 +62,14 @@ for path in dataset_paths:
     # Classify the whole synthetic dataset
     dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
+
     train_df_transformed = transform_for_classification(dataset_name, train_df)
+    train_df_transformed = compare_and_fill_missing_columns(test_df_transformed, train_df_transformed)
+
+    # Check that both have equal columns
+    assert set(list(train_df_transformed.columns.values)).symmetric_difference(
+        set(list(test_df_transformed.columns.values))) == set()
+
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]
     scores = run_classification(train_df_transformed, test_df_transformed, target_column)
 

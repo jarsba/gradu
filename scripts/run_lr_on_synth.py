@@ -11,6 +11,7 @@ from src.utils.synthetic_data_object import SynthDataObject
 from constants import TARGET_COLUMNS_FOR_DATASET, TEST_DATASETS_FOR_DATASET, COLUMNS_FOR_DATASET
 from src.utils.data_utils import transform_for_classification
 from base_lr import run_logistic_regression_on_3d, run_logistic_regression_on_2d
+from src.utils.classification_utils import compare_and_fill_missing_columns
 
 dataset_paths = snakemake.input
 
@@ -52,6 +53,7 @@ for path in dataset_paths:
         print(f"Running logistic regression on {path} and index {i}")
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
         train_df_transformed = transform_for_classification(dataset_name, train_df)
+        train_df_transformed = compare_and_fill_missing_columns(test_df_transformed, train_df_transformed)
 
         # Check that both have equal columns
         assert set(list(train_df_transformed.columns.values)).symmetric_difference(
@@ -72,18 +74,24 @@ for path in dataset_paths:
                                      balanced_accuracy_score, f1_score, coefficients, point_estimates,
                                      variance_estimates]
 
-        dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
-        train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
-        train_df_transformed = transform_for_classification(dataset_name, train_df)
+    # Classify the whole synthetic dataset
+    dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
+    train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
+    train_df_transformed = transform_for_classification(dataset_name, train_df)
+    train_df_transformed = compare_and_fill_missing_columns(test_df_transformed, train_df_transformed)
 
-        X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
-        accuracy_score, balanced_accuracy_score, f1_score, \
-        coefficients, point_estimates, variance_estimates = run_logistic_regression_on_3d(
-            dataset_tensor, X_train, y_train, X_test, y_test, col_to_predict=target_column_index)
+    # Check that both have equal columns
+    assert set(list(train_df_transformed.columns.values)).symmetric_difference(
+        set(list(test_df_transformed.columns.values))) == set()
 
-        results.loc[len(results)] = [experiment_id, dataset_name, np.nan, query, epsilon, MCMC_algorithm,
-                                     accuracy_score,
-                                     balanced_accuracy_score, f1_score, coefficients, point_estimates,
-                                     variance_estimates]
+    X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
+    accuracy_score, balanced_accuracy_score, f1_score, \
+    coefficients, point_estimates, variance_estimates = run_logistic_regression_on_3d(
+        dataset_tensor, X_train, y_train, X_test, y_test, col_to_predict=target_column_index)
 
-        results.to_csv(snakemake.output[0], index=False)
+    results.loc[len(results)] = [experiment_id, dataset_name, np.nan, query, epsilon, MCMC_algorithm,
+                                 accuracy_score,
+                                 balanced_accuracy_score, f1_score, coefficients, point_estimates,
+                                 variance_estimates]
+
+    results.to_csv(snakemake.output[0], index=False)

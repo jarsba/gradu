@@ -1,0 +1,70 @@
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+TRA1MZ9H,1245400.540478701,1253551.679640139,8151.139161437983,Main run,adult_high_discretization,[],8.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,,,,,,
+TRA1MZ9H,1245400.542866546,1245409.150186691,8.60732014500536,Query selection,adult_high_discretization,,8.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+TRA1MZ9H,1245409.150194826,1245409.150590979,0.00039615295827388763,Calculating full marginal query,adult_high_discretization,,8.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+TRA1MZ9H,1245409.150606578,1245409.165729239,0.015122660901397467,Calculating canonical query set,adult_high_discretization,,8.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+TRA1MZ9H,1245409.542491927,1245503.523945473,93.98145354585722,Laplace approximation,adult_high_discretization,,8.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,4.0,"(151,)"
+TRA1MZ9H,1245503.524033027,1253551.123327025,8047.599293997977,MCMC,adult_high_discretization,,8.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,4.0,"(151,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+RNMYIGKZ,1082892.17305632,1098807.892378506,15915.719322185963,Main run,adult_high_discretization,[],3.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,,,,,,
+RNMYIGKZ,1082892.175659515,1082901.187343963,9.011684447992593,Query selection,adult_high_discretization,,3.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RNMYIGKZ,1082901.187355885,1082901.187791923,0.00043603801168501377,Calculating full marginal query,adult_high_discretization,,3.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RNMYIGKZ,1082901.187809446,1082901.204030055,0.016220609191805124,Calculating canonical query set,adult_high_discretization,,3.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RNMYIGKZ,1082901.627253762,1083029.480403791,127.85315002896823,Laplace approximation,adult_high_discretization,,3.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,5.0,"(151,)"
+RNMYIGKZ,1083029.480509459,1098807.233523149,15777.753013690002,MCMC,adult_high_discretization,,3.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,5.0,"(151,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+R3B8OC56,1294067.533245687,1295871.858974795,1804.3257291081827,Main run,adult_low_discretization,[],8.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,,,,,,
+R3B8OC56,1294067.535597933,1294076.201116931,8.665518997935578,Query selection,adult_low_discretization,,8.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+R3B8OC56,1294076.20112696,1294076.201449494,0.00032253400422632694,Calculating full marginal query,adult_low_discretization,,8.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+R3B8OC56,1294076.201465935,1294076.214363441,0.012897506123408675,Calculating canonical query set,adult_low_discretization,,8.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+R3B8OC56,1294076.551164189,1294117.780665678,41.229501489084214,Laplace approximation,adult_low_discretization,,8.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+R3B8OC56,1294117.780770304,1295857.522414128,1739.741643824149,MCMC,adult_low_discretization,,8.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+QUYOHMNH,1294029.551133286,1296476.717185299,2447.166052012937,Main run,adult_low_discretization,[],1.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,,,,,,
+QUYOHMNH,1294029.553314862,1294037.977091855,8.423776992829517,Query selection,adult_low_discretization,,1.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+QUYOHMNH,1294037.977101023,1294037.977421364,0.00032034097239375114,Calculating full marginal query,adult_low_discretization,,1.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+QUYOHMNH,1294037.97744064,1294037.990737317,0.01329667679965496,Calculating canonical query set,adult_low_discretization,,1.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+QUYOHMNH,1294038.312844243,1294110.329824208,72.0169799651485,Laplace approximation,adult_low_discretization,,1.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,3.0,"(106,)"
+QUYOHMNH,1294110.329926049,1296463.982842724,2353.652916674968,MCMC,adult_low_discretization,,1.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,3.0,"(106,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+HR2WPI8V,1294034.501364745,1296524.760504074,2490.259139328962,Main run,adult_low_discretization,[],3.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,,,,,,
+HR2WPI8V,1294034.503570433,1294043.152365176,8.648794742999598,Query selection,adult_low_discretization,,3.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+HR2WPI8V,1294043.152376869,1294043.152721053,0.00034418399445712566,Calculating full marginal query,adult_low_discretization,,3.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+HR2WPI8V,1294043.152741501,1294043.166881356,0.014139854814857244,Calculating canonical query set,adult_low_discretization,,3.0,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+HR2WPI8V,1294043.533320353,1294096.517826512,52.984506159089506,Laplace approximation,adult_low_discretization,,3.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+HR2WPI8V,1294096.51791641,1296512.103718604,2415.585802193964,MCMC,adult_low_discretization,,3.0,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+A3CRZHOC,1294003.620502326,1298489.307285176,4485.686782849953,Main run,adult_low_discretization,[],0.3,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,,,,,,
+A3CRZHOC,1294003.622858969,1294011.851067939,8.22820897004567,Query selection,adult_low_discretization,,0.3,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+A3CRZHOC,1294011.851077366,1294011.851403616,0.0003262499812990427,Calculating full marginal query,adult_low_discretization,,0.3,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+A3CRZHOC,1294011.851420557,1294011.865988051,0.014567494159564376,Calculating canonical query set,adult_low_discretization,,0.3,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+A3CRZHOC,1294012.198143593,1294082.941656068,70.74351247493178,Laplace approximation,adult_low_discretization,,0.3,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+A3CRZHOC,1294082.941734845,1298475.891242084,4392.949507239042,MCMC,adult_low_discretization,,0.3,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,106.0,4.0,"(106,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+RQR1LYTU,1131648.054753445,1142771.358131525,11123.303378080018,Main run,adult_high_discretization,[],1.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,,,,,,
+RQR1LYTU,1131648.05722326,1131656.84856548,8.791342220036313,Query selection,adult_high_discretization,,1.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RQR1LYTU,1131656.848577493,1131656.849048276,0.00047078286297619343,Calculating full marginal query,adult_high_discretization,,1.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RQR1LYTU,1131656.849072371,1131656.864414925,0.015342554077506065,Calculating canonical query set,adult_high_discretization,,1.0,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+RQR1LYTU,1131657.258562211,1131848.835680203,191.57711799209937,Laplace approximation,adult_high_discretization,,1.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,3.0,"(151,)"
+RQR1LYTU,1131848.83578026,1142752.036209128,10903.200428868178,MCMC,adult_high_discretization,,1.0,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,151.0,3.0,"(151,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+H0WUQSL3,1294034.515367954,1321710.202071436,27675.686703481944,Main run,adult_high_discretization,[],0.3,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,,,,,,
+H0WUQSL3,1294034.517796931,1294043.53771584,9.019918908830732,Query selection,adult_high_discretization,,0.3,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+H0WUQSL3,1294043.537727271,1294043.5382288,0.0005015290807932615,Calculating full marginal query,adult_high_discretization,,0.3,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+H0WUQSL3,1294043.538250451,1294043.556896891,0.018646440003067255,Calculating canonical query set,adult_high_discretization,,0.3,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+H0WUQSL3,1294043.962233772,1294167.113147441,123.15091366902925,Laplace approximation,adult_high_discretization,,0.3,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,165.0,4.0,"(165,)"
+H0WUQSL3,1294167.113252748,1321687.984653582,27520.87140083406,MCMC,adult_high_discretization,,0.3,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,165.0,4.0,"(165,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+L5Q8DJE2,1294003.620516873,1328030.405717208,34026.785200335085,Main run,adult_low_discretization,[],0.1,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,,,,,,
+L5Q8DJE2,1294003.622849201,1294011.931891967,8.309042765991762,Query selection,adult_low_discretization,,0.1,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+L5Q8DJE2,1294011.931902346,1294011.932310208,0.00040786201134324074,Calculating full marginal query,adult_low_discretization,,0.1,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+L5Q8DJE2,1294011.932324535,1294011.946946079,0.014621543930843472,Calculating canonical query set,adult_low_discretization,,0.1,1.0992076159646117e-09,NUTS,low,True,,empty,[],,,,
+L5Q8DJE2,1294012.266404301,1294081.42060468,69.15420037903823,Laplace approximation,adult_low_discretization,,0.1,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,132.0,4.0,"(132,)"
+L5Q8DJE2,1294081.420700369,1328015.037024587,33933.61632421799,MCMC,adult_low_discretization,,0.1,1.0992076159646117e-09,NUTS,low,True,torch_LBFGS,empty,[],,132.0,4.0,"(132,)"
+experiment_id,start,stop,timedelta,task,dataset_name,query,epsilon,delta,MCMC_algo,discretization,laplace_approximation,laplace_approximation_algorithm,query_str,query_list,missing_query,n_canonical_queries,junction_tree_width,suff_stat_dim
+25Q6034J,1131529.438976049,1210576.453183812,79047.01420776313,Main run,adult_high_discretization,[],0.1,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,,,,,,
+25Q6034J,1131529.441314818,1131538.166311796,8.724996977951378,Query selection,adult_high_discretization,,0.1,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+25Q6034J,1131538.166322096,1131538.166914357,0.0005922610871493816,Calculating full marginal query,adult_high_discretization,,0.1,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+25Q6034J,1131538.166936168,1131538.184895849,0.017959681106731296,Calculating canonical query set,adult_high_discretization,,0.1,1.0992076159646117e-09,NUTS,high,True,,empty,[],,,,
+25Q6034J,1131538.722534929,1131641.069148627,102.34661369817331,Laplace approximation,adult_high_discretization,,0.1,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,193.0,4.0,"(193,)"
+25Q6034J,1131641.069233586,1210546.382660758,78905.3134271719,MCMC,adult_high_discretization,,0.1,1.0992076159646117e-09,NUTS,high,True,torch_LBFGS,empty,[],,193.0,4.0,"(193,)"

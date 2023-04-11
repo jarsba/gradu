@@ -27,7 +27,7 @@ DATASET_COLUMN_TYPES = {
         'age': 'category',
         'workclass': 'category',
         'gender': 'category',
-        'education-num': 'int',
+        'education-num': 'category',
         'marital-status': 'category',
         'occupation': 'category',
         'relationship': 'category',
