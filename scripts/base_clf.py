@@ -42,8 +42,6 @@ def run_classification(train_df, test_df, target_column):
     scores = []
 
     for model in models:
-        print(X_train)
-        print(y_train)
         model = model.fit(X_train, y_train)
 
         probabilities = model.predict(X_test)

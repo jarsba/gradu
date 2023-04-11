@@ -9,7 +9,7 @@ DATASET_COLUMN_TYPES = {
         'age': 'int',
         'workclass': 'category',
         'gender': 'category',
-        'education-num': 'category',
+        'education-num': 'int',
         'marital-status': 'category',
         'occupation': 'category',
         'relationship': 'category',
@@ -27,7 +27,7 @@ DATASET_COLUMN_TYPES = {
         'age': 'category',
         'workclass': 'category',
         'gender': 'category',
-        'education-num': 'category',
+        'education-num': 'int',
         'marital-status': 'category',
         'occupation': 'category',
         'relationship': 'category',
@@ -37,9 +37,9 @@ DATASET_COLUMN_TYPES = {
         'capital-loss': 'int',
         'hours-per-week': 'category',
         'native-country': 'category',
-        'had-capital-gains': 'category',
-        'had-capital-losses': 'category',
-        'compensation': 'category'
+        'had-capital-gains': 'int',
+        'had-capital-losses': 'int',
+        'compensation': 'int'
     }
 }
 
@@ -54,6 +54,8 @@ DATA_TO_COLUMNS_MAPPING = {
     "adult_no_discretization_test": 'adult',
     "adult_low_discretization_test": 'adult_discrete',
     "adult_high_discretization_test": 'adult_discrete',
+    "adult_independence_pruning": 'adult_discrete',
+    "adult_independence_pruning_test": 'adult_discrete',
 }
 
 
@@ -112,7 +114,7 @@ def transform_for_classification(dataset_name: str, df: pd.DataFrame) -> pd.Data
                 df_copy[column] = df_copy[column].astype('int')
 
         df_copy = pd.get_dummies(df_copy)
-        df_copy = df_copy.rename(columns=lambda x: re.sub('[-_()]+', '', x))
+        df_copy = df_copy.rename(columns=lambda x: re.sub('[^A-Za-z0-9_]+', '', x))
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
 
     elif 'binary' in dataset_name:

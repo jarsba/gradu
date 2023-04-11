@@ -16,25 +16,30 @@ results = pd.DataFrame(
 
 
 for path in dataset_paths:
+    print(f"Running logistic regression on {path} dataset")
     df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]
 
-    df_transformed = transform_for_classification(dataset_name, df)
+    train_df_transformed = transform_for_classification(dataset_name, df)
 
-    df_np = df_transformed.to_numpy()
+    df_np = train_df_transformed.to_numpy()
 
     target_column: str = TARGET_COLUMNS_FOR_DATASET[dataset_name]
-    feature_columns = [col for col in df_transformed.columns if col != target_column]
+    feature_columns = [col for col in train_df_transformed.columns if col != target_column]
 
-    X_train, y_train = df_transformed.drop(columns=[target_column]), df_transformed[target_column]
+    X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
 
     test_df_path = TEST_DATASETS_FOR_DATASET[dataset_name]
     test_df = pd.read_csv(test_df_path)
 
     test_df_transformed = transform_for_classification(dataset_name, test_df)
 
-    target_column_index = df_transformed.columns.get_loc(target_column)
+    # Check that both have equal columns
+    assert set(list(train_df_transformed.columns.values)).symmetric_difference(
+        set(list(test_df_transformed.columns.values))) == set()
+
+    target_column_index = train_df_transformed.columns.get_loc(target_column)
 
     X_test, y_test = test_df_transformed.drop(columns=[target_column]), test_df_transformed[target_column]
 

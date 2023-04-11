@@ -45,6 +45,10 @@ for path in dataset_paths:
         train_df_transformed = transform_for_classification(dataset_name, train_df)
 
 
+        # Check that both have equal columns
+        assert set(list(train_df_transformed.columns.values)).symmetric_difference(
+            set(list(test_df_transformed.columns.values))) == set()
+
         scores = run_classification(train_df_transformed, test_df_transformed, target_column)
 
         for model_score in scores:

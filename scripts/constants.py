@@ -64,16 +64,12 @@ COLUMNS_FOR_DATASET = {
               'hours-per-week', 'native-country', 'compensation'],
     "binary4d": ['A', 'B', 'C', 'D'],
     "binary3d": ['A', 'B', 'C'],
-    "adult_small": ["education-num", "marital-status", "sex", "age", "hours-per-week", "compensation"],
-    "adult_large": ["age", "sex", "education-num", "hours-per-week", "workclass", "marital-status",
-                    "had-capital-gains", "had-capital-losses", "compensation"],
-    "adult_no_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
-                                'had-capital-gains', 'had-capital-losses', 'compensation'],
-    "adult_low_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
-                                'had-capital-gains', 'had-capital-losses', 'compensation'],
-    "adult_high_discretization": ['age', 'education-num', "sex", 'hours-per-week', 'workclass', 'marital-status',
-                                'had-capital-gains', 'had-capital-losses', 'compensation'],
-    "adult_independence_pruning": ["education-num", "sex", "age", "hours-per-week", "compensation"]
+    "adult_small": ["age", "education-num", "marital-status", "sex", "hours-per-week", "compensation"],
+    "adult_large": ["age", "workclass", "education-num", "marital-status", "sex", "hours-per-week", "had-capital-gains", "had-capital-losses", "compensation"],
+    "adult_no_discretization": ["age", "workclass", "education-num", "marital-status", "sex", "hours-per-week", "had-capital-gains", "had-capital-losses", "compensation"],
+    "adult_low_discretization": ["age", "workclass", "education-num", "marital-status", "sex", "hours-per-week", "had-capital-gains", "had-capital-losses", "compensation"],
+    "adult_high_discretization": ["age", "workclass", "education-num", "marital-status", "sex", "hours-per-week", "had-capital-gains", "had-capital-losses", "compensation"],
+    "adult_independence_pruning": ["age", "education-num", "sex", "hours-per-week", "compensation"]
 }
 
 

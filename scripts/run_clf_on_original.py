@@ -28,6 +28,7 @@ class ScikitModel(Protocol):
 results = pd.DataFrame(columns=["dataset_name", "model_name", "accuracy", "balanced_accuracy", "F1"])
 
 for path in dataset_paths:
+    print(f"Running classification on {path} dataset")
     train_df = pd.read_csv(path)
 
     dataset_name = inverted_dataset_map[path]
@@ -39,6 +40,10 @@ for path in dataset_paths:
     test_df = pd.read_csv(test_df_path)
 
     test_df_transformed = transform_for_classification(dataset_name, test_df)
+
+    # Check that both have equal columns
+    assert set(list(train_df_transformed.columns.values)).symmetric_difference(
+        set(list(test_df_transformed.columns.values))) == set()
 
     scores = run_classification(train_df_transformed, test_df_transformed, target_column)
 
