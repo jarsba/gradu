@@ -30,7 +30,6 @@ if __name__ == '__main__':
     test_df = pd.read_csv(test_df_path)
 
     test_df_transformed = transform_for_ci_coverage(dataset_name, test_df)
-    print(test_df_transformed.columns.values)
     test_df_np = test_df_transformed.to_numpy()
 
     target_column = TARGET_COLUMNS_FOR_DATASET[dataset_name]

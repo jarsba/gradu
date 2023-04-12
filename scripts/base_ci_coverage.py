@@ -23,16 +23,20 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                                                                     add_constant=False)
     true_parameter_values = point_estimates.flatten()
 
-    sampling_rngs = jax.random.split(rng, n_repeats)
+    sampling_rngs = jax.random.split(rng, n_repeats*len(confidence_intervals))
     dataset_name = model.meta['dataset_name']
     n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
     ci_data_objects = []
 
     for i in range(n_repeats):
-        for interval in confidence_intervals:
-            print(f"Running CI coverage for dataset {dataset_name}, index {i} and interval {interval}")
-            datasets = model.generate(sampling_rngs[i], n_original_datapoints, n_datasets)
+        for j, interval in enumerate(confidence_intervals):
+            print(f"Running CI coverage for dataset {dataset_name}, index {i} and interval {interval}", flush=True)
+
+            rng_index = i * len(confidence_intervals) + j
+            rng = sampling_rngs[rng_index]
+
+            datasets = model.generate(rng, n_original_datapoints, n_datasets)
 
             datasets_transformed = [transform_for_ci_coverage(dataset_name, dataset) for dataset in datasets]
 
