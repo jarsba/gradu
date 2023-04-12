@@ -73,6 +73,6 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
 
                 ci_data_objects.append(conf_int_object)
 
-    ci_df = pd.from_records([obj.to_dict() for obj in ci_data_objects])
+    ci_df = pd.DataFrame.from_records([obj.to_dict() for obj in ci_data_objects])
 
     return ci_df

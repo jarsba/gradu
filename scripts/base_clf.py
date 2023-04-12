@@ -39,6 +39,10 @@ def run_classification(train_df, test_df, target_column):
     X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]
 
+    if len(y_train.unique()) == 1:
+        # If there is only one class, the dataset is not suitable for classification
+        return None
+
     scores = []
 
     for model in models:
@@ -53,7 +57,7 @@ def run_classification(train_df, test_df, target_column):
 
         scores.append((type(model).__name__, accuracy, balanced_accuracy, f1))
 
-        #print(
+        # print(
         #    f'Model: {type(model).__name__} \t Accuracy: {np.mean(accuracy_score):.3f} ({np.std(accuracy_score):.3f}), Balanced accuracy: {np.mean(balanced_accuracy_score):.3f} ({np.std(balanced_accuracy_score):.3f}), F1: {np.mean(f1_score):.3f} ({np.std(f1_score):.3f})')
 
     return scores

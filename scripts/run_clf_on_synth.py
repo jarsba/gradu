@@ -43,7 +43,6 @@ for path in dataset_paths:
     test_df_transformed = transform_for_classification(dataset_name, test_df)
 
     for i in range(datasets):
-
         print(f"Running classification on {path} and index {i}")
 
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
@@ -57,12 +56,17 @@ for path in dataset_paths:
 
         scores = run_classification(train_df_transformed, test_df_transformed, target_column)
 
+        # If scores is None, it means that the dataset is not suitable for classification
+        if scores is None:
+            continue
+
         for model_score in scores:
             model_name, accuracy, balanced_accuracy, f1 = model_score
             results.loc[len(results)] = [experiment_id, dataset_name, i, query, epsilon, MCMC_algorithm, model_name,
                                          accuracy,
                                          balanced_accuracy, f1]
 
+    print(f"Running classification on the whole synthetic dataset: {path}")
     # Classify the whole synthetic dataset
     dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])

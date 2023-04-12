@@ -13,7 +13,7 @@ class SMWrapper(BaseEstimator, RegressorMixin):
         A universal sklearn-style wrapper for statsmodels regressors
     """
 
-    def __init__(self, model_class, fit_intercept=True):
+    def __init__(self, model_class, fit_intercept=False):
         self.model_class = model_class
         self.fit_intercept = fit_intercept
         self.results = None
@@ -41,7 +41,7 @@ class SMWrapper(BaseEstimator, RegressorMixin):
 
 def create_model():
     binomial_GLM = partial(sm.GLM, family=sm.families.Binomial())
-    return SMWrapper(binomial_GLM)
+    return SMWrapper(binomial_GLM, fit_intercept=False)
 
 
 def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int):

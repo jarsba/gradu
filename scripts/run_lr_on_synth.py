@@ -78,6 +78,7 @@ for path in dataset_paths:
                                      balanced_accuracy_score, f1_score, coefficients, point_estimates,
                                      variance_estimates]
 
+    print(f"Running logistic regression on whole dataset: {path}")
     # Classify the whole synthetic dataset
     dataset_tensor_stacked = dataset_tensor.reshape((n_datasets * n_rows, n_cols))
     train_df = pd.DataFrame(dataset_tensor_stacked, columns=COLUMNS_FOR_DATASET[dataset_name])
