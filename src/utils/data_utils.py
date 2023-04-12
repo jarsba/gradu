@@ -174,6 +174,8 @@ def transform_for_ci_coverage(dataset_name: str, df: pd.DataFrame) -> pd.DataFra
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
     elif 'dummy' in dataset_name:
         df_copy = df_copy.astype('int')
+    elif 'binary' in dataset_name:
+        df_copy = df_copy.astype('int')
     else:
         raise ValueError(f"Dataset {dataset_name} not supported")
 
