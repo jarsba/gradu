@@ -379,11 +379,11 @@ rule run_logistic_regression_on_independence_pruning_datasets:
 
 rule run_ci_coverage_on_original_models:
     input:
-        expand("models/napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.dill", zip, original_dataset_name=original_dataset_list, original_epsilon=original_epsilon_list, original_query_str=original_query_list)
+        "models/napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.dill"
     output:
-        "results/ci_coverage_original_data_results.csv"
+        "results/ci_coverage_napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.csv"
     log:
-        "logs/ci_coverage_napsu_original_modelss.log"
+        "logs/ci_coverage_napsu_original_models_{original_dataset_name}_{original_epsilon}e_{original_query_str}.log"
     threads: 1
     resources:
         runtime="2880",
@@ -399,11 +399,11 @@ rule run_ci_coverage_on_original_models:
 
 rule run_ci_coverage_on_discretized_models:
     input:
-        expand("models/napsu_discretization_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.dill", zip, discretization_dataset_name=discretization_dataset_list, discretization_epsilon=discretization_epsilon_list, discretization_query_str=discretization_query_list)
+        "models/napsu_discretization_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.dill"
     output:
-        "results/ci_coverage_discretized_data_results.csv"
+        "results/ci_coverage_napsu_discretized_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.csv"
     log:
-        "logs/ci_coverage_discretization_models.log"
+        "logs/ci_coverage_discretization_models_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.log"
     threads: 1
     resources:
         runtime="2880",
@@ -418,11 +418,11 @@ rule run_ci_coverage_on_discretized_models:
 
 rule run_ci_coverage_on_independence_pruning_models:
     input:
-        expand("models/napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.dill", zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
+        "models/napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.dill"
     output:
-        "results/ci_coverage_independence_pruning_results.csv"
+        "results/ci_coverage_napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.csv"
     log:
-        "logs/ci_coverage_independence_pruning_models.log"
+        "logs/ci_coverage_independence_pruning_models_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.log"
     threads: 1
     resources:
         runtime="2880",
@@ -435,6 +435,64 @@ rule run_ci_coverage_on_independence_pruning_models:
     script:
         "scripts/run_ci_coverage_on_independence_pruning_models.py"
 
+
+rule combine_ci_results_from_original_models:
+    input:
+        expand("results/ci_coverage_napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.csv",zip,original_dataset_name=original_dataset_list,original_epsilon=original_epsilon_list,original_query_str=original_query_list)
+    output:
+        "results/ci_coverage_original_data_results.csv"
+    log:
+        "logs/combine_ci_results_from_original_models.log"
+    threads: 1
+    resources:
+        runtime="30",
+        time="00:30:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/combine_csvs.py"
+
+rule combine_ci_results_from_discretized_models:
+    input:
+        expand("results/ci_coverage_napsu_discretized_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.csv", zip, discretization_dataset_name=discretization_dataset_list, discretization_epsilon=discretization_epsilon_list, discretization_query_str=discretization_query_list)
+    output:
+        "results/ci_coverage_discretized_data_results.csv"
+    log:
+        "logs/combine_ci_results_from_discretized_model.log"
+    threads: 1
+    resources:
+        runtime="30",
+        time="00:30:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/combine_csvs.py"
+
+
+rule combine_ci_results_from_independence_pruning_models:
+    input:
+        expand("results/ci_coverage_napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.csv", zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
+    output:
+        "results/ci_coverage_independence_pruning_results.csv"
+    log:
+        "logs/combine_ci_results_from_independence_pruning_model.log"
+    threads: 1
+    resources:
+        runtime="30",
+        time="00:30:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/combine_csvs.py"
 
 rule compare_original_lr_results:
     input:
