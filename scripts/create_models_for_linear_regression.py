@@ -52,6 +52,7 @@ if __name__ == '__main__':
     laplace_approximation = parameter_combinations.laplace_approximation
     laplace_approximation_algorithm = parameter_combinations.laplace_approximation_algorithm
     algo = parameter_combinations.algo
+    repeat_index = parameter_combinations.repeat_index
 
     target_file = str(snakemake.output[0])
 
@@ -79,7 +80,8 @@ if __name__ == '__main__':
         "delta": delta,
         "MCMC_algo": algo,
         "laplace_approximation": laplace_approximation,
-        "laplace_approximation_algorithm": laplace_approximation_algorithm
+        "laplace_approximation_algorithm": laplace_approximation_algorithm,
+        "repeat_index": repeat_index,
     }
 
     pid = timer.start(f"Main run", **timer_meta)
@@ -113,7 +115,7 @@ if __name__ == '__main__':
     print("Writing model to file")
     result.store(target_file)
 
-    inf_data.to_netcdf(f"logs/inf_data_linear_regression_{dataset_name}_{epsilon}e.nc")
+    inf_data.to_netcdf(f"logs/inf_data_linear_regression_{dataset_name}_{epsilon}e_{repeat_index}_repeat.nc")
 
     # Save storage and timer results every iteration
     storage.save(file_path=storage_file_path, mode=mode, index=False)
