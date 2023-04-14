@@ -112,7 +112,7 @@ rule create_original_napsu_models:
     input:
         "data/parameter_combinations/napsu_original_model_parameters_{original_dataset_name}_{original_epsilon}e_{original_query_str}.pickle"
     output:
-        "models/napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.dill",
+        protected("models/napsu_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.dill"),
         # timer="napsu_original_model_MCMC_time_vs_epsilon_comparison.csv",
         # experiment_storage="napsu_original_model_experiment_storage_output.csv"
     log:
@@ -155,7 +155,7 @@ rule create_models_for_independence_pruning:
     input:
         "data/parameter_combinations/napsu_independence_pruning_model_parameters_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.pickle",
     output:
-        "models/napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.dill",
+        protected("models/napsu_independence_pruning_model_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.dill"),
         #experiment_storage="napsu_independence_pruning_storage.csv",
         #timer="napsu_independence_pruning_timer.csv"
     log:
@@ -197,7 +197,7 @@ rule create_models_for_discretization:
     input:
         "data/parameter_combinations/napsu_discretization_model_parameters_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.pickle",
     output:
-        "models/napsu_discretization_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.dill",
+        protected("models/napsu_discretization_model_{discretization_dataset_name}_{discretization_epsilon}e_{discretization_query_str}.dill"),
         #experiment_storage="napsu_discretization_test_storage.csv",
         #timer="napsu_discretization_test_timer.csv"
     log:
@@ -240,7 +240,7 @@ rule create_models_for_linear_regression:
     input:
         "data/parameter_combinations/napsu_linear_regression_model_parameters_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.pickle",
     output:
-        "models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.dill",
+        protected("models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.dill"),
         #experiment_storage="napsu_independence_pruning_storage.csv",
         #timer="napsu_independence_pruning_timer.csv"
     log:
