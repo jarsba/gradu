@@ -68,16 +68,18 @@ def generate_independence_pruning_missing_queries():
     return independence_pruning_missing_query_strings
 
 
-def generate_linear_regression_products(epsilons) -> Tuple[List, List]:
+def generate_linear_regression_products(epsilons, n_repeats=20) -> Tuple[List, List, List]:
     dataset_list = []
     epsilon_list = []
+    repeat_index_list = []
+    for i in range(n_repeats):
+        for n_categories in range(2, 8):
+            for epsilon in epsilons:
+                epsilon_str = epsilon_float_to_str(epsilon)
+                dataset_name = f"dummy_5x{n_categories}"
 
-    for n_categories in range(2, 8):
-        for epsilon in epsilons:
-            epsilon_str = epsilon_float_to_str(epsilon)
-            dataset_name = f"dummy_5x{n_categories}"
+                dataset_list.append(dataset_name)
+                epsilon_list.append(epsilon_str)
+                repeat_index_list.append(i)
 
-            dataset_list.append(dataset_name)
-            epsilon_list.append(epsilon_str)
-
-    return dataset_list, epsilon_list
+    return dataset_list, epsilon_list, repeat_index_list

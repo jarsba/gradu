@@ -19,6 +19,7 @@ if __name__ == "__main__":
 
     epsilons = snakemake.config["epsilons"]
     queries = snakemake.config['queries']
+    n_of_repeats = snakemake.config['n_of_repeats']
     discretization_levels = ['low', 'high']
     algo = "NUTS"
 
@@ -50,7 +51,8 @@ if __name__ == "__main__":
                     discretization_level=None,
                     laplace_approximation=True,
                     laplace_approximation_algorithm="torch_LBFGS",
-                    missing_query=None
+                    missing_query=None,
+                    repeat_index=None
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
@@ -80,7 +82,8 @@ if __name__ == "__main__":
                     discretization_level=discretization_level,
                     laplace_approximation=True,
                     laplace_approximation_algorithm="torch_LBFGS",
-                    missing_query=None
+                    missing_query=None,
+                    repeat_index=None
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
@@ -134,35 +137,38 @@ if __name__ == "__main__":
                     discretization_level=None,
                     laplace_approximation=True,
                     laplace_approximation_algorithm="torch_LBFGS",
-                    missing_query=missing_query
+                    missing_query=missing_query,
+                    repeat_index=None
                 )
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
 
-    for n_categories in range(2, 8):
-        dataset = create_dummy_dataset(n_columns=5, n_rows=10000, n_categories=n_categories)
-        dataset_name = f"dummy_5x{n_categories}"
-        dataset_columns = list(dataset.columns)
+    for i in range(n_of_repeats):
+        for n_categories in range(2, 8):
+            dataset = create_dummy_dataset(n_columns=5, n_rows=10000, n_categories=n_categories)
+            dataset_name = f"dummy_5x{n_categories}"
+            dataset_columns = list(dataset.columns)
 
-        for epsilon in epsilons:
-            experiment_id = generate_experiment_id()
-            epsilon_str = epsilon_float_to_str(epsilon)
-            query_list = []
-            query_str = join_query_list(query_list)
-            job_name = f"napsu_linear_regression_model_parameters_{dataset_name}_{epsilon_str}e"
-            job_parameter = JobParameters(
-                job_name=job_name,
-                experiment_id=experiment_id,
-                dataset=dataset_name,
-                dataset_path=None,
-                query_list=query_list,
-                query_string=query_str,
-                epsilon=epsilon,
-                algo=algo,
-                discretization_level=None,
-                laplace_approximation=True,
-                laplace_approximation_algorithm="torch_LBFGS",
-                missing_query=None
-            )
-            with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
-                pickle.dump(job_parameter, f)
+            for epsilon in epsilons:
+                experiment_id = generate_experiment_id()
+                epsilon_str = epsilon_float_to_str(epsilon)
+                query_list = []
+                query_str = join_query_list(query_list)
+                job_name = f"napsu_linear_regression_model_parameters_{dataset_name}_{epsilon_str}e_{i}_repeat"
+                job_parameter = JobParameters(
+                    job_name=job_name,
+                    experiment_id=experiment_id,
+                    dataset=dataset_name,
+                    dataset_path=None,
+                    query_list=query_list,
+                    query_string=query_str,
+                    epsilon=epsilon,
+                    algo=algo,
+                    discretization_level=None,
+                    laplace_approximation=True,
+                    laplace_approximation_algorithm="torch_LBFGS",
+                    missing_query=None,
+                    repeat_index=i
+                )
+                with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
+                    pickle.dump(job_parameter, f)

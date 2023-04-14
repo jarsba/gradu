@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from jax.config import config
+
 config.update("jax_enable_x64", True)
 
 import torch
+
 torch.set_default_dtype(torch.float64)
 
 import os
@@ -110,6 +112,7 @@ class NapsuMQModel(InferenceModel):
             "laplace_approximation": use_laplace_approximation,
             "missing_query": missing_query,
             "discretization": discretization,
+            "no_privacy": no_privacy
         }
 
         dataframe = DataFrameData(data)
@@ -196,6 +199,7 @@ class NapsuMQModel(InferenceModel):
         suff_stat_dim = suff_stat.shape
         print(suff_stat_dim)
         timer_meta['suff_stat_dim'] = suff_stat_dim
+        timer_meta['suff_stat'] = suff_stat
 
         sensitivity = np.sqrt(2 * len(query_sets))
         inference_rng, dp_rng = jax.random.split(rng, 2)
@@ -210,8 +214,19 @@ class NapsuMQModel(InferenceModel):
             sigma_DP = privacy_accounting.sigma(epsilon, delta, sensitivity)
             print(sigma_DP)
             dp_noise = jax.random.normal(dp_rng, suff_stat.shape) * sigma_DP
+            print(f"DP noise mean: {dp_noise.mean()}")
             dp_suff_stat = suff_stat + dp_noise
             dp_suff_stat_torch = torch.from_numpy(np.array(dp_suff_stat))
+            timer_meta['dp_suff_stat'] = dp_suff_stat
+            print(dp_suff_stat)
+
+        print("SUFF STAT MEANS")
+        print(suff_stat.mean())
+        print(dp_suff_stat.mean())
+
+        print("SUFF STAT VARIANCES")
+        print(suff_stat.var())
+        print(dp_suff_stat.var())
 
         if dry_run is True:
             meta = {
@@ -244,7 +259,8 @@ class NapsuMQModel(InferenceModel):
                                                                                 mnjax,
                                                                                 use_forward_mode=laplace_approximation_forward_mode)
             elif laplace_approximation_algorithm == 'torch_LBFGS':
-                laplace_approx, success = mei.laplace_approximation_normal_prior(dp_suff_stat_torch, n, sigma_DP, mntorch)
+                laplace_approx, success = mei.laplace_approximation_normal_prior(dp_suff_stat_torch, n, sigma_DP,
+                                                                                 mntorch)
             else:
                 raise ValueError(f"Unknown laplace approximation algorithm: {laplace_approximation_algorithm}")
 

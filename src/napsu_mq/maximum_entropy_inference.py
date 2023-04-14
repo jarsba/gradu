@@ -39,7 +39,7 @@ from src.utils.experiment_storage import ExperimentStorage, experiment_id_ctx
 
 storage = ExperimentStorage()
 kernels = Literal['NUTS', 'HMC']
-
+default_extra_fields = ("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps", "adapt_state")
 
 def rng_state_set(generator: Optional[torch.Generator] = None) -> Optional[torch.Tensor]:
     if generator is not None:
@@ -137,7 +137,7 @@ def run_numpyro_mcmc(
         pr = cProfile.Profile()
         pr.enable()
         mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
-                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+                 extra_fields=default_extra_fields)
         pr.disable()
         experiment_id = experiment_id_ctx.get()
         pr.dump_stats(f"logs/MCMC_profile_{experiment_id}.prof")
@@ -149,7 +149,7 @@ def run_numpyro_mcmc(
         s.close()
     else:
         mcmc.run(rng, suff_stat, n, sigma_DP, prior_mu, prior_sigma, max_ent_dist,
-                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+                 extra_fields=default_extra_fields)
 
     print_MCMC_diagnostics(mcmc)
     store_MCMC_diagnostics(mcmc)
@@ -181,7 +181,7 @@ def run_numpyro_mcmc_normalised(
         pr = cProfile.Profile()
         pr.enable()
         mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
-                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+                 extra_fields=default_extra_fields)
         pr.disable()
         experiment_id = experiment_id_ctx.get()
         pr.dump_stats(f"logs/MCMC_{experiment_id}.prof")
@@ -194,7 +194,7 @@ def run_numpyro_mcmc_normalised(
 
     else:
         mcmc.run(rng, suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess,
-                 extra_fields=("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps"))
+                 extra_fields=default_extra_fields)
 
     print_MCMC_diagnostics(mcmc)
     store_MCMC_diagnostics(mcmc)

@@ -31,7 +31,7 @@ independence_pruning_datasets = config['independence_pruning_datasets']
 independence_pruning_queries = generate_independence_pruning_missing_queries()
 independence_dataset_list, independence_query_list, independence_epsilon_list = generate_dataset_query_epsilon_products_independence_queries(independence_pruning_datasets, independence_pruning_queries, epsilons)
 
-linear_regression_dataset_list, linear_regression_epsilon_list = generate_linear_regression_products(epsilons)
+linear_regression_dataset_list, linear_regression_epsilon_list, linear_regression_repeat_index_list = generate_linear_regression_products(epsilons)
 
 singularity: "docker://continuumio/miniconda3:4.12.0"
 
@@ -238,14 +238,14 @@ rule generate_datasets_for_discretized_data:
 
 rule create_models_for_linear_regression:
     input:
-        "data/parameter_combinations/napsu_linear_regression_model_parameters_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.pickle",
+        "data/parameter_combinations/napsu_linear_regression_model_parameters_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.pickle",
     output:
-        "models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.dill",
+        "models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.dill",
         #experiment_storage="napsu_independence_pruning_storage.csv",
         #timer="napsu_independence_pruning_timer.csv"
     log:
-        "logs/napsu_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.log",
-        "logs/inf_data_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.nc"
+        "logs/napsu_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.log",
+        "logs/inf_data_linear_regression_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.nc"
     threads: 8
     resources:
         runtime="4320" if cluster == "vorna" else "2880",
@@ -300,15 +300,15 @@ rule run_logistic_regression_on_original:
 
 rule run_classification_on_synt:
     input:
-        expand("data/synt_datasets/synthetic_dataset_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.pickle", zip, original_dataset_name=original_dataset_list, original_epsilon=original_epsilon_list, original_query_str=original_query_list)
+        "data/synt_datasets/synthetic_dataset_original_model_{original_dataset_name}_{original_epsilon}e_{original_query_str}.pickle"
     output:
-        "results/synthetic_classification_results.csv"
+        "results/synthetic_classification_results_{original_dataset_name}_{original_epsilon}e_{original_query_str}.csv"
     log:
-        "logs/classification_synthetic_dataset_original_models.log"
+        "logs/classification_synthetic_dataset_{original_dataset_name}_{original_epsilon}e_{original_query_str}.log"
     threads: 1
     resources:
-        runtime="2880",
-        time="48:00:00",
+        runtime="120",
+        time="02:00:00",
         mem_mb=32000,
         disk_mb=50000,
         partition="medium"
@@ -494,6 +494,26 @@ rule combine_ci_results_from_independence_pruning_models:
     script:
         "scripts/combine_csvs.py"
 
+rule combine_synt_classification_results:
+    input:
+        expand("results/synthetic_classification_results_{original_dataset_name}_{original_epsilon}e_{original_query_str}.csv", zip,original_dataset_name=original_dataset_list,original_epsilon=original_epsilon_list,original_query_str=original_query_list)
+    output:
+        "results/synthetic_classification_results.csv"
+    log:
+        "logs/comparison_logistic_regression.log"
+    threads: 1
+    resources:
+        runtime="120",
+        time="02:00:00",
+        mem_mb=16000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/combine_csvs.py"
+
+
 rule compare_original_lr_results:
     input:
         "results/synthetic_logistic_regression_results.csv",
@@ -537,7 +557,7 @@ rule compare_original_clf_results:
 
 rule create_linear_regression_plots:
     input:
-        expand("models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e.dill", zip, linear_regression_dataset_name=linear_regression_dataset_list, linear_regression_epsilon_str=linear_regression_epsilon_list)
+        expand("models/napsu_linear_regression_model_{linear_regression_dataset_name}_{linear_regression_epsilon_str}e_{linear_regression_repeat_index}_repeat.dill", zip, linear_regression_dataset_name=linear_regression_dataset_list, linear_regression_epsilon_str=linear_regression_epsilon_list, linear_regression_repeat_index=linear_regression_repeat_index_list)
     output:
         report("plots/linear_regression_comparison.svg")
     log:

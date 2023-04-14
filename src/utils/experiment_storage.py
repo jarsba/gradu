@@ -1,7 +1,8 @@
-from typing import Mapping, Optional, Literal, Union
+from typing import Mapping, Optional, Literal, Union, List
 import pandas as pd
 from src.utils.singleton import Singleton
 import contextvars
+import pickle
 
 experiment_id_ctx = contextvars.ContextVar('experiment_id')
 
@@ -21,6 +22,10 @@ class ExperimentStorage(metaclass=Singleton):
             return True
         else:
             return False
+
+    def get_storage_as_dict(self) -> List[dict]:
+        records_as_dict = [{'experiment_id': key, **item} for key, item in self.storage.items()]
+        return records_as_dict
 
     def store(self, experiment_id: Union[str, int], dict_to_store: Mapping) -> None:
         if self._has_key(experiment_id):
@@ -76,3 +81,14 @@ class ExperimentStorage(metaclass=Singleton):
             self.to_csv(file_path, mode="a", **kwargs)
         else:
             raise Exception("Invalid mode")
+
+    def save_as_pickle(self, file_path: str = None) -> None:
+        if file_path is None and self.file_path is None:
+            raise Exception("File path is not defined.")
+
+        file_path = file_path if file_path is not None else self.file_path
+
+        storage_records = self.get_storage_as_dict()
+
+        with open(file_path, 'wb') as file:
+            pickle.dump(storage_records, file, protocol=pickle.HIGHEST_PROTOCOL)

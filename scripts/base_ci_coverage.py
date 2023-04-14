@@ -3,7 +3,7 @@ import pandas as pd
 
 from constants import TRAIN_DATASET_SIZE_MAP
 from src.napsu_mq.napsu_mq import NapsuMQResult
-from src.napsu_mq.rubins_rules import conf_int
+from src.napsu_mq.rubins_rules import conf_int, non_negative_conf_int
 from src.utils.confidence_interval_object import ConfidenceIntervalObject
 from src.utils.data_utils import transform_for_ci_coverage, dataframe_list_to_tensor
 from src.napsu_mq.logistic_regression import logistic_regression, logistic_regression_on_2d
@@ -23,7 +23,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                                                                     add_constant=False)
     true_parameter_values = point_estimates.flatten()
 
-    sampling_rngs = jax.random.split(rng, n_repeats*len(confidence_intervals))
+    sampling_rngs = jax.random.split(rng, n_repeats * len(confidence_intervals))
     dataset_name = model.meta['dataset_name']
     n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
 
@@ -49,18 +49,40 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                 q_i = q[:, d]
                 u_i = u[:, d]
 
+                # Add check for infinite values and remove them from the logistic regression point and variance
+                # estimates
+                inds = (np.isfinite(q_i) & np.isfinite(u_i))
+                q_i = q_i[inds]
+                u_i = u_i[inds]
+
+                if len(u_i) == 0:
+                    q_i = np.array(np.nan)
+                    u_i = np.array(np.nan)
+
                 ci_result = conf_int(q_i, u_i, interval)
 
                 if np.isnan(ci_result[0]) or np.isnan(ci_result[1]):
                     print(f"WARNING: Confidence interval had nan: {ci_result}")
+
+                ci_result_nn = non_negative_conf_int(
+                    q_i, u_i, interval, n_original_datapoints * n_datasets, n_original_datapoints
+                )
+
+                if np.isnan(ci_result_nn[0]) or np.isnan(ci_result_nn[1]):
+                    print(f"WARNING: Confidence interval had nan: {ci_result_nn}")
 
                 true_param_value = true_parameter_values[d]
 
                 print(
                     f"True param value: {true_param_value}, confidence interval: {ci_result[0]} - {ci_result[1]}")
 
+                print(
+                    f"True param value: {true_param_value}, non-negative confidence interval: {ci_result_nn[0]} - {ci_result_nn[1]}")
+
                 contains_true_value = ci_result[0] <= true_param_value <= ci_result[1]
                 print(contains_true_value)
+                contains_true_value_nn = ci_result_nn[0] <= true_param_value <= ci_result_nn[1]
+                print(contains_true_value_nn)
 
                 conf_int_object = ConfidenceIntervalObject(
                     original_dataset_name=dataset_name,
@@ -72,6 +94,10 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     conf_int_width=ci_result[1] - ci_result[0],
                     true_parameter_value=true_param_value,
                     contains_true_parameter=contains_true_value,
+                    nn_conf_int_start=ci_result_nn[0],
+                    nn_conf_int_end=ci_result_nn[1],
+                    nn_conf_int_width=ci_result_nn[1] - ci_result_nn[0],
+                    contains_true_parameter_nn=contains_true_value_nn,
                     meta=meta
                 )
 

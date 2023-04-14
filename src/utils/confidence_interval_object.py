@@ -12,6 +12,10 @@ class ConfidenceIntervalObject:
     conf_int_width: float
     true_parameter_value: float
     contains_true_parameter: bool
+    nn_conf_int_start: float
+    nn_conf_int_end: float
+    nn_conf_int_width: float
+    contains_true_parameter_nn: bool
     # Contains any additional information that we want to store
     meta: dict
 

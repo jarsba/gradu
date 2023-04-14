@@ -16,3 +16,4 @@ class JobParameters:
     laplace_approximation: bool
     laplace_approximation_algorithm: str
     missing_query: Union[None, str, List[str]]
+    repeat_index: Union[int, None] = None

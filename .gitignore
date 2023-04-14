@@ -173,3 +173,7 @@ napsu_independence_pruning_timer.csv
 napsu_linear_regression_test_storage.csv
 napsu_linear_regression_test_timer.csv
 napsu_MCMC_time_vs_epsilon_comparison.csv 
+
+# Notebooks images
+notebooks/*.png
+notebooks/*.svg

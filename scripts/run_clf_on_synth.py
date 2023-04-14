@@ -43,7 +43,7 @@ for path in dataset_paths:
     test_df_transformed = transform_for_classification(dataset_name, test_df)
 
     for i in range(datasets):
-        print(f"Running classification on {path} and index {i}")
+        print(f"Running classification on {path} and index {i}", flush=True)
 
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
 
