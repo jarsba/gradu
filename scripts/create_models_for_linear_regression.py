@@ -25,7 +25,7 @@ from src.utils.string_utils import epsilon_float_to_str
 from src.utils.timer import Timer
 from src.utils.data_utils import transform_for_modeling
 from src.utils.job_parameters import JobParameters
-from src.utils.seed_utils import set_seed
+from src.utils.seed_utils import set_seed, get_seed
 from src.utils.data_generator import create_dummy_dataset
 
 """
@@ -34,8 +34,6 @@ using the number of canonical queries and the tree width.
 """
 
 if __name__ == '__main__':
-    seed = snakemake.config['seed']
-    rng = set_seed(seed)
 
     parameter_combination_pickle_path = snakemake.input[0]
     parameter_combination_pickle_file = open(parameter_combination_pickle_path, "rb")
@@ -53,6 +51,10 @@ if __name__ == '__main__':
     laplace_approximation_algorithm = parameter_combinations.laplace_approximation_algorithm
     algo = parameter_combinations.algo
     repeat_index = parameter_combinations.repeat_index
+
+    seed = snakemake.config['seed']
+    unique_seed = get_seed(seed, repeat_index)
+    rng = set_seed(unique_seed)
 
     target_file = str(snakemake.output[0])
 
