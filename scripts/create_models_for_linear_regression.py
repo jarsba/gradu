@@ -56,9 +56,9 @@ if __name__ == '__main__':
 
     target_file = str(snakemake.output[0])
 
-    storage_file_path = "napsu_linear_regression_test_storage.csv"
+    storage_file_path = f"logs/napsu_linear_regression_test_storage_{experiment_id}.pickle"
     mode: Literal["append"] = "append"
-    timer_file_path = "napsu_linear_regression_test_timer.csv"
+    timer_file_path = "logs/napsu_linear_regression_test_timer.csv"
 
     storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
     timer = Timer(file_path=timer_file_path, mode=mode)
@@ -118,5 +118,5 @@ if __name__ == '__main__':
     inf_data.to_netcdf(f"logs/inf_data_linear_regression_{dataset_name}_{epsilon_str}e_{repeat_index}_repeat.nc")
 
     # Save storage and timer results every iteration
-    storage.save(file_path=storage_file_path, mode=mode, index=False)
+    storage.save_as_pickle(file_path=storage_file_path, experiment_id=experiment_id)
     timer.save(file_path=timer_file_path, mode=mode, index=False)

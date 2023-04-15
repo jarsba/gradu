@@ -96,10 +96,10 @@ def print_MCMC_diagnostics(mcmc):
     for key, value in summary_dict.items():
         print(f"[{key}]\t max r_hat: {jnp.max(value['r_hat']):.4f}")
 
-    poten = mcmc.get_extra_fields()["potential_energy"]
-    accept_prob = mcmc.get_extra_fields()["accept_prob"]
-    mean_accept_prob = mcmc.get_extra_fields()["mean_accept_prob"]
-    diverging = mcmc.get_extra_fields()["diverging"]
+    poten = mcmc.get_extra_fields(group_by_chain=True)["potential_energy"]
+    accept_prob = mcmc.get_extra_fields(group_by_chain=True)["accept_prob"]
+    mean_accept_prob = mcmc.get_extra_fields(group_by_chain=True)["mean_accept_prob"]
+    diverging = mcmc.get_extra_fields(group_by_chain=True)["diverging"]
 
     min, max, mean, std = get_stats_from_variable(poten)
     print(f"Potential energy\tmin: {min}\tmax: {max}\tmean: {mean}\tstd: {std}")
@@ -113,9 +113,11 @@ def print_MCMC_diagnostics(mcmc):
 
 def store_MCMC_diagnostics(mcmc):
     summary_dict = summary(mcmc.get_samples(), group_by_chain=True)
+    extra_fields = mcmc.get_extra_fields(group_by_chain=True)
     MCMC_diagnostics = {**summary_dict}
     experiment_id = experiment_id_ctx.get()
     storage.store(experiment_id, MCMC_diagnostics)
+    storage.store(experiment_id, extra_fields)
 
 
 def run_numpyro_mcmc(

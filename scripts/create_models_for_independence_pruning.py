@@ -71,9 +71,9 @@ if __name__ == "__main__":
     adult_dataset = pd.read_csv(dataset_path)
     adult_train_df = transform_for_modeling("adult_small", adult_dataset)
 
-    storage_file_path = "napsu_independence_pruning_storage.csv"
+    storage_file_path = "logs/napsu_independence_pruning_storage.csv"
     mode: Literal["append"] = "append"
-    timer_file_path = "napsu_independence_pruning_timer.csv"
+    timer_file_path = "logs/napsu_independence_pruning_timer.csv"
 
     storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
     timer = Timer(file_path=timer_file_path, mode=mode)

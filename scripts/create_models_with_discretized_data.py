@@ -74,9 +74,9 @@ if __name__ == '__main__':
 
     target_file = str(snakemake.output[0])
 
-    storage_file_path = "napsu_discretization_test_storage.csv"
+    storage_file_path = "logs/napsu_discretization_test_storage.csv"
     mode: Literal["append"] = "append"
-    timer_file_path = "napsu_discretization_test_timer.csv"
+    timer_file_path = "logs/napsu_discretization_test_timer.csv"
 
     storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
     timer = Timer(file_path=timer_file_path, mode=mode)

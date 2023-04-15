@@ -82,13 +82,16 @@ class ExperimentStorage(metaclass=Singleton):
         else:
             raise Exception("Invalid mode")
 
-    def save_as_pickle(self, file_path: str = None) -> None:
+    def save_as_pickle(self, file_path: str = None, experiment_id: str = None) -> None:
         if file_path is None and self.file_path is None:
             raise Exception("File path is not defined.")
 
         file_path = file_path if file_path is not None else self.file_path
 
-        storage_records = self.get_storage_as_dict()
+        if experiment_id is None:
+            storage_records = self.get_storage_as_dict()
+        else:
+            storage_records = self.get_item(experiment_id)
 
         with open(file_path, 'wb') as file:
             pickle.dump(storage_records, file, protocol=pickle.HIGHEST_PROTOCOL)

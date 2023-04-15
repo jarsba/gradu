@@ -1,6 +1,7 @@
 import itertools
 import sys
 import os
+from dataclasses import asdict
 
 sys.path.append(snakemake.config['workdir'])
 
@@ -30,6 +31,8 @@ if __name__ == "__main__":
     # Create JobParameter objects for original NAPSU-MQ models
     original_datasets = snakemake.config['original_datasets']
 
+    all_job_parameters = []
+
     for dataset_name, dataset_path in original_datasets.items():
         for epsilon in epsilons:
             for query_list in queries[dataset_name]:
@@ -54,6 +57,9 @@ if __name__ == "__main__":
                     missing_query=None,
                     repeat_index=None
                 )
+
+                all_job_parameters.append(job_parameter)
+
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
 
@@ -85,6 +91,9 @@ if __name__ == "__main__":
                     missing_query=None,
                     repeat_index=None
                 )
+
+                all_job_parameters.append(job_parameter)
+
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
 
@@ -140,6 +149,9 @@ if __name__ == "__main__":
                     missing_query=missing_query,
                     repeat_index=None
                 )
+
+                all_job_parameters.append(job_parameter)
+
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
 
@@ -170,5 +182,12 @@ if __name__ == "__main__":
                     missing_query=None,
                     repeat_index=i
                 )
+
+                all_job_parameters.append(job_parameter)
+
                 with open(os.path.join(PARAMETER_COMBINATIONS_FOLDER, f"{job_name}.pickle"), 'wb') as f:
                     pickle.dump(job_parameter, f)
+
+    # Create CSV table of all job parameters
+    job_parameter_df = pd.DataFrame([asdict(job_parameter) for job_parameter in all_job_parameters])
+    job_parameter_df.to_csv("job_parameters.csv", index=False)

@@ -51,9 +51,9 @@ if __name__ == '__main__':
 
     target_file = str(snakemake.output[0])
 
-    storage_file_path = "napsu_experiment_storage_output.csv"
+    storage_file_path = "logs/napsu_experiment_storage_output.csv"
     mode: Literal["append"] = "append"
-    timer_file_path = "napsu_MCMC_time_vs_epsilon_comparison.csv"
+    timer_file_path = "logs/napsu_MCMC_time_vs_epsilon_comparison.csv"
 
     storage = ExperimentStorage(file_path=storage_file_path, mode=mode)
     timer = Timer(file_path=timer_file_path, mode=mode)
