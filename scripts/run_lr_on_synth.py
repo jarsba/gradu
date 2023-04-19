@@ -101,4 +101,5 @@ for path in dataset_paths:
                                  balanced_accuracy_score, f1_score, coefficients, point_estimates,
                                  variance_estimates]
 
-    results.to_csv(snakemake.output[0], index=False)
+
+results.to_csv(snakemake.output[0], index=False)

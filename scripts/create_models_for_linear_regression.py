@@ -84,6 +84,7 @@ if __name__ == '__main__':
         "laplace_approximation": laplace_approximation,
         "laplace_approximation_algorithm": laplace_approximation_algorithm,
         "repeat_index": repeat_index,
+        "original_seed": unique_seed
     }
 
     pid = timer.start(f"Main run", **timer_meta)
