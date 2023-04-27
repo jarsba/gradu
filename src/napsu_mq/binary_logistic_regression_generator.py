@@ -24,6 +24,7 @@ TRUE_PARAMS_MAP = {
     "4d": [1.0, 0.0, 2.0]
 }
 
+
 class BinaryLogisticRegressionDataGenerator:
     """
     Generator for d-dimensional binary datasets where all variables but the
@@ -88,4 +89,3 @@ if __name__ == '__main__':
 
     test_dataframe = pd.DataFrame(test_data, columns=['A', 'B', 'C', 'D'])
     test_dataframe.to_csv("binary4d_test.csv", index=False)
-

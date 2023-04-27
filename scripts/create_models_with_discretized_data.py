@@ -132,7 +132,7 @@ if __name__ == '__main__':
     print("Writing model to file")
     result.store(target_file)
 
-    inf_data.to_netcdf(f"logs/inf_data_discretization_{dataset_name}_{epsilon}e_{query_str}.nc")
+    inf_data.to_netcdf(f"logs/inf_data_discretization_{dataset_name}_{epsilon_str}e_{query_str}.nc")
 
     # Save storage and timer results every iteration
     storage.save(file_path=storage_file_path, mode=mode, index=False)

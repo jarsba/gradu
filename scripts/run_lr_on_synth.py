@@ -53,6 +53,9 @@ for path in dataset_paths:
 
     X_test, y_test = test_df_transformed.drop(columns=[target_column]), test_df_transformed[target_column]
 
+    X_test = X_test.astype(np.uint8)
+    y_test = y_test.astype(np.uint8)
+
     for i in range(datasets):
         print(f"Running logistic regression on {path} and index {i}")
         train_df = pd.DataFrame(dataset_tensor[i], columns=COLUMNS_FOR_DATASET[dataset_name])
@@ -89,9 +92,13 @@ for path in dataset_paths:
     assert set(list(train_df_transformed.columns.values)).symmetric_difference(
         set(list(test_df_transformed.columns.values))) == set()
 
-    df_np = train_df_transformed.to_numpy()
+    df_np = train_df_transformed.to_numpy().astype(np.uint8)
 
     X_train, y_train = train_df_transformed.drop(columns=[target_column]), train_df_transformed[target_column]
+
+    X_train = X_train.astype(np.uint8)
+    y_train = y_train.astype(np.uint8)
+
     accuracy_score, balanced_accuracy_score, f1_score, \
     coefficients, point_estimates, variance_estimates = run_logistic_regression_on_2d(
         df_np, X_train, y_train, X_test, y_test, col_to_predict=target_column_index)
