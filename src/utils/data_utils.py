@@ -19,9 +19,9 @@ DATASET_COLUMN_TYPES = {
         'capital-loss': 'int',
         'hours-per-week': 'int',
         'native-country': 'category',
-        'had-capital-gains': 'category',
-        'had-capital-losses': 'category',
-        'compensation': 'category'
+        'had-capital-gains': 'int',
+        'had-capital-losses': 'int',
+        'compensation': 'int'
     },
     'adult_discrete': {
         'age': 'category',
@@ -133,16 +133,13 @@ def transform_for_modeling(dataset_name: str, df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy()
 
     if 'adult' in dataset_name:
-        COLUMNS_KEY = DATA_TO_COLUMNS_MAPPING[dataset_name]
-        ADULT_TYPES = DATASET_COLUMN_TYPES[COLUMNS_KEY]
-
         for column in columns:
-            dtype = ADULT_TYPES[column]
-            if dtype == 'category':
+            try:
                 df_copy[column] = df_copy[column].astype('category')
-            else:
-                raise Exception(
-                    f"Column {column} has unsupported type {dtype}. For modeling all types should be categorical.")
+            except Exception as exp:
+                dtype = df_copy[column].dtype
+                print(f"Column {column} has unsupported type {dtype}. For modeling all types should be categorical.")
+                raise exp
 
         df_copy = df_copy.reindex(columns=[col for col in df_copy.columns if col != 'compensation'] + ['compensation'])
     elif 'binary' in dataset_name:

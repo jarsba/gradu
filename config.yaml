@@ -81,7 +81,6 @@ queries:
     - [[ 'sex', 'hours-per-week' ]]
     - [[ 'age', 'sex' ]]
 
-
   "adult_no_discretization":
     - []
 

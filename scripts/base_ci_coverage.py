@@ -38,6 +38,8 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
 
             datasets = model.generate(rng, n_original_datapoints, n_datasets)
 
+            n, syn_data_d = datasets[0].shape
+
             datasets_transformed = [transform_for_ci_coverage(dataset_name, dataset) for dataset in datasets]
 
             datasets_np = dataframe_list_to_tensor(datasets_transformed)
@@ -49,9 +51,9 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                 q_i = q[:, d]
                 u_i = u[:, d]
 
-                # Add check for infinite values and remove them from the logistic regression point and variance
+                # Add check for huge confidence intervals and remove them from the logistic regression point and variance
                 # estimates
-                inds = (np.isfinite(q_i) & np.isfinite(u_i))
+                inds = (u_i < 1000)
                 q_i = q_i[inds]
                 u_i = u_i[inds]
 
@@ -65,7 +67,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     print(f"WARNING: Confidence interval had nan: {ci_result}")
 
                 ci_result_nn = non_negative_conf_int(
-                    q_i, u_i, interval, n_original_datapoints * n_datasets, n_original_datapoints
+                    q_i, u_i, interval, n, n_original_datapoints
                 )
 
                 if np.isnan(ci_result_nn[0]) or np.isnan(ci_result_nn[1]):
@@ -80,9 +82,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     f"True param value: {true_param_value}, non-negative confidence interval: {ci_result_nn[0]} - {ci_result_nn[1]}")
 
                 contains_true_value = ci_result[0] <= true_param_value <= ci_result[1]
-                print(contains_true_value)
                 contains_true_value_nn = ci_result_nn[0] <= true_param_value <= ci_result_nn[1]
-                print(contains_true_value_nn)
 
                 conf_int_object = ConfidenceIntervalObject(
                     original_dataset_name=dataset_name,
@@ -98,6 +98,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     nn_conf_int_end=ci_result_nn[1],
                     nn_conf_int_width=ci_result_nn[1] - ci_result_nn[0],
                     contains_true_parameter_nn=contains_true_value_nn,
+                    parameter_index=d+1,
                     meta=meta
                 )
 

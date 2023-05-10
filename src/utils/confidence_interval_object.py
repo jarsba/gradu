@@ -16,6 +16,7 @@ class ConfidenceIntervalObject:
     nn_conf_int_end: float
     nn_conf_int_width: float
     contains_true_parameter_nn: bool
+    parameter_index: int
     # Contains any additional information that we want to store
     meta: dict
 
@@ -30,5 +31,9 @@ class ConfidenceIntervalObject:
             'conf_int_width': self.conf_int_width,
             'true_parameter_value': self.true_parameter_value,
             'contains_true_parameter': self.contains_true_parameter,
+            'nn_conf_int_start': self.nn_conf_int_start,
+            'nn_conf_int_end': self.nn_conf_int_end,
+            'nn_conf_int_width': self.nn_conf_int_width,
+            'parameter_index': self.parameter_index,
             **self.meta
         }

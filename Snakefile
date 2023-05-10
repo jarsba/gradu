@@ -357,6 +357,7 @@ rule run_logistic_regression_on_discretized_data:
     script:
         "scripts/run_lr_on_synth.py"
 
+
 rule run_logistic_regression_on_independence_pruning_datasets:
     input:
         expand("data/synt_datasets/synthetic_dataset_independence_pruning_{independence_dataset_name}_{independence_epsilon}e_{independence_query_str}.pickle", zip, independence_dataset_name=independence_dataset_list, independence_epsilon=independence_epsilon_list, independence_query_str=independence_query_list)
