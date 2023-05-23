@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-
-from constants import TRAIN_DATASET_SIZE_MAP
+import d3p
 from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.napsu_mq.rubins_rules import conf_int, non_negative_conf_int
 from src.utils.confidence_interval_object import ConfidenceIntervalObject
@@ -12,21 +11,25 @@ import jax
 
 def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray, meta: dict,
                                   confidence_intervals: np.ndarray = np.linspace(0.05, 0.95, 19), n_repeats: int = 50,
-                                  n_datasets: int = 100,
+                                  n_datasets: int = 100, n_syn_datapoints: int = None,
                                   rng: jax.random.PRNGKey = None,
                                   target_column_index: int = None) -> pd.DataFrame:
     if rng is None:
         rng = jax.random.PRNGKey(2534753284572)
+
+    if n_syn_datapoints is None:
+        n_syn_datapoints = test_dataset.shape[0]
 
     point_estimates, variance_estimates = logistic_regression_on_2d(test_dataset, col_to_predict=target_column_index,
                                                                     return_intervals=False, return_results=False,
                                                                     add_constant=False)
     true_parameter_values = point_estimates.flatten()
 
-    sampling_rngs = jax.random.split(rng, n_repeats * len(confidence_intervals))
-    dataset_name = model.meta['dataset_name']
-    n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
-
+    sampling_rngs = d3p.random.split(rng, n_repeats * len(confidence_intervals))
+    #dataset_name = model.meta['dataset_name']
+    #n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
+    dataset_name = "binary3d"
+    n_original_datapoints = 100000
     ci_data_objects = []
 
     for i in range(n_repeats):
@@ -36,9 +39,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
             rng_index = i * len(confidence_intervals) + j
             rng = sampling_rngs[rng_index]
 
-            datasets = model.generate(rng, n_original_datapoints, n_datasets)
-
-            n, syn_data_d = datasets[0].shape
+            datasets = model.generate(rng, n_syn_datapoints, n_datasets, single_dataframe=False)
 
             datasets_transformed = [transform_for_ci_coverage(dataset_name, dataset) for dataset in datasets]
 
@@ -67,7 +68,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     print(f"WARNING: Confidence interval had nan: {ci_result}")
 
                 ci_result_nn = non_negative_conf_int(
-                    q_i, u_i, interval, n, n_original_datapoints
+                    q_i, u_i, interval, n_syn_datapoints, n_original_datapoints
                 )
 
                 if np.isnan(ci_result_nn[0]) or np.isnan(ci_result_nn[1]):

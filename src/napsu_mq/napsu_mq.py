@@ -90,6 +90,7 @@ class NapsuMQModel(InferenceModel):
         laplace_approximation_forward_mode = check_kwargs(kwargs, "laplace_approximation_forward_mode", False)
         only_laplace_approximation = check_kwargs(kwargs, "only_laplace_approximation", False)
         no_privacy = check_kwargs(kwargs, "no_privacy", False)
+        disable_MST = check_kwargs(kwargs, "disable_MST", False)
 
         try:
             experiment_id = experiment_id_ctx.get()
@@ -112,7 +113,8 @@ class NapsuMQModel(InferenceModel):
             "laplace_approximation": use_laplace_approximation,
             "missing_query": missing_query,
             "discretization": discretization,
-            "no_privacy": no_privacy
+            "no_privacy": no_privacy,
+            "disable_MST": disable_MST
         }
 
         dataframe = DataFrameData(data)
@@ -127,17 +129,20 @@ class NapsuMQModel(InferenceModel):
 
         domain = Domain(domain_key_list, domain_value_count_list)
 
-        print("start MST selection")
-        if return_MST_weights is True:
-            query_sets, weights = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
-                                                cliques_to_include=column_feature_set,
-                                                return_MST_weights=return_MST_weights)
+        if disable_MST is False:
+            print("start MST selection")
+            if return_MST_weights is True:
+                query_sets, weights = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
+                                                    cliques_to_include=column_feature_set,
+                                                    return_MST_weights=return_MST_weights)
 
-        else:
+            else:
+                pass
             query_sets = MST_selection(Dataset(dataframe.int_df, domain), epsilon, delta,
                                        cliques_to_include=column_feature_set)
-
-        print("end MST selection")
+            print("end MST selection")
+        else:
+            query_sets = column_feature_set
 
         timer.stop(pid)
 
@@ -148,7 +153,8 @@ class NapsuMQModel(InferenceModel):
         queries = FullMarginalQuerySet(query_sets, dataframe.values_by_col)
         timer.stop(pid)
 
-        query_list = queries.flatten()
+        full_set_of_marginal_query_number = len(queries.flatten().queries)
+        print(f"Full set of marginal queries: {full_set_of_marginal_query_number}")
 
         pid = timer.start(f"Calculating canonical query set", **timer_meta)
 
@@ -201,7 +207,9 @@ class NapsuMQModel(InferenceModel):
         timer_meta['suff_stat_dim'] = suff_stat_dim
         timer_meta['suff_stat'] = suff_stat
 
-        sensitivity = np.sqrt(2 * len(query_sets))
+        ns = len(query_sets)
+        print(f"Number of marginal queries: {ns}")
+        sensitivity = np.sqrt(2 * ns)
         inference_rng, dp_rng = jax.random.split(rng, 2)
 
         if no_privacy is True:

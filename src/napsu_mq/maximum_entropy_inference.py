@@ -41,6 +41,7 @@ storage = ExperimentStorage()
 kernels = Literal['NUTS', 'HMC']
 default_extra_fields = ("potential_energy", "accept_prob", "mean_accept_prob", "diverging", "num_steps", "adapt_state")
 
+
 def rng_state_set(generator: Optional[torch.Generator] = None) -> Optional[torch.Tensor]:
     if generator is not None:
         old_rng_state = torch.get_rng_state()
@@ -178,6 +179,8 @@ def run_numpyro_mcmc_normalised(
     else:
         mean_guess = laplace_approx.mean
         L_guess = jnp.linalg.cholesky(laplace_approx.covariance_matrix)
+
+    print(suff_stat, n, sigma_DP, prior_sigma, max_ent_dist, mean_guess, L_guess)
 
     if enable_profiling is True:
         pr = cProfile.Profile()

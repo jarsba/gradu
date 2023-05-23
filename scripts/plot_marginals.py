@@ -19,7 +19,7 @@ def value_count_df(orig_df, syn_dfs, col):
     return pd.DataFrame.from_records(vl_list, columns=["Value", "Count", "Type"])
 
 
-def plot_dataframe_marginal_comparison(orig_df, syn_dfs, filename=None, estimator=np.mean):
+def plot_dataframe_marginal_comparison(orig_df, syn_dfs, filename=None, estimator=np.mean, title=None):
     """Plot a comparison of 1-way marginals between original and synthetic data.
     Args:
         orig_df (DataFrame): Original dataframe.
@@ -40,6 +40,9 @@ def plot_dataframe_marginal_comparison(orig_df, syn_dfs, filename=None, estimato
             ax.get_legend().remove()
         else:
             ax.legend(loc="upper left", bbox_to_anchor=(1.00, 1))
+
+    if title is not None:
+        fig.suptitle(title)
 
     plt.tight_layout()
     if filename is not None:

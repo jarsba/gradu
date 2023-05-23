@@ -34,6 +34,7 @@ class ConfidenceIntervalObject:
             'nn_conf_int_start': self.nn_conf_int_start,
             'nn_conf_int_end': self.nn_conf_int_end,
             'nn_conf_int_width': self.nn_conf_int_width,
+            'contains_true_parameter_nn': self.contains_true_parameter_nn,
             'parameter_index': self.parameter_index,
             **self.meta
         }

@@ -33,8 +33,11 @@ def create_models():
     return models
 
 
-def run_classification(train_df, test_df, target_column):
-    models = create_models()
+def run_classification(train_df, test_df, target_column, models=None):
+    if models is None:
+        models = create_models()
+    else:
+        assert len(models) > 0 and type(models) == list
 
     X_train, y_train = train_df.drop(columns=[target_column]), train_df[target_column]
     X_test, y_test = test_df.drop(columns=[target_column]), test_df[target_column]

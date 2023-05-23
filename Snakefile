@@ -357,6 +357,24 @@ rule run_logistic_regression_on_discretized_data:
     script:
         "scripts/run_lr_on_synth.py"
 
+rule run_logistic_regression_on_original_discretized_data:
+    input:
+        original_dataset_files
+    output:
+        "results/original_logistic_regression_results.csv"
+    log:
+        expand("logs/logistic_regression_original_dataset_{original_dataset}.log",original_dataset=original_datasets)
+    threads: 1
+    resources:
+        runtime="120",
+        time="02:00:00",
+        mem_mb=32000,
+        disk_mb=50000,
+        partition="short"
+    conda:
+        "envs/analysis.yaml"
+    script:
+        "scripts/run_lr_on_original.py"
 
 rule run_logistic_regression_on_independence_pruning_datasets:
     input:

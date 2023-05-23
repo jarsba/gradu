@@ -116,9 +116,9 @@ class DataFrameData:
         return cat_df
 
     def int_df_to_cat_df(self, int_df: pd.DataFrame) -> pd.DataFrame:
-        """Convert interger-valued dataframe to categorical dataframe.
+        """Convert integer-valued dataframe to categorical dataframe.
         Args:
-            int_df (DataFrame): The interger valued dataframe.
+            int_df (DataFrame): The integer valued dataframe.
         Returns:
             DataFrame: Categorical valued dataframe.
         """
@@ -127,14 +127,14 @@ class DataFrameData:
             if is_categorical_dtype(self.base_df[col]):
                 cat_df[col] = self.base_df[col].cat.categories[int_df[col]]
             else:
-                logger.warning(f"Column {col} is not categorical column")
+                cat_df[col] = int_df[col]
 
         return cat_df.astype("category")
 
     def ndarray_to_cat_df(self, ndarray: np.ndarray) -> pd.DataFrame:
         """Convert integer-valued ndarray to categorical dataframe.
         Args:
-            ndarray (ndarray): The interger-valued array to convert.
+            ndarray (ndarray): The integer-valued array to convert.
         Returns:
             DataFrame: The categorical dataframe.
         """

@@ -66,7 +66,7 @@ def run_logistic_regression_on_3d(df_np, X_train, y_train, X_test, y_test, col_t
 def run_logistic_regression_on_2d(df_np, X_train, y_train, X_test, y_test, col_to_predict: int,
                                   return_confidence_intervals=False):
     model = create_model()
-    model.fit(X_train, y_train)
+    model = model.fit(X_train, y_train)
 
     probabilities = model.predict(X_test)
     predictions = probabilities >= 0.5

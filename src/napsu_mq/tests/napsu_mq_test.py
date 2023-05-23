@@ -26,7 +26,7 @@ import jax
 from src.napsu_mq.napsu_mq import NapsuMQResult, NapsuMQModel
 from src.napsu_mq.binary_logistic_regression_generator import BinaryLogisticRegressionDataGenerator
 from src.napsu_mq.tests.test_utils import create_test_directory, file_exists, TEST_DIRECTORY_PATH, purge_test_directory
-from src.utils.keygen import get_key
+from src.utils.keygen import generate_experiment_id
 from src.utils.experiment_storage import experiment_id_ctx
 
 
@@ -37,10 +37,10 @@ class TestNapsuMQ(unittest.TestCase):
         rng = jax.random.PRNGKey(16778774)
         data_gen = BinaryLogisticRegressionDataGenerator(np.array([1.0, 0.0]))
         cls.data = data_gen.generate_data(n=2000, rng_key=rng)
-        cls.dataframe = pd.DataFrame(cls.data, columns=['A', 'B', 'C'], dtype=int)
+        cls.dataframe = pd.DataFrame(cls.data, columns=['A', 'B', 'C'], dtype="category")
         cls.n, cls.d = cls.data.shape
 
-        experiment_id = get_key()
+        experiment_id = generate_experiment_id()
         experiment_id_ctx.set(experiment_id)
 
     def setUp(self):

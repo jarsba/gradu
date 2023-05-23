@@ -39,7 +39,7 @@ class DataFrameDataTest(unittest.TestCase):
             "int_col2": pd.Series([5, 6, 7, 8], dtype='int8'),
             "cat_col1": pd.Series(["cat", "dog", "mouse", "horse"], dtype='category'),
             "cat_col2": pd.Series(["Java", "Python", "Haskell", "Rust"], dtype='category'),
-        })
+        }, dtype="category")
         self.df_data3 = DataFrameData(self.df3)
 
     def test_int_df_to_cat_df(self):
@@ -168,7 +168,7 @@ class DataFrameDataTest(unittest.TestCase):
             "int_col2": pd.Series([5, 6, 7, 8], dtype='int8'),
             "cat_col1": pd.Series([0, 1, 3, 2], dtype='int8'),
             "cat_col2": pd.Series([1, 2, 0, 3], dtype='int8'),
-        })
+        }, dtype='category')
 
         pd.testing.assert_frame_equal(true_int_dataframe, self.df_data3.int_df)
 

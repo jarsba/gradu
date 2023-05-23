@@ -24,20 +24,22 @@ def logistic_regression(
         The last two items may not be present depending on argument values.
     """
     m, n, d = datasets.shape
-    if col_to_predict is None: col_to_predict = d - 1
+    if col_to_predict is None:
+        col_to_predict = d - 1
     feature_cols = set(range(d))
     feature_cols.remove(col_to_predict)
     feature_cols = list(feature_cols)
 
-    num_coefs = d if add_constant else d - 1
+    num_coefs = d if add_constant is True else d - 1
     q = np.zeros((m, num_coefs))
     u = np.zeros((m, num_coefs))
     conf_ints = {conf_level: np.zeros((m, num_coefs, 2)) for conf_level in conf_levels}
     result_objs = []
     for i in range(m):
         dataset = datasets[i, :, :]
-        feature_array = sm.add_constant(dataset[:, feature_cols], has_constant="add") if add_constant else dataset[:,
-                                                                                                           feature_cols]
+        feature_array = sm.add_constant(dataset[:, feature_cols],
+                                        has_constant="add") if add_constant is True else dataset[:,
+                                                                                         feature_cols]
         y_array = dataset[:, col_to_predict]
 
         try:
@@ -88,7 +90,8 @@ def logistic_regression_regularised(
         The last item may not be present depending on argument values.
     """
     m, n, d = datasets.shape
-    if col_to_predict is None: col_to_predict = d - 1
+    if col_to_predict is None:
+        col_to_predict = d - 1
     feature_cols = set(range(d))
     feature_cols.remove(col_to_predict)
     feature_cols = list(feature_cols)
@@ -149,18 +152,18 @@ def logistic_regression_on_2d(
         The last two items may not be present depending on argument values.
     """
     n, d = dataset.shape
-    if col_to_predict is None: col_to_predict = d - 1
+    if col_to_predict is None:
+        col_to_predict = d - 1
     feature_cols = set(range(d))
     feature_cols.remove(col_to_predict)
     feature_cols = list(feature_cols)
 
-    num_coefs = d if add_constant else d - 1
+    num_coefs = d if add_constant is True else d - 1
     q = np.zeros((1, num_coefs))
     u = np.zeros((1, num_coefs))
     conf_ints = {conf_level: np.zeros((1, num_coefs, 2)) for conf_level in conf_levels}
 
-    feature_array = sm.add_constant(dataset[:, feature_cols], has_constant="add") if add_constant else dataset[:,
-                                                                                                       feature_cols]
+    feature_array = sm.add_constant(dataset[:, feature_cols], has_constant="add") if add_constant is True else dataset[:, feature_cols]
     y_array = dataset[:, col_to_predict]
 
     try:
@@ -172,7 +175,6 @@ def logistic_regression_on_2d(
 
         q[0, :] = syn_result.params
         u[0, :] = syn_result.bse ** 2
-
 
     except PerfectSeparationError:
         raise
