@@ -60,7 +60,7 @@ def run_classification(train_df, test_df, target_column, models=None):
 
         scores.append((type(model).__name__, accuracy, balanced_accuracy, f1))
 
-        # print(
-        #    f'Model: {type(model).__name__} \t Accuracy: {np.mean(accuracy_score):.3f} ({np.std(accuracy_score):.3f}), Balanced accuracy: {np.mean(balanced_accuracy_score):.3f} ({np.std(balanced_accuracy_score):.3f}), F1: {np.mean(f1_score):.3f} ({np.std(f1_score):.3f})')
+        print(
+            f'Model: {type(model).__name__} \t Accuracy: {np.mean(accuracy):.3f} ({np.std(accuracy):.3f}), Balanced accuracy: {np.mean(balanced_accuracy):.3f} ({np.std(balanced_accuracy):.3f}), F1: {np.mean(f1):.3f} ({np.std(f1):.3f})')
 
     return scores

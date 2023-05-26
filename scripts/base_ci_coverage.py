@@ -13,12 +13,17 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                                   confidence_intervals: np.ndarray = np.linspace(0.05, 0.95, 19), n_repeats: int = 50,
                                   n_datasets: int = 100, n_syn_datapoints: int = None,
                                   rng: jax.random.PRNGKey = None,
-                                  target_column_index: int = None) -> pd.DataFrame:
+                                  target_column_index: int = None,
+                                  n_original_datapoints: int = None
+                                  ) -> pd.DataFrame:
     if rng is None:
         rng = jax.random.PRNGKey(2534753284572)
 
     if n_syn_datapoints is None:
         n_syn_datapoints = test_dataset.shape[0]
+
+    if n_original_datapoints is None:
+        n_original_datapoints = n_syn_datapoints
 
     point_estimates, variance_estimates = logistic_regression_on_2d(test_dataset, col_to_predict=target_column_index,
                                                                     return_intervals=False, return_results=False,
@@ -26,10 +31,9 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
     true_parameter_values = point_estimates.flatten()
 
     sampling_rngs = d3p.random.split(rng, n_repeats * len(confidence_intervals))
-    #dataset_name = model.meta['dataset_name']
-    #n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
+    # dataset_name = model.meta['dataset_name']
+    # n_original_datapoints = TRAIN_DATASET_SIZE_MAP[dataset_name]
     dataset_name = "binary3d"
-    n_original_datapoints = 100000
     ci_data_objects = []
 
     for i in range(n_repeats):
@@ -99,7 +103,7 @@ def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray
                     nn_conf_int_end=ci_result_nn[1],
                     nn_conf_int_width=ci_result_nn[1] - ci_result_nn[0],
                     contains_true_parameter_nn=contains_true_value_nn,
-                    parameter_index=d+1,
+                    parameter_index=d + 1,
                     meta=meta
                 )
 
