@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("/home/local/jarlehti/projects/gradu")
-sys.path.append("/wrk-vakka/jarlehti/gradu")
+sys.path.append("/wrk-vakka/users/jarlehti/gradu")
 
 import jax.numpy as jnp
 import numpy as np
@@ -18,16 +18,12 @@ data_gen_rng = d3p.random.convert_to_jax_rng_key(data_gen_rng)
 
 binary3d = get_binary3d_train()
 
-napsu_result_read_file = open("/tmp/napsu_mq_result.dill", "rb")
-loaded_result: NapsuMQResult = NapsuMQResult.load(napsu_result_read_file)
-napsu_result_read_file.close()
-
 coefficients = [-2.0, 4.0]
 dataset = BinaryLogisticRegressionDataGenerator(jnp.array(coefficients)).generate_data(n=100000, rng_key=data_gen_rng)
 orig_df = pd.DataFrame(dataset, dtype="category")
 n, d = orig_df.shape
 
-orig_df_np = orig_df.to_numpy()
+orig_df_np = orig_df.to_numpy(dtype="int8")
 
 rng = d3p.random.PRNGKey(74249069)
 inference_rng, sampling_rng = d3p.random.split(inference_rng)
@@ -50,7 +46,7 @@ meta = {
     'epsilon': epsilon
 }
 
-ci_intervals = np.round(np.linspace(0.05, 0.95, 3), 2)
+ci_intervals = np.round(np.linspace(0.05, 0.95, 19), 2)
 ci_df = calculate_ci_coverage_objects(model, orig_df_np, meta, rng=sampling_rng, confidence_intervals=ci_intervals,
                                       n_repeats=50, n_datasets=100, n_syn_datapoints=n,
                                       target_column_index=target_column_index)
