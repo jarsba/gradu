@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import d3p
-from src.napsu_mq.napsu_mq import NapsuMQResult
 from src.napsu_mq.rubins_rules import conf_int, non_negative_conf_int
 from src.utils.confidence_interval_object import ConfidenceIntervalObject
 from src.utils.data_utils import transform_for_ci_coverage, dataframe_list_to_tensor
@@ -9,7 +8,7 @@ from src.napsu_mq.logistic_regression import logistic_regression, logistic_regre
 import jax
 
 
-def calculate_ci_coverage_objects(model: NapsuMQResult, test_dataset: np.ndarray, meta: dict,
+def calculate_ci_coverage_objects(model, test_dataset: np.ndarray, meta: dict,
                                   confidence_intervals: np.ndarray = np.linspace(0.05, 0.95, 19), n_repeats: int = 50,
                                   n_datasets: int = 100, n_syn_datapoints: int = None,
                                   rng: jax.random.PRNGKey = None,
